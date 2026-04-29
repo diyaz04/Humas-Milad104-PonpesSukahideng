@@ -12,7 +12,7 @@ interface PopupBannerProps {
 
 export default function PopupBanner({ schedule, matches, registrations }: PopupBannerProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [currentContent, setCurrentContent] = useState<any>(null);
+  const [currentContent, setCurrentContent] = useState<any[]>([]);
   const [hasShown, setHasShown] = useState(false);
 
   const getTeamName = (id: string | null) => {
@@ -21,40 +21,43 @@ export default function PopupBanner({ schedule, matches, registrations }: PopupB
     return reg ? reg.teamName : id;
   };
 
-  const determineContent = () => {
+  const determineContent = (): any[] => {
     const now = new Date();
     const todayStr = format(now, 'yyyy-MM-dd');
+    const items: any[] = [];
     
-    // 1. Check current matches
-    const ongoingMatch = matches.find(m => m.status === 'ongoing');
-    if (ongoingMatch) {
-      return {
+    // 1. Check all current matches
+    const ongoingMatches = matches.filter(m => m.status === 'ongoing');
+    ongoingMatches.forEach(m => {
+      items.push({
         type: 'match',
         title: 'Pertandingan Sedang Berlangsung!',
-        subtitle: `${ongoingMatch.sportId}`,
-        details: `${getTeamName(ongoingMatch.teamAId)} vs ${getTeamName(ongoingMatch.teamBId)}`,
-        time: 'Sedang Berlangsung',
+        subtitle: m.sportId || 'Sport',
+        details: `${getTeamName(m.teamAId)} vs ${getTeamName(m.teamBId)}`,
+        time: m.startTime ? `Sejak ${m.startTime} WIB` : 'Sedang Berlangsung',
         location: 'Arena PORSAS'
-      };
-    }
+      });
+    });
 
-    // 2. Check current schedule item
-    const currentEvent = schedule.find(s => {
+    // 2. Check all current schedule items
+    const currentEvents = schedule.filter(s => {
       const start = parseISO(`${s.date}T${s.startTime}`);
       const end = parseISO(`${s.date}T${s.endTime}`);
       return s.date === todayStr && isAfter(now, start) && isBefore(now, end);
     });
 
-    if (currentEvent) {
-      return {
+    currentEvents.forEach(e => {
+      items.push({
         type: 'event',
         title: 'Kegiatan Berlangsung',
-        subtitle: currentEvent.category,
-        details: currentEvent.name,
-        time: `${currentEvent.startTime} - ${currentEvent.endTime}`,
-        location: currentEvent.location
-      };
-    }
+        subtitle: e.category,
+        details: e.name,
+        time: `${e.startTime} - ${e.endTime} WIB`,
+        location: e.location
+      });
+    });
+
+    if (items.length > 0) return items;
 
     // 3. Next upcoming today
     const upcomingToday = schedule
@@ -62,52 +65,55 @@ export default function PopupBanner({ schedule, matches, registrations }: PopupB
         const start = parseISO(`${s.date}T${s.startTime}`);
         return s.date === todayStr && isAfter(start, now);
       })
-      .sort((a, b) => a.startTime.localeCompare(b.startTime))[0];
+      .sort((a, b) => a.startTime.localeCompare(b.startTime));
 
-    if (upcomingToday) {
-      return {
+    if (upcomingToday.length > 0) {
+      const firstTime = upcomingToday[0].startTime;
+      const simultaneousUpcoming = upcomingToday.filter(s => s.startTime === firstTime);
+      return simultaneousUpcoming.map(s => ({
         type: 'upcoming',
         title: 'Kegiatan Berikutnya Hari Ini',
-        subtitle: upcomingToday.category,
-        details: upcomingToday.name,
-        time: upcomingToday.startTime,
-        location: upcomingToday.location
-      };
+        subtitle: s.category,
+        details: s.name,
+        time: `${s.startTime} WIB`,
+        location: s.location
+      }));
     }
 
     // 4. Closest in future
-    const closestFuture = schedule
+    const closestFutureDate = schedule
       .filter(s => isAfter(parseISO(s.date), now))
-      .sort((a, b) => a.date.localeCompare(b.date))[0];
+      .sort((a, b) => a.date.localeCompare(b.date))[0]?.date;
 
-    if (closestFuture) {
-      return {
+    if (closestFutureDate) {
+      const futureEvents = schedule.filter(s => s.date === closestFutureDate);
+      return futureEvents.map(s => ({
         type: 'future',
         title: 'Kegiatan Mendatang',
-        subtitle: closestFuture.category,
-        details: closestFuture.name,
-        time: format(parseISO(closestFuture.date), 'dd MMM yyyy'),
-        location: closestFuture.location
-      };
+        subtitle: s.category,
+        details: s.name,
+        time: `${format(parseISO(s.date), 'dd MMM yyyy')}, ${s.startTime} WIB`,
+        location: s.location
+      }));
     }
 
-    // 5. Default fallback for today if nothing else is scheduled
-    return {
+    // 5. Default fallback
+    return [{
       type: 'default',
       title: 'Agenda Milad Hari Ini',
       subtitle: 'Informasi',
       details: 'Persiapan oleh Panitia',
       time: 'Sepanjang Hari',
       location: 'Pesantren Sukahideng'
-    };
+    }];
   };
 
   useEffect(() => {
-    const content = determineContent();
-    if (content) {
-      setCurrentContent(content);
+    const items = determineContent();
+    if (items.length > 0) {
+      setCurrentContent(items);
       if (!hasShown) {
-        setTimeout(() => setIsOpen(true), 2000); // Wait 2s for initial landing feel
+        setTimeout(() => setIsOpen(true), 2000);
         setHasShown(true);
       }
     }
@@ -116,16 +122,16 @@ export default function PopupBanner({ schedule, matches, registrations }: PopupB
   // Polling every 5 minutes
   useEffect(() => {
     const interval = setInterval(() => {
-      const newContent = determineContent();
-      if (newContent && JSON.stringify(newContent) !== JSON.stringify(currentContent)) {
-        setCurrentContent(newContent);
+      const newItems = determineContent();
+      if (newItems.length > 0 && JSON.stringify(newItems) !== JSON.stringify(currentContent)) {
+        setCurrentContent(newItems);
         setIsOpen(true);
       }
     }, 5 * 60 * 1000);
     return () => clearInterval(interval);
   }, [currentContent]);
 
-  if (!currentContent) return null;
+  if (currentContent.length === 0) return null;
 
   return (
     <>
@@ -137,58 +143,70 @@ export default function PopupBanner({ schedule, matches, registrations }: PopupB
             exit={{ opacity: 0, y: 50, scale: 0.9 }}
             className="fixed inset-0 z-[70] flex items-center justify-center p-6 bg-brand-dark/40 backdrop-blur-sm"
           >
-            <div className="relative w-full max-w-lg bg-brand-cream rounded-[40px] shadow-2xl overflow-hidden border-4 border-brand-gold">
+            <div className="relative w-full max-w-lg bg-brand-cream rounded-[40px] shadow-2xl overflow-hidden border-4 border-brand-gold max-h-[90vh] flex flex-col">
               <button 
                 onClick={() => setIsOpen(false)}
-                className="absolute top-6 right-6 p-2 text-brand-dark/20 hover:text-brand-dark hover:bg-brand-dark/5 rounded-full transition-all"
+                className="absolute top-6 right-6 p-2 text-brand-dark/20 hover:text-brand-dark hover:bg-brand-dark/5 rounded-full transition-all z-20"
               >
                 <X size={24} />
               </button>
               
-              <div className="p-10">
+              <div className="flex-1 overflow-y-auto p-10 custom-scrollbar">
                 <div className="flex items-center gap-4 mb-8">
-                  <div className="w-14 h-14 bg-brand-gold rounded-2xl flex items-center justify-center text-brand-dark animate-pulse">
+                  <div className="w-14 h-14 bg-brand-gold rounded-2xl flex items-center justify-center text-brand-dark animate-pulse shrink-0">
                     <Bell size={28} />
                   </div>
                   <div>
-                    <h3 className="text-sm font-bold text-brand-gold uppercase tracking-[0.2em]">{currentContent.title}</h3>
-                    <p className="font-serif italic text-brand-dark/60">{currentContent.subtitle}</p>
+                    <h3 className="text-sm font-bold text-brand-gold uppercase tracking-[0.2em]">Agenda Terbaru</h3>
+                    <p className="font-serif italic text-brand-dark/60">{currentContent.length} Agenda Ditemukan</p>
                   </div>
                 </div>
 
-                <div className="mb-10">
-                  <h4 className="text-3xl md:text-4xl font-serif font-bold text-brand-dark mb-6 leading-tight">
-                    {currentContent.details}
-                  </h4>
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-3 text-brand-dark/70 font-medium">
-                      <Clock size={20} className="text-brand-gold" />
-                      <span>{currentContent.time}</span>
+                <div className="space-y-12">
+                  {currentContent.map((item, idx) => (
+                    <div key={idx} className={idx !== currentContent.length - 1 ? 'border-b border-brand-dark/5 pb-8' : ''}>
+                      <div className="mb-4">
+                        <span className="text-[10px] font-bold bg-brand-gold/10 text-brand-gold px-3 py-1 rounded-full uppercase tracking-widest">{item.title}</span>
+                        <p className="font-serif italic text-brand-dark/40 text-sm mt-1">{item.subtitle}</p>
+                      </div>
+                      
+                      <h4 className="text-2xl md:text-3xl font-serif font-bold text-brand-dark mb-6 leading-tight">
+                        {item.details}
+                      </h4>
+                      
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-3 text-brand-dark/70 font-medium">
+                          <Clock size={18} className="text-brand-gold shrink-0" />
+                          <span className="text-sm">{item.time}</span>
+                        </div>
+                        <div className="flex items-center gap-3 text-brand-dark/70 font-medium">
+                          <MapPin size={18} className="text-brand-gold shrink-0" />
+                          <span className="text-sm">{item.location}</span>
+                        </div>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-3 text-brand-dark/70 font-medium">
-                      <MapPin size={20} className="text-brand-gold" />
-                      <span>{currentContent.location}</span>
-                    </div>
-                  </div>
+                  ))}
                 </div>
+              </div>
 
+              <div className="p-10 pt-0">
                 <button 
                   onClick={() => setIsOpen(false)}
                   className="w-full bg-brand-dark text-brand-gold py-5 rounded-2xl font-bold uppercase tracking-[0.2em] hover:bg-brand-forest transition-all flex items-center justify-center gap-3"
                 >
-                  Lihat Detail <ChevronRight size={18} />
+                  Tutup Notifikasi <ChevronRight size={18} />
                 </button>
               </div>
 
               {/* Decorative Corner */}
-              <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-brand-gold/10 rounded-full blur-3xl" />
+              <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-brand-gold/10 rounded-full blur-3xl -z-10" />
             </div>
           </motion.div>
         )}
       </AnimatePresence>
 
       {/* Small notification in corner if updated and closed */}
-      {!isOpen && hasShown && currentContent && (
+      {!isOpen && hasShown && currentContent.length > 0 && (
         <motion.button 
           initial={{ opacity: 0, x: 50 }}
           animate={{ opacity: 1, x: 0 }}
