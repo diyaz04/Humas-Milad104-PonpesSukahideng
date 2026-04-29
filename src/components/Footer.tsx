@@ -100,7 +100,7 @@ export default function Footer({ onAdminTrigger }: FooterProps) {
 
       <div className="max-w-7xl mx-auto px-6 mt-24 pt-12 border-t border-brand-gold/10 flex flex-col md:flex-row justify-between items-center gap-8">
         <p className="text-xs text-brand-cream/30 uppercase tracking-[0.3em] text-center md:text-left" onClick={handleTriggerClick}>
-          © {new Date().getFullYear()} Pesantren Sukahideng. All Rights Reserved.
+          © 2026 Humas & Publikasi Panitia Milad 104 Ponpes Sukahideng.
         </p>
         <div className="text-[10px] text-brand-cream/20 font-serif italic">
           Khidmah - Ilmu - Amal
