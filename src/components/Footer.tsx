@@ -63,9 +63,19 @@ export default function Footer({ onAdminTrigger }: FooterProps) {
             Menanamkan nilai-nilai keislaman, kemandirian, dan khidmah kepada masyarakat sejak tahun 1922.
           </p>
           <div className="flex gap-4">
-            {[Instagram, Facebook, Youtube].map((Icon, idx) => (
-              <a key={idx} href="#" className="w-10 h-10 rounded-full border border-brand-gold/20 flex items-center justify-center hover:bg-brand-gold hover:text-brand-dark transition-all">
-                <Icon size={18} />
+            {[
+              { Icon: Instagram, href: 'https://www.instagram.com/ikhlash.sukahideng?igsh=MXhyYnV4NmZkMG9yZA==' },
+              { Icon: Facebook, href: 'https://www.facebook.com/share/18GPrDcUY9/' },
+              { Icon: Youtube, href: 'https://youtube.com/@pondokpesantrensukahideng?si=9SleGolrUNuzXf4i' }
+            ].map((item, idx) => (
+              <a 
+                key={idx} 
+                href={item.href} 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="w-10 h-10 rounded-full border border-brand-gold/20 flex items-center justify-center hover:bg-brand-gold hover:text-brand-dark transition-all"
+              >
+                <item.Icon size={18} />
               </a>
             ))}
           </div>
