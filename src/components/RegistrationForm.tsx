@@ -11,27 +11,37 @@ interface RegistrationFormProps {
 }
 
 export default function RegistrationForm({ koorwils, sports }: RegistrationFormProps) {
+  const [category, setCategory] = useState<'olahraga' | 'seni'>('olahraga');
   const [formData, setFormData] = useState({
-    teamName: '',
+    name: '',
     koorwil: '',
-    sport: '',
+    sportId: '',
     members: '',
-    contact: ''
+    contact: '',
+    gender: 'putra' as 'putra' | 'putri'
   });
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
 
+  const filteredSports = sports.filter(s => s.category === category);
+  const selectedSport = sports.find(s => s.id === formData.sportId);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.teamName || !formData.koorwil || !formData.sport || !formData.members || !formData.contact) return;
+    if (!formData.name || (category === 'olahraga' && !formData.koorwil) || !formData.sportId || !formData.members || !formData.contact) {
+      alert("Harap isi semua kolom yang diperlukan.");
+      return;
+    }
 
     setStatus('loading');
     try {
       await addDoc(collection(db, 'registrations'), {
         ...formData,
+        category,
+        sportName: selectedSport?.name || '',
         timestamp: new Date().toISOString()
       });
       setStatus('success');
-      setFormData({ teamName: '', koorwil: '', sport: '', members: '', contact: '' });
+      setFormData({ name: '', koorwil: '', sportId: '', members: '', contact: '', gender: 'putra' });
       setTimeout(() => setStatus('idle'), 5000);
     } catch (error) {
       console.error(error);
@@ -47,80 +57,124 @@ export default function RegistrationForm({ koorwils, sports }: RegistrationFormP
         <div className="absolute top-0 right-0 w-64 h-64 bg-brand-gold/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl" />
         
         <div className="relative z-10">
-          <div className="flex items-center gap-4 mb-12">
-            <div className="w-12 h-12 bg-brand-gold rounded-2xl flex items-center justify-center text-brand-dark">
-              <Send size={24} />
+          <div className="flex flex-col md:flex-row md:items-center gap-6 mb-12">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-brand-gold rounded-2xl flex items-center justify-center text-brand-dark shadow-lg shadow-brand-gold/20">
+                <Send size={24} />
+              </div>
+              <div>
+                <h2 className="text-3xl font-serif font-bold text-brand-cream uppercase tracking-wider">Pendaftaran PORSAS</h2>
+                <p className="text-brand-gold/60 text-sm italic">Pekan Olahraga & Seni Alumni Sukahideng</p>
+              </div>
             </div>
-            <div>
-              <h2 className="text-3xl font-serif font-bold text-brand-cream uppercase tracking-wider">Pendaftaran Tim</h2>
-              <p className="text-brand-gold/60 text-sm italic">Pastikan data yang diinput sudah benar</p>
+            
+            <div className="flex bg-brand-dark/40 p-1 rounded-xl border border-brand-gold/20 ml-auto self-start">
+              <button 
+                onClick={() => { setCategory('olahraga'); setFormData({ ...formData, sportId: '' }); }}
+                className={`px-4 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all ${category === 'olahraga' ? 'bg-brand-gold text-brand-dark' : 'text-brand-cream/50 hover:text-brand-cream'}`}
+              >
+                Olahraga
+              </button>
+              <button 
+                onClick={() => { setCategory('seni'); setFormData({ ...formData, sportId: '', koorwil: '' }); }}
+                className={`px-4 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all ${category === 'seni' ? 'bg-brand-gold text-brand-dark' : 'text-brand-cream/50 hover:text-brand-cream'}`}
+              >
+                Seni
+              </button>
             </div>
           </div>
 
           <form onSubmit={handleSubmit} className="grid md:grid-cols-2 gap-8">
             <div className="space-y-6">
               <div>
-                <label className="block text-[10px] uppercase tracking-[0.2em] text-brand-gold/70 font-bold mb-2 ml-1">Nama Tim / Kabilah</label>
+                <label className="block text-[10px] uppercase tracking-[0.2em] text-brand-gold/70 font-bold mb-2 ml-1">
+                  {selectedSport?.type === 'individu' ? 'Nama Peserta' : 'Nama Tim / Kabilah'}
+                </label>
                 <input 
                   type="text" 
-                  value={formData.teamName}
-                  onChange={e => setFormData({ ...formData, teamName: e.target.value })}
-                  placeholder="Contoh: El-Aziz FC"
+                  value={formData.name}
+                  onChange={e => setFormData({ ...formData, name: e.target.value })}
+                  placeholder={selectedSport?.type === 'individu' ? "Contoh: Ahmad Fauzi" : "Contoh: El-Aziz FC"}
                   className="w-full bg-brand-dark/50 border border-brand-gold/20 rounded-2xl px-6 py-4 text-brand-cream focus:outline-none focus:border-brand-gold transition-all"
                   required
                 />
               </div>
 
+              {category === 'olahraga' && (
+                <div>
+                  <label className="block text-[10px] uppercase tracking-[0.2em] text-brand-gold/70 font-bold mb-2 ml-1">Asal Koorwil</label>
+                  <select 
+                    value={formData.koorwil}
+                    onChange={e => setFormData({ ...formData, koorwil: e.target.value })}
+                    className="w-full bg-brand-dark/50 border border-brand-gold/20 rounded-2xl px-6 py-4 text-brand-cream focus:outline-none focus:border-brand-gold transition-all appearance-none"
+                    required
+                  >
+                    <option value="" disabled>Pilih Wilayah</option>
+                    {koorwils.map(k => (
+                      <option key={k.id} value={k.name} className="bg-brand-dark">{k.name}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
               <div>
-                <label className="block text-[10px] uppercase tracking-[0.2em] text-brand-gold/70 font-bold mb-2 ml-1">Asal Koorwil</label>
+                <label className="block text-[10px] uppercase tracking-[0.2em] text-brand-gold/70 font-bold mb-2 ml-1">Cabang Perlombaan</label>
                 <select 
-                  value={formData.koorwil}
-                  onChange={e => setFormData({ ...formData, koorwil: e.target.value })}
+                  value={formData.sportId}
+                  onChange={e => setFormData({ ...formData, sportId: e.target.value })}
                   className="w-full bg-brand-dark/50 border border-brand-gold/20 rounded-2xl px-6 py-4 text-brand-cream focus:outline-none focus:border-brand-gold transition-all appearance-none"
                   required
                 >
-                  <option value="" disabled>Pilih Wilayah</option>
-                  {koorwils.map(k => (
-                    <option key={k.id} value={k.name} className="bg-brand-dark">{k.name}</option>
+                  <option value="" disabled>Pilih Cabang {category}</option>
+                  {filteredSports.map(s => (
+                    <option key={s.id} value={s.id} className="bg-brand-dark">{s.name} ({s.gender})</option>
                   ))}
                 </select>
               </div>
 
-              <div>
-                <label className="block text-[10px] uppercase tracking-[0.2em] text-brand-gold/70 font-bold mb-2 ml-1">Cabang Olahraga</label>
-                <select 
-                  value={formData.sport}
-                  onChange={e => setFormData({ ...formData, sport: e.target.value })}
-                  className="w-full bg-brand-dark/50 border border-brand-gold/20 rounded-2xl px-6 py-4 text-brand-cream focus:outline-none focus:border-brand-gold transition-all appearance-none"
-                  required
-                >
-                  <option value="" disabled>Pilih Cabang</option>
-                  {sports.map(s => (
-                    <option key={s.id} value={s.name} className="bg-brand-dark">{s.name}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-[10px] uppercase tracking-[0.2em] text-brand-gold/70 font-bold mb-2 ml-1">Kontak PIC (WA)</label>
-                <input 
-                  type="text" 
-                  value={formData.contact}
-                  onChange={e => setFormData({ ...formData, contact: e.target.value })}
-                  placeholder="0812xxxx"
-                  className="w-full bg-brand-dark/50 border border-brand-gold/20 rounded-2xl px-6 py-4 text-brand-cream focus:outline-none focus:border-brand-gold transition-all"
-                  required
-                />
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-[10px] uppercase tracking-[0.2em] text-brand-gold/70 font-bold mb-2 ml-1">Kategori Gender</label>
+                  <div className="flex bg-brand-dark/50 rounded-2xl border border-brand-gold/20 p-1">
+                    <button 
+                      type="button"
+                      onClick={() => setFormData({ ...formData, gender: 'putra' })}
+                      className={`flex-1 py-3 rounded-xl text-xs font-bold uppercase tracking-widest transition-all ${formData.gender === 'putra' ? 'bg-brand-gold text-brand-dark' : 'text-brand-cream/50'}`}
+                    >
+                      Putra
+                    </button>
+                    <button 
+                      type="button"
+                      onClick={() => setFormData({ ...formData, gender: 'putri' })}
+                      className={`flex-1 py-3 rounded-xl text-xs font-bold uppercase tracking-widest transition-all ${formData.gender === 'putri' ? 'bg-brand-gold text-brand-dark' : 'text-brand-cream/50'}`}
+                    >
+                      Putri
+                    </button>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-[10px] uppercase tracking-[0.2em] text-brand-gold/70 font-bold mb-2 ml-1">Kontak PIC (WA)</label>
+                  <input 
+                    type="text" 
+                    value={formData.contact}
+                    onChange={e => setFormData({ ...formData, contact: e.target.value })}
+                    placeholder="0812xxxx"
+                    className="w-full bg-brand-dark/50 border border-brand-gold/20 rounded-2xl px-6 py-4 text-brand-cream focus:outline-none focus:border-brand-gold transition-all font-mono"
+                    required
+                  />
+                </div>
               </div>
             </div>
 
             <div className="space-y-6">
               <div className="h-full flex flex-col">
-                <label className="block text-[10px] uppercase tracking-[0.2em] text-brand-gold/70 font-bold mb-2 ml-1 md:h-[22px]">Daftar Nama Anggota</label>
+                <label className="block text-[10px] uppercase tracking-[0.2em] text-brand-gold/70 font-bold mb-2 ml-1 md:h-[22px]">
+                  {selectedSport?.type === 'individu' ? 'Detail Peserta (Nama, Angkatan, dsb)' : 'Daftar Nama Anggota Tim'}
+                </label>
                 <textarea 
                   value={formData.members}
                   onChange={e => setFormData({ ...formData, members: e.target.value })}
-                  placeholder="Tuliskan nama-nama anggota tim..."
+                  placeholder={selectedSport?.type === 'individu' ? "Tuliskan data diri lengkap..." : "Tuliskan nama-nama anggota tim..."}
                   className="flex-grow w-full bg-brand-dark/50 border border-brand-gold/20 rounded-2xl px-6 py-4 text-brand-cream focus:outline-none focus:border-brand-gold transition-all resize-none min-h-[200px]"
                   required
                 />

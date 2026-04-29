@@ -51,26 +51,32 @@
     },
     "Sport": {
       "title": "Sport Category",
-      "description": "Types of sports in PORSAS",
+      "description": "Types of sports/arts in PORSAS",
       "type": "object",
       "properties": {
-        "name": { "type": "string" }
+        "name": { "type": "string" },
+        "category": { "type": "string", "enum": ["olahraga", "seni"] },
+        "gender": { "type": "string", "enum": ["putra", "putri", "umum"] },
+        "type": { "type": "string", "enum": ["individu", "tim"] }
       },
-      "required": ["name"]
+      "required": ["name", "category", "gender", "type"]
     },
     "Registration": {
       "title": "PORSAS Registration",
-      "description": "Team registration for PORSAS",
+      "description": "Registration for PORSAS",
       "type": "object",
       "properties": {
-        "teamName": { "type": "string" },
+        "name": { "type": "string" },
         "koorwil": { "type": "string" },
-        "sport": { "type": "string" },
+        "sportId": { "type": "string" },
+        "sportName": { "type": "string" },
+        "category": { "type": "string", "enum": ["olahraga", "seni"] },
+        "gender": { "type": "string", "enum": ["putra", "putri"] },
         "members": { "type": "string" },
         "contact": { "type": "string" },
         "timestamp": { "type": "string", "format": "date-time" }
       },
-      "required": ["teamName", "koorwil", "sport", "members", "contact"]
+      "required": ["name", "sportId", "sportName", "category", "gender", "members", "contact"]
     },
     "Match": {
       "title": "PORSAS Match",

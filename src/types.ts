@@ -33,15 +33,21 @@ export interface Koorwil {
 export interface Sport {
   id: string;
   name: string;
+  category: 'olahraga' | 'seni';
+  gender: 'putra' | 'putri' | 'umum';
+  type: 'individu' | 'tim';
 }
 
 export interface Registration {
   id: string;
-  teamName: string;
-  koorwil: string;
-  sport: string;
+  name: string;
+  koorwil?: string;
+  sportId: string;
+  sportName: string;
+  category: 'olahraga' | 'seni';
   members: string;
   contact: string;
+  gender: 'putra' | 'putri';
   timestamp: string;
 }
 

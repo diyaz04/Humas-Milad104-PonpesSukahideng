@@ -16,11 +16,12 @@ export default function PorsasPanel({ koorwils, sports, registrations, matches }
   
   // Master Data Inputs
   const [newKoorwil, setNewKoorwil] = useState('');
-  const [newSport, setNewSport] = useState('');
-
-  // Bracket Management
-  const [selectedSport, setSelectedSport] = useState<string>('');
-  const [selectedTeams, setSelectedTeams] = useState<string[]>([]);
+  const [newSport, setNewSport] = useState({
+    name: '',
+    category: 'olahraga' as 'olahraga' | 'seni',
+    gender: 'umum' as 'putra' | 'putri' | 'umum',
+    type: 'tim' as 'individu' | 'tim'
+  });
 
   const addKoorwil = async () => {
     if (!newKoorwil) return;
@@ -29,13 +30,18 @@ export default function PorsasPanel({ koorwils, sports, registrations, matches }
   };
 
   const addSport = async () => {
-    if (!newSport) return;
-    await addDoc(collection(db, 'sports'), { name: newSport });
-    setNewSport('');
+    if (!newSport.name) return;
+    await addDoc(collection(db, 'sports'), { ...newSport });
+    setNewSport({
+      name: '',
+      category: 'olahraga',
+      gender: 'umum',
+      type: 'tim'
+    });
   };
 
-  const deleteMaster = async (collectionName: string, id: string) => {
-    if (confirm(`Hapus item ini dari ${collectionName}?`)) {
+  const deleteMaster = async (collectionName: string, id: string, name: string) => {
+    if (confirm(`Apakah Anda yakin ingin menghapus "${name}"? Data yang sudah terhubung mungkin akan terdampak.`)) {
       await deleteDoc(doc(db, collectionName, id));
     }
   };
@@ -116,29 +122,91 @@ export default function PorsasPanel({ koorwils, sports, registrations, matches }
               {koorwils.map(k => (
                 <div key={k.id} className="flex justify-between items-center p-3 bg-slate-50 rounded-xl">
                   <span className="font-medium text-slate-700">{k.name}</span>
-                  <button onClick={() => deleteMaster('koorwils', k.id)} className="text-red-400 p-1"><Trash2 size={16} /></button>
+                  <button 
+                    onClick={() => deleteMaster('koorwils', k.id, k.name)} 
+                    className="text-red-400 hover:text-red-600 hover:bg-red-50 p-2 rounded-lg transition-all"
+                    title="Hapus Koorwil"
+                  >
+                    <Trash2 size={16} />
+                  </button>
                 </div>
               ))}
             </div>
           </div>
 
           <div className="bg-white p-8 rounded-3xl shadow-sm border border-slate-100">
-            <h3 className="font-serif font-bold text-xl mb-6">Cabang Olahraga</h3>
-            <div className="flex gap-2 mb-6">
+            <h3 className="font-serif font-bold text-xl mb-6">Cabang Olahraga & Seni</h3>
+            <div className="space-y-4 mb-8">
               <input 
                 type="text" 
-                placeholder="Tambah Cabor..."
-                value={newSport}
-                onChange={e => setNewSport(e.target.value)}
-                className="flex-grow border-2 border-slate-100 rounded-xl p-3 outline-none"
+                placeholder="Nama Cabang (contoh: Futsal, Kaligrafi)..."
+                value={newSport.name}
+                onChange={e => setNewSport({ ...newSport, name: e.target.value })}
+                className="w-full border-2 border-slate-100 rounded-xl p-3 outline-none"
               />
-              <button onClick={addSport} className="bg-brand-dark text-brand-gold p-3 rounded-xl"><Plus /></button>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-[10px] uppercase tracking-widest text-slate-400 font-bold mb-1 block">Kategori</label>
+                  <select 
+                    value={newSport.category}
+                    onChange={e => setNewSport({ ...newSport, category: e.target.value as any })}
+                    className="w-full border-2 border-slate-100 rounded-xl p-2 text-sm"
+                  >
+                    <option value="olahraga">Olahraga</option>
+                    <option value="seni">Seni</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-[10px] uppercase tracking-widest text-slate-400 font-bold mb-1 block">Gender</label>
+                  <select 
+                    value={newSport.gender}
+                    onChange={e => setNewSport({ ...newSport, gender: e.target.value as any })}
+                    className="w-full border-2 border-slate-100 rounded-xl p-2 text-sm"
+                  >
+                    <option value="putra">Putra</option>
+                    <option value="putri">Putri</option>
+                    <option value="umum">Umum (Putra/i)</option>
+                  </select>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-[10px] uppercase tracking-widest text-slate-400 font-bold mb-1 block">Tipe Peserta</label>
+                  <select 
+                    value={newSport.type}
+                    onChange={e => setNewSport({ ...newSport, type: e.target.value as any })}
+                    className="w-full border-2 border-slate-100 rounded-xl p-2 text-sm"
+                  >
+                    <option value="tim">Tim</option>
+                    <option value="individu">Individu</option>
+                  </select>
+                </div>
+                <button 
+                  onClick={addSport} 
+                  className="mt-auto bg-brand-dark text-brand-gold p-3 rounded-xl flex items-center justify-center gap-2 font-bold uppercase text-xs tracking-widest"
+                >
+                  <Plus size={16} /> Tambah Cabang
+                </button>
+              </div>
             </div>
             <div className="space-y-2">
               {sports.map(s => (
                 <div key={s.id} className="flex justify-between items-center p-3 bg-slate-50 rounded-xl">
-                  <span className="font-medium text-slate-700">{s.name}</span>
-                  <button onClick={() => deleteMaster('sports', s.id)} className="text-red-400 p-1"><Trash2 size={16} /></button>
+                  <div className="flex flex-col">
+                    <span className="font-medium text-slate-700">{s.name}</span>
+                    <div className="flex gap-2 mt-1">
+                      <span className="text-[8px] uppercase tracking-tighter bg-brand-gold/10 text-brand-gold px-1 rounded">{s.category}</span>
+                      <span className="text-[8px] uppercase tracking-tighter bg-blue-50 text-blue-400 px-1 rounded">{s.gender}</span>
+                      <span className="text-[8px] uppercase tracking-tighter bg-purple-50 text-purple-400 px-1 rounded">{s.type}</span>
+                    </div>
+                  </div>
+                  <button 
+                    onClick={() => deleteMaster('sports', s.id, s.name)} 
+                    className="text-red-400 hover:text-red-600 hover:bg-red-50 p-2 rounded-lg transition-all"
+                    title="Hapus Cabang"
+                  >
+                    <Trash2 size={16} />
+                  </button>
                 </div>
               ))}
             </div>
@@ -152,23 +220,40 @@ export default function PorsasPanel({ koorwils, sports, registrations, matches }
             <table className="w-full text-left">
               <thead className="bg-slate-50 text-[10px] uppercase tracking-widest text-slate-400 font-bold">
                 <tr>
-                  <th className="px-8 py-4">Tim</th>
+                  <th className="px-8 py-4">Peserta / Tim</th>
                   <th className="px-8 py-4">Koorwil</th>
-                  <th className="px-8 py-4">Cabor</th>
+                  <th className="px-8 py-4">Cabang</th>
                   <th className="px-8 py-4">PIC / Kontak</th>
                   <th className="px-8 py-4">Anggota</th>
+                  <th className="px-8 py-4 text-center">Aksi</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50 text-sm">
                 {registrations.map(reg => (
-                  <tr key={reg.id} className="hover:bg-slate-50/50">
-                    <td className="px-8 py-4 font-bold text-brand-dark uppercase tracking-wide">{reg.teamName}</td>
-                    <td className="px-8 py-4 text-slate-500">{reg.koorwil}</td>
+                  <tr key={reg.id} className="hover:bg-slate-50/50 group">
                     <td className="px-8 py-4">
-                        <span className="bg-brand-gold/10 text-brand-gold px-2 py-1 rounded text-[10px] font-bold uppercase">{reg.sport}</span>
+                      <div className="flex flex-col">
+                        <span className="font-bold text-brand-dark uppercase tracking-wide">{reg.name}</span>
+                        <span className={`text-[8px] uppercase tracking-widest font-bold ${reg.gender === 'putra' ? 'text-blue-400' : 'text-pink-400'}`}>{reg.gender}</span>
+                      </div>
+                    </td>
+                    <td className="px-8 py-4 text-slate-500">{reg.koorwil || '-'}</td>
+                    <td className="px-8 py-4">
+                        <div className="flex flex-col gap-1">
+                          <span className="bg-brand-gold/10 text-brand-gold px-2 py-1 rounded text-[10px] font-bold uppercase w-fit">{reg.sportName}</span>
+                          <span className="text-[8px] uppercase text-slate-400 font-bold ml-1">{reg.category}</span>
+                        </div>
                     </td>
                     <td className="px-8 py-4 text-slate-500 font-mono">{reg.contact}</td>
                     <td className="px-8 py-4 truncate max-w-[200px] text-slate-400 italic">{reg.members}</td>
+                    <td className="px-8 py-4 text-center">
+                        <button 
+                          onClick={() => deleteMaster('registrations', reg.id, `Pendaftaran ${reg.name}`)}
+                          className="text-red-300 hover:text-red-600 p-2 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -203,7 +288,7 @@ export default function PorsasPanel({ koorwils, sports, registrations, matches }
               <div>
                 <label className="text-[10px] uppercase tracking-widest text-slate-400 font-bold mb-2 block">Pilih Peserta ({selectedTeams.length})</label>
                 <div className="max-h-48 overflow-y-auto border-2 border-slate-100 rounded-xl p-4 space-y-2">
-                  {registrations.filter(r => !selectedSport || r.sport === sports.find(s => s.id === selectedSport)?.name).map(reg => (
+                  {registrations.filter(r => !selectedSport || r.sportId === selectedSport).map(reg => (
                     <label key={reg.id} className="flex items-center gap-3 cursor-pointer hover:bg-slate-50 p-2 rounded-lg transition-all">
                       <input 
                         type="checkbox" 
@@ -214,7 +299,7 @@ export default function PorsasPanel({ koorwils, sports, registrations, matches }
                         }}
                         className="w-4 h-4 rounded text-brand-gold accent-brand-gold"
                       />
-                      <span className="text-sm font-medium text-slate-600">{reg.teamName} ({reg.koorwil})</span>
+                      <span className="text-sm font-medium text-slate-600">{reg.name} ({reg.koorwil || 'Individu'})</span>
                     </label>
                   ))}
                 </div>
@@ -229,8 +314,8 @@ export default function PorsasPanel({ koorwils, sports, registrations, matches }
                       <div key={match.id} className="flex flex-col md:flex-row items-center gap-4 p-6 bg-slate-50 rounded-2xl border border-slate-100">
                           <div className="flex-grow grid grid-cols-3 items-center text-center gap-4">
                               <div className="text-right">
-                                  <p className="text-xs text-slate-400 uppercase font-bold mb-1">Tim A</p>
-                                  <p className="font-bold text-brand-dark truncate">{registrations.find(r => r.id === match.teamAId)?.teamName || "TBD"}</p>
+                                  <p className="text-xs text-slate-400 uppercase font-bold mb-1">Pihak A</p>
+                                  <p className="font-bold text-brand-dark truncate">{registrations.find(r => r.id === match.teamAId)?.name || "TBD"}</p>
                               </div>
                               <div className="flex items-center justify-center gap-2">
                                   <input 
@@ -248,8 +333,8 @@ export default function PorsasPanel({ koorwils, sports, registrations, matches }
                                   />
                               </div>
                               <div className="text-left">
-                                  <p className="text-xs text-slate-400 uppercase font-bold mb-1">Tim B</p>
-                                  <p className="font-bold text-brand-dark truncate">{registrations.find(r => r.id === match.teamBId)?.teamName || "TBD"}</p>
+                                  <p className="text-xs text-slate-400 uppercase font-bold mb-1">Pihak B</p>
+                                  <p className="font-bold text-brand-dark truncate">{registrations.find(r => r.id === match.teamBId)?.name || "TBD"}</p>
                               </div>
                           </div>
                           <div className="flex items-center gap-3">
