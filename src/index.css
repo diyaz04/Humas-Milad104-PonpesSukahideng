@@ -1,0 +1,52 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&family=DM+Sans:wght@300;400;500;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-serif: "Cormorant Garamond", serif;
+  --font-sans: "DM Sans", sans-serif;
+  
+  --color-brand-dark: #0B2017;
+  --color-brand-green: #112C1E;
+  --color-brand-forest: #1A4A30;
+  --color-brand-gold: #C9A84C;
+  --color-brand-lightgold: #F0D98C;
+  --color-brand-cream: #FAF6ED;
+}
+
+@layer base {
+  body {
+    @apply font-sans bg-brand-cream text-brand-dark;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-serif;
+  }
+}
+
+.islamic-pattern {
+  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0l5.878 18.09h19.022l-15.39 11.18 5.878 18.09-15.388-11.18-15.388 11.18 5.878-18.09-15.39-11.18h19.022L30 0z' fill='%23C9A84C' fill-opacity='0.03' fill-rule='evenodd'/%3E%3C/svg%3E");
+}
+
+.glass-nav {
+  @apply bg-brand-dark/80 backdrop-blur-md border-b border-brand-gold/20;
+}
+
+.timeline-line {
+  @apply relative before:absolute before:left-0 before:top-0 before:bottom-0 before:w-px before:bg-brand-gold/30;
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.8s ease-out forwards;
+}
+

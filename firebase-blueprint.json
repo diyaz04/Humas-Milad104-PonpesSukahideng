@@ -1,0 +1,123 @@
+{
+  "entities": {
+    "Setting": {
+      "title": "Site Settings",
+      "description": "Global configuration for the website content",
+      "type": "object",
+      "properties": {
+        "heroTitle": { "type": "string" },
+        "heroTagline": { "type": "string" },
+        "countdownDate": { "type": "string", "format": "date-time" },
+        "aboutTitle": { "type": "string" },
+        "aboutText": { "type": "string" }
+      },
+      "required": ["heroTitle", "heroTagline", "countdownDate"]
+    },
+    "News": {
+      "title": "News & Announcements",
+      "description": "News items displayed on the landing page",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "content": { "type": "string" },
+        "date": { "type": "string", "format": "date-time" },
+        "imageUrl": { "type": "string" }
+      },
+      "required": ["title", "content", "date"]
+    },
+    "ScheduleItem": {
+      "title": "Agenda Item",
+      "description": "Events in the milad schedule",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "date": { "type": "string", "format": "date" },
+        "startTime": { "type": "string" },
+        "endTime": { "type": "string" },
+        "location": { "type": "string" },
+        "description": { "type": "string" },
+        "category": { "type": "string" }
+      },
+      "required": ["name", "date", "startTime"]
+    },
+    "Koorwil": {
+      "title": "Koorwil",
+      "description": "Regional coordinators for alumni groups",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" }
+      },
+      "required": ["name"]
+    },
+    "Sport": {
+      "title": "Sport Category",
+      "description": "Types of sports in PORSAS",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" }
+      },
+      "required": ["name"]
+    },
+    "Registration": {
+      "title": "PORSAS Registration",
+      "description": "Team registration for PORSAS",
+      "type": "object",
+      "properties": {
+        "teamName": { "type": "string" },
+        "koorwil": { "type": "string" },
+        "sport": { "type": "string" },
+        "members": { "type": "string" },
+        "contact": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["teamName", "koorwil", "sport", "members", "contact"]
+    },
+    "Match": {
+      "title": "PORSAS Match",
+      "description": "A single match in the tournament bracket",
+      "type": "object",
+      "properties": {
+        "sportId": { "type": "string" },
+        "round": { "type": "number" },
+        "matchIndex": { "type": "number" },
+        "teamAId": { "type": "string" },
+        "teamBId": { "type": "string" },
+        "scoreA": { "type": "number" },
+        "scoreB": { "type": "number" },
+        "winnerId": { "type": "string" },
+        "status": { "type": "string", "enum": ["scheduled", "ongoing", "completed"] },
+        "startTime": { "type": "string", "format": "date-time" }
+      }
+    }
+  },
+  "firestore": {
+    "settings/general": {
+      "schema": "Setting",
+      "description": "Main settings document"
+    },
+    "news": {
+      "schema": "News",
+      "description": "Collection of news items"
+    },
+    "schedule": {
+      "schema": "ScheduleItem",
+      "description": "Collection of schedule events"
+    },
+    "koorwils": {
+      "schema": "Koorwil",
+      "description": "List of available koorwils"
+    },
+    "sports": {
+      "schema": "Sport",
+      "description": "List of available sports"
+    },
+    "registrations": {
+      "schema": "Registration",
+      "description": "Submitted team registrations"
+    },
+    "matches": {
+      "schema": "Match",
+      "description": "Tournament bracket matches"
+    }
+  }
+}

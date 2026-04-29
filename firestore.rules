@@ -1,0 +1,9 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // CRITICAL: Simplified rules for full access without restrictions as requested by user.
+    match /{document=**} {
+      allow read, write: if true;
+    }
+  }
+}
