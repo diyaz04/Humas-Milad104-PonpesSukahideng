@@ -39,7 +39,7 @@ export default function Hero({ settings }: HeroProps) {
   return (
     <div className="relative min-h-screen flex flex-col justify-center items-center text-center px-6 pt-20 overflow-hidden bg-brand-dark">
       {/* Background Decor */}
-      <div className="absolute inset-0 opacity-80 bg-[url('https://assets.promediateknologi.id/crop/0x0:0x0/1200x600/webp/photo/2022/12/30/388964777.jpg')] bg-cover bg-center mix-blend-overlay" />
+      <div className="absolute inset-0 opacity-100 bg-[url('https://assets.promediateknologi.id/crop/0x0:0x0/1200x600/webp/photo/2022/12/30/388964777.jpg')] bg-cover bg-center mix-blend-overlay" />
       <div className="absolute inset-0 bg-gradient-to-b from-brand-dark/40 via-brand-dark/80 to-brand-dark" />
       
       <motion.div 
