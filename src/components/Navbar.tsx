@@ -39,7 +39,7 @@ export default function Navbar({ onMenuOpen }: NavbarProps) {
         </div>
 
         <div className="hidden md:flex gap-10 items-center">
-          {['About', 'Agenda', 'Porsas', 'Berita'].map((item) => (
+          {['About', 'Agenda', 'Merchandise', 'Porsas', 'Berita'].map((item) => (
             <a 
               key={item} 
               href={`#${item.toLowerCase()}`}

@@ -38,6 +38,36 @@ export interface Sport {
   type: 'individu' | 'tim';
 }
 
+export interface Product {
+  id: string;
+  name: string;
+  price: number;
+  image: string;
+  description: string;
+  isActive: boolean;
+}
+
+export interface ProductOrder {
+  id: string;
+  productId: string;
+  productName: string;
+  customerName: string;
+  customerContact: string;
+  address: string;
+  quantity: number;
+  totalPrice: number;
+  paymentProof: string; // URL or indicator
+  status: 'pending' | 'verified' | 'rejected';
+  timestamp: string;
+  orderCode: string;
+}
+
+export interface MerchantConfig {
+  bankName: string;
+  accountNumber: string;
+  accountName: string;
+}
+
 export interface Registration {
   id: string;
   name: string;
@@ -72,4 +102,4 @@ export interface FAQ {
   order: number;
 }
 
-export type AdminType = 'milad' | 'jadwal' | 'porsas' | null;
+export type AdminType = 'milad' | 'jadwal' | 'porsas' | 'pesanan' | null;

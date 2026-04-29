@@ -78,6 +78,48 @@
       },
       "required": ["name", "sportId", "sportName", "category", "gender", "members", "contact"]
     },
+    "Product": {
+      "title": "Merchandise Product",
+      "description": "Products available for purchase",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "price": { "type": "number" },
+        "image": { "type": "string", "description": "Image URL or base64" },
+        "description": { "type": "string" },
+        "isActive": { "type": "boolean" }
+      },
+      "required": ["name", "price", "isActive"]
+    },
+    "ProductOrder": {
+      "title": "Merchandise Order",
+      "description": "Orders placed by users",
+      "type": "object",
+      "properties": {
+        "productId": { "type": "string" },
+        "productName": { "type": "string" },
+        "customerName": { "type": "string" },
+        "customerContact": { "type": "string" },
+        "address": { "type": "string" },
+        "quantity": { "type": "number" },
+        "totalPrice": { "type": "number" },
+        "paymentProof": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "verified", "rejected"] },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "orderCode": { "type": "string" }
+      },
+      "required": ["productId", "customerName", "customerContact", "quantity", "status", "orderCode"]
+    },
+    "MerchantConfig": {
+      "title": "Merchant Configuration",
+      "description": "Bank details for merchandise payments",
+      "type": "object",
+      "properties": {
+        "bankName": { "type": "string" },
+        "accountNumber": { "type": "string" },
+        "accountName": { "type": "string" }
+      }
+    },
     "Match": {
       "title": "PORSAS Match",
       "description": "A single match in the tournament bracket",

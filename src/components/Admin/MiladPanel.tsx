@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import { doc, setDoc, addDoc, collection, deleteDoc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import { Setting, News, FAQ } from '../../types';
-import { Plus, Trash2, Edit2, Check, Save } from 'lucide-react';
+import { Plus, Trash2, Edit2, Check, Save, AlertCircle } from 'lucide-react';
 import FAQPanel from './FAQPanel';
+import ConfirmModal from './ConfirmModal';
 
 interface MiladPanelProps {
   settings: Setting | null;
@@ -12,6 +13,8 @@ interface MiladPanelProps {
 }
 
 export default function MiladPanel({ settings, news, faqs }: MiladPanelProps) {
+  const [deleteNewsId, setDeleteNewsId] = useState<string | null>(null);
+
   const [localSettings, setLocalSettings] = useState<Setting>(settings || {
     heroTitle: '',
     heroTagline: '',
@@ -41,9 +44,10 @@ export default function MiladPanel({ settings, news, faqs }: MiladPanelProps) {
     setNewsForm({ title: '', content: '', date: new Date().toISOString().split('T')[0], imageUrl: '' });
   };
 
-  const deleteNews = async (id: string) => {
-    if (confirm("Hapus berita ini?")) {
-      await deleteDoc(doc(db, 'news', id));
+  const confirmDeleteNews = async () => {
+    if (deleteNewsId) {
+      await deleteDoc(doc(db, 'news', deleteNewsId));
+      setDeleteNewsId(null);
     }
   };
 
@@ -154,7 +158,7 @@ export default function MiladPanel({ settings, news, faqs }: MiladPanelProps) {
                   <p className="text-[10px] text-slate-400 uppercase font-bold">{new Date(item.date).toDateString()}</p>
                 </div>
                 <button 
-                  onClick={() => deleteNews(item.id)}
+                  onClick={() => setDeleteNewsId(item.id)}
                   className="p-2 text-red-500 hover:bg-red-50 rounded-lg"
                 >
                   <Trash2 size={18} />
@@ -168,6 +172,14 @@ export default function MiladPanel({ settings, news, faqs }: MiladPanelProps) {
       <div className="md:col-span-2">
         <FAQPanel faqs={faqs} />
       </div>
+
+      <ConfirmModal 
+        isOpen={deleteNewsId !== null}
+        onClose={() => setDeleteNewsId(null)}
+        onConfirm={confirmDeleteNews}
+        title="Hapus Berita?"
+        message="Apakah Anda yakin ingin menghapus berita ini? Berita ini akan hilang dari halaman utama."
+      />
     </div>
   );
 }

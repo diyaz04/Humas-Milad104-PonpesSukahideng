@@ -19,7 +19,7 @@ import {
   X
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Setting, News, ScheduleItem, Koorwil, Sport, Registration, Match, FAQ, AdminType } from './types';
+import { Setting, News, ScheduleItem, Koorwil, Sport, Registration, Match, FAQ, AdminType, Product } from './types';
 
 // Components
 import Navbar from './components/Navbar';
@@ -30,6 +30,7 @@ import Porsas from './components/Porsas';
 import RegistrationForm from './components/RegistrationForm';
 import Bracket from './components/Bracket';
 import NewsSection from './components/NewsSection';
+import Merchandise from './components/Merchandise';
 import Footer from './components/Footer';
 import AdminDashboard from './components/Admin/AdminDashboard';
 import PopupBanner from './components/PopupBanner';
@@ -46,6 +47,7 @@ export default function App() {
   const [schedule, setSchedule] = useState<ScheduleItem[]>([]);
   const [koorwils, setKoorwils] = useState<Koorwil[]>([]);
   const [sports, setSports] = useState<Sport[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [registrations, setRegistrations] = useState<Registration[]>([]);
   const [matches, setMatches] = useState<Match[]>([]);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -73,7 +75,7 @@ export default function App() {
           const defaultSettings: Setting = {
             heroTitle: "Milad ke-104 Pesantren Sukahideng",
             heroTagline: "Meneguhkan Khidmah, Menginspirasi Umat",
-            countdownDate: "2026-05-15T00:00:00",
+            countdownDate: "2026-07-15T00:00:00",
             aboutTitle: "Makna Milad ke-104",
             aboutText: "Pesantren Sukahideng telah berdiri selama lebih dari satu abad, membimbing generasi dengan ilmu dan akhlak. Milad ke-104 ini merupakan momentum untuk bersyukur dan mengaktualisasikan nilai-nilai pesantren dalam menjawab tantangan zaman."
           };
@@ -104,6 +106,11 @@ export default function App() {
       setSports(snap.docs.map(d => ({ id: d.id, ...d.data() } as Sport)));
     }, (err) => handleFirestoreError(err, OperationType.LIST, 'sports'));
 
+    // Listen for products
+    const unsubProducts = onSnapshot(query(collection(db, 'products'), orderBy('name')), (snap) => {
+      setProducts(snap.docs.map(d => ({ id: d.id, ...d.data() } as Product)));
+    }, (err) => handleFirestoreError(err, OperationType.LIST, 'products'));
+
     // Listen for registrations
     const unsubRegs = onSnapshot(collection(db, 'registrations'), (snap) => {
       setRegistrations(snap.docs.map(d => ({ id: d.id, ...d.data() } as Registration)));
@@ -126,6 +133,7 @@ export default function App() {
       unsubSchedule();
       unsubKoorwils();
       unsubSports();
+      unsubProducts();
       unsubRegs();
       unsubMatches();
       unsubFaqs();
@@ -136,6 +144,7 @@ export default function App() {
     if (keyword === 'milad') setActiveAdmin('milad');
     else if (keyword === 'jadwal') setActiveAdmin('jadwal');
     else if (keyword === 'porsas') setActiveAdmin('porsas');
+    else if (keyword === 'pesanan') setActiveAdmin('pesanan');
     else setActiveAdmin(null);
   };
 
@@ -176,6 +185,7 @@ export default function App() {
             <nav className="flex flex-col gap-8 mt-12 text-2xl font-serif text-brand-cream text-center">
               <a href="#about" className="hover:text-brand-gold transition-colors" onClick={() => setIsMenuOpen(false)}>Tentang Milad</a>
               <a href="#agenda" className="hover:text-brand-gold transition-colors" onClick={() => setIsMenuOpen(false)}>Agenda</a>
+              <a href="#merchandise" className="hover:text-brand-gold transition-colors" onClick={() => setIsMenuOpen(false)}>Merchandise</a>
               <a href="#porsas" className="hover:text-brand-gold transition-colors" onClick={() => setIsMenuOpen(false)}>PORSAS</a>
               <a href="#berita" className="hover:text-brand-gold transition-colors" onClick={() => setIsMenuOpen(false)}>Berita</a>
             </nav>
@@ -194,6 +204,12 @@ export default function App() {
 
         <section id="agenda" className="py-24">
           <Schedule schedule={schedule} />
+        </section>
+
+        <section id="merchandise" className="py-24 bg-white">
+          <div className="max-w-7xl mx-auto">
+            <Merchandise products={products} />
+          </div>
         </section>
 
         <section id="porsas" className="bg-brand-dark py-24 text-brand-cream overflow-hidden">

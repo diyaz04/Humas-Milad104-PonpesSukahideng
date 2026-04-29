@@ -38,7 +38,7 @@ export default function Bracket({ sports, matches, registrations }: BracketProps
   const getTeamName = (id: string | null) => {
     if (!id) return "TBD";
     const reg = registrations.find(r => r.id === id);
-    return reg ? reg.teamName : id; // Fallback to ID if not found (maybe manual input)
+    return reg ? reg.name : id; // Fallback to ID if not found (maybe manual input)
   };
 
   return (

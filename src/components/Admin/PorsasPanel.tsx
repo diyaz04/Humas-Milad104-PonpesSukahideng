@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { collection, addDoc, deleteDoc, doc, updateDoc, writeBatch } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import { Koorwil, Sport, Registration, Match } from '../../types';
-import { Plus, Trash2, Trophy, Users, Layout, ChevronRight, Save } from 'lucide-react';
+import { Plus, Trash2, Trophy, Users, Layout, ChevronRight, Save, AlertCircle } from 'lucide-react';
+import ConfirmModal from './ConfirmModal';
 
 interface PorsasPanelProps {
   koorwils: Koorwil[];
@@ -13,6 +14,7 @@ interface PorsasPanelProps {
 
 export default function PorsasPanel({ koorwils, sports, registrations, matches }: PorsasPanelProps) {
   const [activeTab, setActiveTab] = useState<'master' | 'registrasi' | 'bracket'>('master');
+  const [deleteConfirm, setDeleteConfirm] = useState<{ id: string, type: string, name: string, coll: string } | null>(null);
   
   // Master Data Inputs
   const [newKoorwil, setNewKoorwil] = useState('');
@@ -22,6 +24,10 @@ export default function PorsasPanel({ koorwils, sports, registrations, matches }
     gender: 'umum' as 'putra' | 'putri' | 'umum',
     type: 'tim' as 'individu' | 'tim'
   });
+
+  // Bracket Management
+  const [selectedSport, setSelectedSport] = useState<string>('');
+  const [selectedTeams, setSelectedTeams] = useState<string[]>([]);
 
   const addKoorwil = async () => {
     if (!newKoorwil) return;
@@ -40,9 +46,10 @@ export default function PorsasPanel({ koorwils, sports, registrations, matches }
     });
   };
 
-  const deleteMaster = async (collectionName: string, id: string, name: string) => {
-    if (confirm(`Apakah Anda yakin ingin menghapus "${name}"? Data yang sudah terhubung mungkin akan terdampak.`)) {
-      await deleteDoc(doc(db, collectionName, id));
+  const confirmDelete = async () => {
+    if (deleteConfirm) {
+      await deleteDoc(doc(db, deleteConfirm.coll, deleteConfirm.id));
+      setDeleteConfirm(null);
     }
   };
 
@@ -123,7 +130,7 @@ export default function PorsasPanel({ koorwils, sports, registrations, matches }
                 <div key={k.id} className="flex justify-between items-center p-3 bg-slate-50 rounded-xl">
                   <span className="font-medium text-slate-700">{k.name}</span>
                   <button 
-                    onClick={() => deleteMaster('koorwils', k.id, k.name)} 
+                    onClick={() => setDeleteConfirm({ id: k.id, coll: 'koorwils', name: k.name, type: 'Koorwil' })} 
                     className="text-red-400 hover:text-red-600 hover:bg-red-50 p-2 rounded-lg transition-all"
                     title="Hapus Koorwil"
                   >
@@ -201,7 +208,7 @@ export default function PorsasPanel({ koorwils, sports, registrations, matches }
                     </div>
                   </div>
                   <button 
-                    onClick={() => deleteMaster('sports', s.id, s.name)} 
+                    onClick={() => setDeleteConfirm({ id: s.id, coll: 'sports', name: s.name, type: 'Cabang' })} 
                     className="text-red-400 hover:text-red-600 hover:bg-red-50 p-2 rounded-lg transition-all"
                     title="Hapus Cabang"
                   >
@@ -248,7 +255,7 @@ export default function PorsasPanel({ koorwils, sports, registrations, matches }
                     <td className="px-8 py-4 truncate max-w-[200px] text-slate-400 italic">{reg.members}</td>
                     <td className="px-8 py-4 text-center">
                         <button 
-                          onClick={() => deleteMaster('registrations', reg.id, `Pendaftaran ${reg.name}`)}
+                          onClick={() => setDeleteConfirm({ id: reg.id, coll: 'registrations', name: reg.name, type: 'Registrasi' })}
                           className="text-red-300 hover:text-red-600 p-2 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
                         >
                           <Trash2 size={16} />
@@ -348,9 +355,7 @@ export default function PorsasPanel({ koorwils, sports, registrations, matches }
                                   <option value="completed">Selesai</option>
                               </select>
                               <button 
-                                onClick={async () => {
-                                    if(confirm("Hapus pertandingan ini?")) await deleteDoc(doc(db, 'matches', match.id));
-                                }}
+                                onClick={() => setDeleteConfirm({ id: match.id, coll: 'matches', name: 'Pertandingan', type: 'Match' })}
                                 className="p-2 text-red-400 hover:bg-red-50 rounded-lg"
                               >
                                   <Trash2 size={18} />
@@ -363,6 +368,14 @@ export default function PorsasPanel({ koorwils, sports, registrations, matches }
           </div>
         </div>
       )}
+
+      <ConfirmModal 
+        isOpen={deleteConfirm !== null}
+        onClose={() => setDeleteConfirm(null)}
+        onConfirm={confirmDelete}
+        title={`Hapus ${deleteConfirm?.type}?`}
+        message={`Apakah Anda yakin ingin menghapus "${deleteConfirm?.name}"? Data yang sudah dihapus tidak dapat dikembalikan dan mungkin berdampak pada data terkait lainnya.`}
+      />
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Bell, X, Clock, MapPin, ChevronRight } from 'lucide-react';
+import { Bell, X, Clock, MapPin, ChevronRight, ShoppingBag } from 'lucide-react';
 import { format, parseISO, isAfter, isBefore, addMinutes, isSameDay } from 'date-fns';
 import { ScheduleItem, Match, Registration } from '../types';
 
@@ -18,7 +18,7 @@ export default function PopupBanner({ schedule, matches, registrations }: PopupB
   const getTeamName = (id: string | null) => {
     if (!id) return "TBD";
     const reg = registrations.find(r => r.id === id);
-    return reg ? reg.teamName : id;
+    return reg ? reg.name : id;
   };
 
   const determineContent = (): any[] => {
@@ -26,6 +26,30 @@ export default function PopupBanner({ schedule, matches, registrations }: PopupB
     const todayStr = format(now, 'yyyy-MM-dd');
     const items: any[] = [];
     
+    // Check if before H-1 (Event July 15, H-1 is July 14)
+    const hDay = parseISO('2026-07-15T00:00:00');
+    const hMinus1 = parseISO('2026-07-14T00:00:00');
+    
+    if (isBefore(now, hMinus1)) {
+      items.push({
+        type: 'registration_promo',
+        title: 'Info Pendaftaran',
+        subtitle: 'Terbuka Untuk Umum & Alumni',
+        details: 'Ayo bergabung dalam kemeriahan Milad ke-104! Segera daftarkan diri dan kabilah Anda.',
+        isPromo: true
+      });
+      
+      items.push({
+        type: 'merchandise_promo',
+        title: 'Official Merchandise',
+        subtitle: 'Edisi Terbatas Milad 104',
+        details: 'Miliki kaos dan atribut eksklusif Milad Sukahideng ke-104 sebelum kehabisan!',
+        isMerch: true
+      });
+      
+      return items;
+    }
+
     // 1. Check all current matches
     const ongoingMatches = matches.filter(m => m.status === 'ongoing');
     ongoingMatches.forEach(m => {
@@ -164,16 +188,56 @@ export default function PopupBanner({ schedule, matches, registrations }: PopupB
                         {item.details}
                       </h4>
                       
-                      <div className="space-y-3">
-                        <div className="flex items-center gap-3 text-brand-dark/70 font-medium">
-                          <Clock size={18} className="text-brand-gold shrink-0" />
-                          <span className="text-sm">{item.time}</span>
+                      {item.isPromo ? (
+                        <div className="space-y-4 mt-8">
+                          <a 
+                            href="#daftar-porsas" 
+                            onClick={() => setIsOpen(false)}
+                            className="flex items-center justify-between w-full bg-brand-gold text-brand-dark px-6 py-4 rounded-2xl font-bold uppercase tracking-widest hover:scale-[1.02] transition-transform text-xs shadow-lg shadow-brand-gold/20"
+                          >
+                            <span>Gowes & Napak Tilas</span>
+                            <ChevronRight size={16} />
+                          </a>
+                          <a 
+                            href="#daftar-porsas" 
+                            onClick={() => setIsOpen(false)}
+                            className="flex items-center justify-between w-full bg-brand-gold text-brand-dark px-6 py-4 rounded-2xl font-bold uppercase tracking-widest hover:scale-[1.02] transition-transform text-xs shadow-lg shadow-brand-gold/20"
+                          >
+                            <span>Karaoke Religi</span>
+                            <ChevronRight size={16} />
+                          </a>
+                          <a 
+                            href="#porsas" 
+                            onClick={() => setIsOpen(false)}
+                            className="flex items-center justify-between w-full border-2 border-brand-gold text-brand-gold px-6 py-4 rounded-2xl font-bold uppercase tracking-widest hover:bg-brand-gold/10 transition-all text-xs"
+                          >
+                            <span>Daftar Tim PORSAS</span>
+                            <ChevronRight size={16} />
+                          </a>
                         </div>
-                        <div className="flex items-center gap-3 text-brand-dark/70 font-medium">
-                          <MapPin size={18} className="text-brand-gold shrink-0" />
-                          <span className="text-sm">{item.location}</span>
+                      ) : item.isMerch ? (
+                        <div className="mt-8">
+                          <a 
+                            href="#merchandise" 
+                            onClick={() => setIsOpen(false)}
+                            className="flex items-center justify-center gap-3 w-full bg-brand-dark text-brand-gold py-5 rounded-2xl font-bold uppercase tracking-[0.2em] hover:scale-[1.02] transition-all text-xs shadow-xl shadow-brand-dark/20"
+                          >
+                            <ShoppingBag size={18} />
+                            <span>Beli Merchandise</span>
+                          </a>
                         </div>
-                      </div>
+                      ) : (
+                        <div className="space-y-3">
+                          <div className="flex items-center gap-3 text-brand-dark/70 font-medium">
+                            <Clock size={18} className="text-brand-gold shrink-0" />
+                            <span className="text-sm">{item.time}</span>
+                          </div>
+                          <div className="flex items-center gap-3 text-brand-dark/70 font-medium">
+                            <MapPin size={18} className="text-brand-gold shrink-0" />
+                            <span className="text-sm">{item.location}</span>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>

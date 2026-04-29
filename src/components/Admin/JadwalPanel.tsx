@@ -2,13 +2,15 @@ import React, { useState } from 'react';
 import { collection, addDoc, deleteDoc, doc, updateDoc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import { ScheduleItem } from '../../types';
-import { Plus, Trash2, Edit2, Search } from 'lucide-react';
+import { Plus, Trash2, Edit2, Search, AlertCircle } from 'lucide-react';
+import ConfirmModal from './ConfirmModal';
 
 interface JadwalPanelProps {
   schedule: ScheduleItem[];
 }
 
 export default function JadwalPanel({ schedule }: JadwalPanelProps) {
+  const [deleteItemId, setDeleteItemId] = useState<string | null>(null);
   const [form, setForm] = useState<Partial<ScheduleItem>>({
     name: '',
     date: '',
@@ -32,9 +34,10 @@ export default function JadwalPanel({ schedule }: JadwalPanelProps) {
     setForm({ name: '', date: '', startTime: '', endTime: '', location: '', description: '', category: '' });
   };
 
-  const deleteItem = async (id: string) => {
-    if (confirm("Hapus agenda ini?")) {
-      await deleteDoc(doc(db, 'schedule', id));
+  const confirmDeleteItem = async () => {
+    if (deleteItemId) {
+      await deleteDoc(doc(db, 'schedule', deleteItemId));
+      setDeleteItemId(null);
     }
   };
 
@@ -173,7 +176,7 @@ export default function JadwalPanel({ schedule }: JadwalPanelProps) {
                   <td className="px-8 py-6 text-sm">
                     <div className="flex gap-2">
                       <button onClick={() => editItem(item)} className="p-2 text-brand-forest hover:bg-brand-forest/5 rounded-lg transition-all"><Edit2 size={18} /></button>
-                      <button onClick={() => deleteItem(item.id)} className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-all"><Trash2 size={18} /></button>
+                      <button onClick={() => setDeleteItemId(item.id)} className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-all"><Trash2 size={18} /></button>
                     </div>
                   </td>
                 </tr>
@@ -182,6 +185,14 @@ export default function JadwalPanel({ schedule }: JadwalPanelProps) {
           </table>
         </div>
       </div>
+
+      <ConfirmModal 
+        isOpen={deleteItemId !== null}
+        onClose={() => setDeleteItemId(null)}
+        onConfirm={confirmDeleteItem}
+        title="Hapus Agenda?"
+        message="Apakah Anda yakin ingin menghapus agenda kegiatan ini? Data ini akan hilang dari jadwal umum."
+      />
     </div>
   );
 }
