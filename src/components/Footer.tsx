@@ -46,15 +46,18 @@ export default function Footer({ onAdminTrigger }: FooterProps) {
       <div className="max-w-7xl mx-auto px-6 grid md:grid-cols-3 gap-16 relative z-10">
         <div className="space-y-8">
           <div className="flex items-center gap-4">
-            <div className="bg-white p-0.5 border border-white rounded-lg shadow-lg inline-block">
-              <img 
-                src="https://lh3.googleusercontent.com/d/1JcDX0c_j35jb8Rj1kw0bCgQwwXC2Jp4w" 
-                alt="Sukahideng Logo" 
-                className="h-16 w-auto object-contain"
-                referrerPolicy="no-referrer"
-              />
+            <div className="relative group">
+              <div className="absolute inset-0 bg-brand-gold/30 blur-2xl rounded-full scale-125 opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
+              <div className="relative bg-white/10 backdrop-blur-md p-1.5 border-2 border-brand-gold/40 rounded-2xl shadow-[0_0_25px_rgba(212,175,55,0.2)] inline-block transition-transform hover:rotate-3 duration-500">
+                <img 
+                  src="https://lh3.googleusercontent.com/d/10ePHDITHyany16gFdE6axqBjSwr2UROr" 
+                  alt="Sukahideng Logo" 
+                  className="h-20 w-auto object-contain drop-shadow-[0_0_12px_rgba(212,175,55,0.6)]"
+                  referrerPolicy="no-referrer"
+                />
+              </div>
             </div>
-            <h2 className="text-3xl font-serif font-bold text-brand-gold tracking-widest uppercase">Sukahideng</h2>
+            <h2 className="text-3xl font-serif font-bold text-brand-gold tracking-widest uppercase drop-shadow-[0_0_15px_rgba(212,175,55,0.4)]">Sukahideng</h2>
           </div>
           <p className="text-brand-cream/50 text-sm leading-relaxed max-w-sm">
             Menanamkan nilai-nilai keislaman, kemandirian, dan khidmah kepada masyarakat sejak tahun 1922.
