@@ -71,7 +71,7 @@ export default function Footer({ onAdminTrigger }: FooterProps) {
         <div>
           <h3 className="text-xl font-serif font-bold text-brand-cream/80 uppercase tracking-widest mb-8">Navigasi</h3>
           <ul className="space-y-4 text-sm text-brand-cream/50 font-medium tracking-wide">
-            {['Hero', 'About', 'Agenda', 'Porsas', 'Berita'].map(item => (
+            {['About', 'Agenda', 'Porsas', 'Berita'].map(item => (
               <li key={item}>
                 <a href={`#${item.toLowerCase()}`} className="hover:text-brand-gold transition-colors inline-flex items-center gap-2 group">
                   <div className="w-0 h-px bg-brand-gold group-hover:w-4 transition-all" />

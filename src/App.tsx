@@ -174,7 +174,6 @@ export default function App() {
               <X size={32} />
             </button>
             <nav className="flex flex-col gap-8 mt-12 text-2xl font-serif text-brand-cream text-center">
-              <a href="#hero" className="hover:text-brand-gold transition-colors" onClick={() => setIsMenuOpen(false)}>Home</a>
               <a href="#about" className="hover:text-brand-gold transition-colors" onClick={() => setIsMenuOpen(false)}>Tentang Milad</a>
               <a href="#agenda" className="hover:text-brand-gold transition-colors" onClick={() => setIsMenuOpen(false)}>Agenda</a>
               <a href="#porsas" className="hover:text-brand-gold transition-colors" onClick={() => setIsMenuOpen(false)}>PORSAS</a>

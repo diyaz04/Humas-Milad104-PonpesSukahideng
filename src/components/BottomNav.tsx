@@ -12,7 +12,6 @@ export default function BottomNav() {
   const [isOpen, setIsOpen] = useState(false);
 
   const navItems: NavItem[] = [
-    { label: 'Home', icon: Home, href: '#hero' },
     { label: 'Agenda', icon: Calendar, href: '#agenda' },
     { label: 'PORSAS', icon: Trophy, href: '#porsas' },
     { label: 'Berita', icon: Newspaper, href: '#berita' },

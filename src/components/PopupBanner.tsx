@@ -59,45 +59,35 @@ export default function PopupBanner({ schedule, matches, registrations }: PopupB
 
     if (items.length > 0) return items;
 
-    // 3. Next upcoming today
-    const upcomingToday = schedule
+    // 3. Next upcoming (Any day)
+    const allFuture = schedule
       .filter(s => {
         const start = parseISO(`${s.date}T${s.startTime}`);
-        return s.date === todayStr && isAfter(start, now);
+        return isAfter(start, now);
       })
-      .sort((a, b) => a.startTime.localeCompare(b.startTime));
+      .sort((a, b) => {
+        if (a.date !== b.date) return a.date.localeCompare(b.date);
+        return a.startTime.localeCompare(b.startTime);
+      });
 
-    if (upcomingToday.length > 0) {
-      const firstTime = upcomingToday[0].startTime;
-      const simultaneousUpcoming = upcomingToday.filter(s => s.startTime === firstTime);
-      return simultaneousUpcoming.map(s => ({
-        type: 'upcoming',
-        title: 'Kegiatan Berikutnya Hari Ini',
+    if (allFuture.length > 0) {
+      const nextDate = allFuture[0].date;
+      const nextTime = allFuture[0].startTime;
+      const simultaneous = allFuture.filter(s => s.date === nextDate && s.startTime === nextTime);
+      
+      const isToday = nextDate === todayStr;
+      
+      return simultaneous.map(s => ({
+        type: isToday ? 'upcoming' : 'future',
+        title: isToday ? 'Kegiatan Berikutnya Hari Ini' : 'Kegiatan Mendatang',
         subtitle: s.category,
         details: s.name,
-        time: `${s.startTime} WIB`,
+        time: isToday ? `${s.startTime} WIB` : `${format(parseISO(s.date), 'dd MMM yyyy')}, ${s.startTime} WIB`,
         location: s.location
       }));
     }
 
-    // 4. Closest in future
-    const closestFutureDate = schedule
-      .filter(s => isAfter(parseISO(s.date), now))
-      .sort((a, b) => a.date.localeCompare(b.date))[0]?.date;
-
-    if (closestFutureDate) {
-      const futureEvents = schedule.filter(s => s.date === closestFutureDate);
-      return futureEvents.map(s => ({
-        type: 'future',
-        title: 'Kegiatan Mendatang',
-        subtitle: s.category,
-        details: s.name,
-        time: `${format(parseISO(s.date), 'dd MMM yyyy')}, ${s.startTime} WIB`,
-        location: s.location
-      }));
-    }
-
-    // 5. Default fallback
+    // 4. Default fallback
     return [{
       type: 'default',
       title: 'Agenda Milad Hari Ini',
