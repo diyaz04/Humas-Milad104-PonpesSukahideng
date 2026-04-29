@@ -66,7 +66,7 @@ export default function Hero({ settings }: HeroProps) {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 1, duration: 1 }}
-          className="flex flex-wrap justify-center gap-4 md:gap-8 mb-16"
+          className="flex justify-center gap-2 md:gap-8 mb-16 px-2"
         >
           {[
             { label: 'Hari', value: timeLeft.days },
@@ -75,11 +75,11 @@ export default function Hero({ settings }: HeroProps) {
             { label: 'Detik', value: timeLeft.seconds }
           ].map((item, idx) => (
             <div key={idx} className="flex flex-col">
-              <div className="w-20 h-20 md:w-28 md:h-28 rounded-2xl border border-brand-gold/30 flex flex-col items-center justify-center bg-brand-gold/5 backdrop-blur-sm group hover:border-brand-gold transition-all">
-                <span className="text-3xl md:text-5xl font-serif font-bold text-brand-gold group-hover:scale-110 transition-transform">
+              <div className="w-[72px] h-[72px] md:w-28 md:h-28 rounded-xl md:rounded-2xl border border-brand-gold/30 flex flex-col items-center justify-center bg-brand-gold/5 backdrop-blur-sm group hover:border-brand-gold transition-all">
+                <span className="text-2xl md:text-5xl font-serif font-bold text-brand-gold group-hover:scale-110 transition-transform">
                   {item.value.toString().padStart(2, '0')}
                 </span>
-                <span className="text-[10px] md:text-xs text-brand-cream/60 uppercase tracking-widest mt-1">{item.label}</span>
+                <span className="text-[8px] md:text-xs text-brand-cream/60 uppercase tracking-widest mt-0.5 md:mt-1">{item.label}</span>
               </div>
             </div>
           ))}
