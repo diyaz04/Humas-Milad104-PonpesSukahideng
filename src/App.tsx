@@ -25,6 +25,7 @@ import { Setting, News, ScheduleItem, Koorwil, Sport, Registration, Match, FAQ, 
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import About from './components/About';
+import VideoSection from './components/VideoSection';
 import Schedule from './components/Schedule';
 import Porsas from './components/Porsas';
 import RegistrationForm from './components/RegistrationForm';
@@ -184,6 +185,7 @@ export default function App() {
             </button>
             <nav className="flex flex-col gap-8 mt-12 text-2xl font-serif text-brand-cream text-center">
               <a href="#about" className="hover:text-brand-gold transition-colors" onClick={() => setIsMenuOpen(false)}>Tentang Milad</a>
+              <a href="#video-content" className="hover:text-brand-gold transition-colors" onClick={() => setIsMenuOpen(false)}>Multimedia</a>
               <a href="#agenda" className="hover:text-brand-gold transition-colors" onClick={() => setIsMenuOpen(false)}>Agenda</a>
               <a href="#merchandise" className="hover:text-brand-gold transition-colors" onClick={() => setIsMenuOpen(false)}>Merchandise</a>
               <a href="#porsas" className="hover:text-brand-gold transition-colors" onClick={() => setIsMenuOpen(false)}>PORSAS</a>
@@ -201,6 +203,8 @@ export default function App() {
         <section id="about" className="py-24 bg-white/30">
           <About settings={settings} />
         </section>
+
+        <VideoSection />
 
         <section id="agenda" className="py-24">
           <Schedule schedule={schedule} />
