@@ -130,6 +130,7 @@ export default function PorsasPanel({ koorwils, sports, registrations, matches }
 
     const worksheet = XLSX.utils.json_to_sheet(dataToExport.map(r => ({
       'Peserta / Tim': r.name,
+      'Status': r.participantType || '-',
       'Koorwil': r.koorwil || '-',
       'Cabang / Penampilan': r.sportName,
       'Kategori': r.category === 'seni' && r.type === 'koorwil' ? 'Penampilan Seni' : r.sportName,
@@ -193,6 +194,7 @@ export default function PorsasPanel({ koorwils, sports, registrations, matches }
     
     const tableData = dataToExport.map(r => [
       r.name,
+      r.participantType || '-',
       r.koorwil || '-',
       r.category === 'seni' && r.type === 'koorwil' ? `${r.sportName} (Seni)` : r.sportName,
       r.contact,
@@ -200,7 +202,7 @@ export default function PorsasPanel({ koorwils, sports, registrations, matches }
     ]);
 
     autoTable(doc, {
-      head: [['PESERTA / TIM', 'KOORWIL', 'CABANG / SENI', 'KONTAK', 'DETAIL ANGGOTA']],
+      head: [['PESERTA / TIM', 'STATUS', 'KOORWIL', 'CABANG / SENI', 'KONTAK', 'DETAIL ANGGOTA']],
       body: tableData,
       startY: 70,
       theme: 'striped',
@@ -578,6 +580,11 @@ export default function PorsasPanel({ koorwils, sports, registrations, matches }
                       <div className="flex flex-col">
                         <div className="flex items-center gap-2">
                             <span className="font-bold text-brand-dark uppercase tracking-wide">{reg.name}</span>
+                            {reg.participantType && (
+                              <span className="text-[7px] px-1.5 py-0.5 rounded-full font-bold uppercase tracking-widest bg-brand-forest/10 text-brand-forest border border-brand-forest/20">
+                                {reg.participantType}
+                              </span>
+                            )}
                             <span className={`text-[7px] px-1.5 py-0.5 rounded-full font-bold uppercase tracking-widest ${reg.type === 'koorwil' ? 'bg-brand-gold text-brand-dark' : 'bg-slate-200 text-slate-500'}`}>
                                 {reg.type === 'koorwil' ? 'WIL' : 'IND'}
                             </span>

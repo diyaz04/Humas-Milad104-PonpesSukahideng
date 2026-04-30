@@ -8,6 +8,7 @@ export default function IndividualRegistration() {
   const [formData, setFormData] = useState({
     name: '',
     category: 'Gowes' as 'Gowes' | 'Karaoke Religi',
+    participantType: 'alumni' as 'alumni' | 'santri' | 'umum',
     angkatan: '',
     phone: '',
     address: ''
@@ -16,7 +17,7 @@ export default function IndividualRegistration() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.name || !formData.phone || !formData.angkatan) {
+    if (!formData.name || !formData.phone || (formData.participantType === 'alumni' && !formData.angkatan)) {
       alert("Harap isi semua kolom yang diperlukan.");
       return;
     }
@@ -27,12 +28,12 @@ export default function IndividualRegistration() {
         ...formData,
         type: 'individual',
         sportName: formData.category,
-        members: `Nama: ${formData.name}, Angkatan: ${formData.angkatan}, Alamat: ${formData.address}`,
+        members: `Nama: ${formData.name}, Status: ${formData.participantType}${formData.participantType === 'alumni' ? `, Angkatan: ${formData.angkatan}` : ''}, Alamat: ${formData.address}`,
         contact: formData.phone,
         timestamp: new Date().toISOString()
       });
       setStatus('success');
-      setFormData({ name: '', category: formData.category, angkatan: '', phone: '', address: '' });
+      setFormData({ name: '', category: formData.category, participantType: 'alumni', angkatan: '', phone: '', address: '' });
       setTimeout(() => setStatus('idle'), 5000);
     } catch (error) {
       console.error(error);
@@ -121,20 +122,6 @@ export default function IndividualRegistration() {
                     />
                   </div>
                   <div>
-                    <label className="block text-[10px] uppercase tracking-[0.2em] text-brand-gold/70 font-bold mb-3 ml-1">Angkatan / Tahun Lulus</label>
-                    <input 
-                      type="text" 
-                      value={formData.angkatan}
-                      onChange={e => setFormData({ ...formData, angkatan: e.target.value })}
-                      placeholder="Contoh: 2015"
-                      className="w-full bg-brand-dark/50 border border-brand-gold/20 rounded-2xl px-6 py-4 text-brand-cream focus:outline-none focus:border-brand-gold transition-all"
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div>
                     <label className="block text-[10px] uppercase tracking-[0.2em] text-brand-gold/70 font-bold mb-3 ml-1">No. WhatsApp</label>
                     <input 
                       type="text" 
@@ -145,11 +132,53 @@ export default function IndividualRegistration() {
                       required
                     />
                   </div>
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-[10px] uppercase tracking-[0.2em] text-brand-gold/70 font-bold mb-3 ml-1">Kategori Pendaftaran</label>
-                    <div className="w-full bg-brand-gold/10 border border-brand-gold/20 rounded-2xl px-6 py-4 text-brand-gold font-bold uppercase tracking-widest text-xs">
-                      {formData.category}
-                    </div>
+                    <label className="block text-[10px] uppercase tracking-[0.2em] text-brand-gold/70 font-bold mb-3 ml-1">Status Pendaftar</label>
+                    <select 
+                      value={formData.participantType}
+                      onChange={e => setFormData({ ...formData, participantType: e.target.value as any })}
+                      className="w-full bg-brand-dark/50 border border-brand-gold/20 rounded-2xl px-6 py-4 text-brand-cream focus:outline-none focus:border-brand-gold transition-all appearance-none cursor-pointer"
+                      required
+                    >
+                      <option value="alumni">Alumni</option>
+                      <option value="santri">Santri</option>
+                      <option value="umum">Umum (Masyarakat)</option>
+                    </select>
+                  </div>
+                  <div>
+                    {/* Placeholder for alignment if needed, or just leave it empty */}
+                  </div>
+                </div>
+
+                <AnimatePresence mode="wait">
+                  {formData.participantType === 'alumni' && (
+                    <motion.div 
+                      key="angkatan-field"
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="overflow-hidden"
+                    >
+                      <label className="block text-[10px] uppercase tracking-[0.2em] text-brand-gold/70 font-bold mb-3 ml-1">Angkatan / Tahun Lulus</label>
+                      <input 
+                        type="text" 
+                        value={formData.angkatan}
+                        onChange={e => setFormData({ ...formData, angkatan: e.target.value })}
+                        placeholder="Contoh: 2015"
+                        className="w-full bg-brand-dark/50 border border-brand-gold/20 rounded-2xl px-6 py-4 text-brand-cream focus:outline-none focus:border-brand-gold transition-all"
+                        required
+                      />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                <div>
+                  <label className="block text-[10px] uppercase tracking-[0.2em] text-brand-gold/70 font-bold mb-3 ml-1">Kategori Pendaftaran</label>
+                  <div className="w-full bg-brand-gold/10 border border-brand-gold/20 rounded-2xl px-6 py-4 text-brand-gold font-bold uppercase tracking-widest text-xs">
+                    {formData.category}
                   </div>
                 </div>
 

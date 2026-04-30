@@ -80,6 +80,7 @@ export interface Registration {
   contact: string;
   gender: 'putra' | 'putri';
   timestamp: string;
+  participantType?: 'alumni' | 'santri' | 'umum';
 }
 
 export interface Match {
