@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
+import { motion } from 'motion/react';
 import { collection, addDoc, deleteDoc, doc, updateDoc, writeBatch } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import { Koorwil, Sport, Registration, Match } from '../../types';
-import { Plus, Trash2, Trophy, Users, Layout, ChevronRight, Save, AlertCircle } from 'lucide-react';
+import { Plus, Trash2, Trophy, Users, Layout, ChevronRight, Save, AlertCircle, BarChart3, PieChart, Activity } from 'lucide-react';
 import ConfirmModal from './ConfirmModal';
 
 interface PorsasPanelProps {
@@ -13,7 +14,7 @@ interface PorsasPanelProps {
 }
 
 export default function PorsasPanel({ koorwils, sports, registrations, matches }: PorsasPanelProps) {
-  const [activeTab, setActiveTab] = useState<'master' | 'registrasi' | 'bracket'>('master');
+  const [activeTab, setActiveTab] = useState<'master' | 'registrasi' | 'bracket' | 'statistik'>('statistik');
   const [deleteConfirm, setDeleteConfirm] = useState<{ id: string, type: string, name: string, coll: string } | null>(null);
   
   // Master Data Inputs
@@ -93,23 +94,196 @@ export default function PorsasPanel({ koorwils, sports, registrations, matches }
     });
   };
 
+  const [regFilter, setRegFilter] = useState<'all' | 'koorwil' | 'individual'>('all');
+
+  const filteredRegistrations = registrations.filter(r => {
+    if (regFilter === 'all') return true;
+    return r.type === regFilter;
+  });
+
+  // Statistik Calculations
+  const stats = {
+    total: registrations.length,
+    koorwilCount: registrations.filter(r => r.type === 'koorwil').length,
+    indivCount: registrations.filter(r => r.type === 'individual').length,
+    bySport: registrations.reduce((acc, reg) => {
+      const sportName = reg.sportName || 'Tidak Diketahui';
+      acc[sportName] = (acc[sportName] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>),
+    byGender: {
+        putra: registrations.filter(r => r.gender === 'putra').length,
+        putri: registrations.filter(r => r.gender === 'putri').length
+    }
+  };
+
   return (
     <div className="space-y-8">
-      <div className="flex gap-4 border-b border-slate-200">
-        {[
-          { id: 'master', label: 'Data Master', icon: Layout },
-          { id: 'registrasi', label: 'Registrasi Tim', icon: Users },
-          { id: 'bracket', label: 'Bagan & Skor', icon: Trophy }
-        ].map(tab => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id as any)}
-            className={`px-8 py-4 flex items-center gap-3 font-bold uppercase tracking-widest text-xs transition-all ${activeTab === tab.id ? 'border-b-4 border-brand-gold text-brand-dark bg-white' : 'text-slate-400 hover:text-slate-600'}`}
-          >
-            <tab.icon size={16} /> {tab.label}
-          </button>
-        ))}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div className="flex gap-4 border-b border-slate-200">
+          {[
+            { id: 'statistik', label: 'Statistik', icon: BarChart3 },
+            { id: 'master', label: 'Data Master', icon: Layout },
+            { id: 'registrasi', label: 'Registrasi', icon: Users },
+            { id: 'bracket', label: 'Bagan & Skor', icon: Trophy }
+          ].map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id as any)}
+              className={`px-8 py-4 flex items-center gap-3 font-bold uppercase tracking-widest text-xs transition-all ${activeTab === tab.id ? 'border-b-4 border-brand-gold text-brand-dark bg-white' : 'text-slate-400 hover:text-slate-600'}`}
+            >
+              <tab.icon size={16} /> {tab.label}
+            </button>
+          ))}
+        </div>
+
+        {activeTab === 'registrasi' && (
+          <div className="flex bg-slate-100 p-1 rounded-xl">
+              <button 
+                onClick={() => setRegFilter('all')}
+                className={`px-4 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all ${regFilter === 'all' ? 'bg-white shadow-sm text-brand-dark' : 'text-slate-400'}`}
+              >
+                Semua
+              </button>
+              <button 
+                onClick={() => setRegFilter('koorwil')}
+                className={`px-4 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all ${regFilter === 'koorwil' ? 'bg-white shadow-sm text-brand-dark' : 'text-slate-400'}`}
+              >
+                Koorwil
+              </button>
+              <button 
+                onClick={() => setRegFilter('individual')}
+                className={`px-4 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all ${regFilter === 'individual' ? 'bg-white shadow-sm text-brand-dark' : 'text-slate-400'}`}
+              >
+                Individu
+              </button>
+          </div>
+        )}
       </div>
+
+      {activeTab === 'statistik' && (
+        <div className="space-y-8">
+            {/* Overview Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+                    <div className="flex items-center gap-4 mb-4">
+                        <div className="p-3 bg-brand-gold/10 text-brand-gold rounded-xl">
+                            <Users size={24} />
+                        </div>
+                        <div>
+                            <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold">Total Pendaftar</p>
+                            <h4 className="text-2xl font-bold text-brand-dark">{stats.total}</h4>
+                        </div>
+                    </div>
+                </div>
+                <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+                    <div className="flex items-center gap-4 mb-4">
+                        <div className="p-3 bg-blue-50 text-blue-400 rounded-xl">
+                            <Layout size={24} />
+                        </div>
+                        <div>
+                            <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold">Via Koorwil</p>
+                            <h4 className="text-2xl font-bold text-brand-dark">{stats.koorwilCount}</h4>
+                        </div>
+                    </div>
+                </div>
+                <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+                    <div className="flex items-center gap-4 mb-4">
+                        <div className="p-3 bg-purple-50 text-purple-400 rounded-xl">
+                            <Activity size={24} />
+                        </div>
+                        <div>
+                            <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold">Via Individu</p>
+                            <h4 className="text-2xl font-bold text-brand-dark">{stats.indivCount}</h4>
+                        </div>
+                    </div>
+                </div>
+                <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+                    <div className="flex items-center gap-4 mb-4">
+                        <div className="p-3 bg-green-50 text-green-400 rounded-xl">
+                            <PieChart size={24} />
+                        </div>
+                        <div>
+                            <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold">Cabor/Kegiatan</p>
+                            <h4 className="text-2xl font-bold text-brand-dark">{Object.keys(stats.bySport).length}</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-8">
+                {/* Stats by Sport */}
+                <div className="bg-white p-8 rounded-3xl shadow-sm border border-slate-100">
+                    <h3 className="font-serif font-bold text-xl mb-6">Pendaftar Per Cabang</h3>
+                    <div className="space-y-4">
+                        {Object.entries(stats.bySport)
+                            .sort((a, b) => b[1] - a[1])
+                            .map(([name, count]) => {
+                                const percentage = stats.total > 0 ? (count / stats.total) * 100 : 0;
+                                return (
+                                    <div key={name} className="space-y-2">
+                                        <div className="flex justify-between items-center text-sm font-bold uppercase tracking-wider">
+                                            <span className="text-brand-dark">{name}</span>
+                                            <span className="text-brand-gold">{count} Orang</span>
+                                        </div>
+                                        <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                                            <motion.div 
+                                                initial={{ width: 0 }}
+                                                animate={{ width: `${percentage}%` }}
+                                                className="bg-brand-gold h-full rounded-full"
+                                            />
+                                        </div>
+                                    </div>
+                                );
+                            })
+                        }
+                    </div>
+                </div>
+
+                <div className="space-y-8">
+                    {/* Stats by Gender */}
+                    <div className="bg-white p-8 rounded-3xl shadow-sm border border-slate-100">
+                        <h3 className="font-serif font-bold text-xl mb-6">Peserta Berdasarkan Gender</h3>
+                        <div className="grid grid-cols-2 gap-6">
+                            <div className="p-6 bg-blue-50/50 rounded-2xl border border-blue-100">
+                                <p className="text-[10px] uppercase tracking-widest text-blue-400 font-bold mb-1">Putra</p>
+                                <h4 className="text-2xl font-bold text-blue-600">{stats.byGender.putra}</h4>
+                                <div className="mt-4 text-[10px] text-blue-400 font-bold uppercase">
+                                    {stats.total > 0 ? Math.round((stats.byGender.putra / (stats.byGender.putra + stats.byGender.putri || 1)) * 100) : 0}% Distribusi
+                                </div>
+                            </div>
+                            <div className="p-6 bg-pink-50/50 rounded-2xl border border-pink-100">
+                                <p className="text-[10px] uppercase tracking-widest text-pink-400 font-bold mb-1">Putri</p>
+                                <h4 className="text-2xl font-bold text-pink-600">{stats.byGender.putri}</h4>
+                                <div className="mt-4 text-[10px] text-pink-400 font-bold uppercase">
+                                    {stats.total > 0 ? Math.round((stats.byGender.putri / (stats.byGender.putra + stats.byGender.putri || 1)) * 100) : 0}% Distribusi
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Quick Insights */}
+                    <div className="bg-brand-dark p-8 rounded-3xl shadow-xl shadow-brand-dark/20 text-brand-cream border border-white/5">
+                        <h3 className="font-serif font-bold text-xl mb-4 text-brand-gold leading-tight">Insight PORSAS</h3>
+                        <p className="text-sm opacity-60 leading-relaxed italic">
+                            "Menampilkan ringkasan data partisipasi alumni dalam rangkaian Pekan Olahraga & Seni Alumni Sukahideng."
+                        </p>
+                        <div className="mt-6 pt-6 border-t border-white/10 flex items-center gap-3">
+                           <div className="w-10 h-10 bg-brand-gold rounded-full flex items-center justify-center text-brand-dark">
+                               <Trophy size={20} />
+                           </div>
+                           <div>
+                               <p className="text-[10px] uppercase tracking-widest font-bold">Cabang Terpopuler</p>
+                               <p className="text-sm font-bold text-brand-gold">
+                                   {Object.entries(stats.bySport).sort((a,b) => b[1]-a[1])[0]?.[0] || 'Belum ada data'}
+                               </p>
+                           </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+      )}
 
       {activeTab === 'master' && (
         <div className="grid md:grid-cols-2 gap-8">
@@ -236,11 +410,16 @@ export default function PorsasPanel({ koorwils, sports, registrations, matches }
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50 text-sm">
-                {registrations.map(reg => (
+                {filteredRegistrations.map(reg => (
                   <tr key={reg.id} className="hover:bg-slate-50/50 group">
                     <td className="px-8 py-4">
                       <div className="flex flex-col">
-                        <span className="font-bold text-brand-dark uppercase tracking-wide">{reg.name}</span>
+                        <div className="flex items-center gap-2">
+                            <span className="font-bold text-brand-dark uppercase tracking-wide">{reg.name}</span>
+                            <span className={`text-[7px] px-1.5 py-0.5 rounded-full font-bold uppercase tracking-widest ${reg.type === 'koorwil' ? 'bg-brand-gold text-brand-dark' : 'bg-slate-200 text-slate-500'}`}>
+                                {reg.type === 'koorwil' ? 'WIL' : 'IND'}
+                            </span>
+                        </div>
                         <span className={`text-[8px] uppercase tracking-widest font-bold ${reg.gender === 'putra' ? 'text-blue-400' : 'text-pink-400'}`}>{reg.gender}</span>
                       </div>
                     </td>
@@ -295,7 +474,7 @@ export default function PorsasPanel({ koorwils, sports, registrations, matches }
               <div>
                 <label className="text-[10px] uppercase tracking-widest text-slate-400 font-bold mb-2 block">Pilih Peserta ({selectedTeams.length})</label>
                 <div className="max-h-48 overflow-y-auto border-2 border-slate-100 rounded-xl p-4 space-y-2">
-                  {registrations.filter(r => !selectedSport || r.sportId === selectedSport).map(reg => (
+                  {registrations.filter(r => r.type === 'koorwil' && (!selectedSport || r.sportId === selectedSport)).map(reg => (
                     <label key={reg.id} className="flex items-center gap-3 cursor-pointer hover:bg-slate-50 p-2 rounded-lg transition-all">
                       <input 
                         type="checkbox" 

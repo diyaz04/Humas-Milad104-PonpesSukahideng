@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Send, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Send, CheckCircle2, AlertCircle, Shield } from 'lucide-react';
 import { collection, addDoc } from 'firebase/firestore';
 import { db, handleFirestoreError, OperationType } from '../lib/firebase';
 import { Koorwil, Sport } from '../types';
@@ -22,13 +22,24 @@ export default function RegistrationForm({ koorwils, sports }: RegistrationFormP
   });
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
 
-  const filteredSports = sports.filter(s => s.category === category);
+  const [verificationCode, setVerificationCode] = useState('');
+  const [showCodeModal, setShowCodeModal] = useState(false);
+
+  const filteredSports = sports.filter(s => s.category === category && (s.name.toLowerCase() !== 'gowes' && s.name.toLowerCase() !== 'karaoke religi'));
   const selectedSport = sports.find(s => s.id === formData.sportId);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleInitialSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name || (category === 'olahraga' && !formData.koorwil) || !formData.sportId || !formData.members || !formData.contact) {
       alert("Harap isi semua kolom yang diperlukan.");
+      return;
+    }
+    setShowCodeModal(true);
+  };
+
+  const handleSubmit = async () => {
+    if (verificationCode !== 'porsasmilad104') {
+      alert("Kode Verifikasi Koorwil salah!");
       return;
     }
 
@@ -37,11 +48,14 @@ export default function RegistrationForm({ koorwils, sports }: RegistrationFormP
       await addDoc(collection(db, 'registrations'), {
         ...formData,
         category,
+        type: 'koorwil',
         sportName: selectedSport?.name || '',
         timestamp: new Date().toISOString()
       });
       setStatus('success');
       setFormData({ name: '', koorwil: '', sportId: '', members: '', contact: '', gender: 'putra' });
+      setVerificationCode('');
+      setShowCodeModal(false);
       setTimeout(() => setStatus('idle'), 5000);
     } catch (error) {
       console.error(error);
@@ -54,21 +68,21 @@ export default function RegistrationForm({ koorwils, sports }: RegistrationFormP
     <div className="max-w-4xl mx-auto">
       <div className="bg-brand-forest/50 backdrop-blur-xl border border-brand-gold/10 rounded-[40px] p-8 md:p-16 shadow-2xl relative overflow-hidden">
         {/* Background Accent */}
-        <div className="absolute top-0 right-0 w-64 h-64 bg-brand-gold/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl" />
+        <div className="absolute top-0 right-0 w-64 h-64 bg-brand-gold/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl opacity-20" />
         
         <div className="relative z-10">
           <div className="flex flex-col md:flex-row md:items-center gap-6 mb-12">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-brand-gold rounded-2xl flex items-center justify-center text-brand-dark shadow-lg shadow-brand-gold/20">
-                <Send size={24} />
+              <div className="w-14 h-14 bg-brand-gold rounded-2xl flex items-center justify-center text-brand-dark shadow-xl shadow-brand-gold/20">
+                <Shield size={28} />
               </div>
               <div>
-                <h2 className="text-3xl font-serif font-bold text-brand-cream uppercase tracking-wider">Pendaftaran PORSAS</h2>
-                <p className="text-brand-gold/60 text-sm italic">Pekan Olahraga & Seni Alumni Sukahideng</p>
+                <h2 className="text-3xl md:text-4xl font-serif font-bold text-brand-cream uppercase tracking-wider">Halaman Koorwil</h2>
+                <p className="text-brand-gold/60 text-sm font-medium italic">Pendaftaran Peserta PORSAS delegasi Wilayah</p>
               </div>
             </div>
             
-            <div className="flex bg-brand-dark/40 p-1 rounded-xl border border-brand-gold/20 ml-auto self-start">
+            <div className="flex bg-brand-dark/40 p-1.5 rounded-2xl border border-brand-gold/20 ml-auto self-start shadow-inner">
               <button 
                 onClick={() => { setCategory('olahraga'); setFormData({ ...formData, sportId: '' }); }}
                 className={`px-4 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all ${category === 'olahraga' ? 'bg-brand-gold text-brand-dark' : 'text-brand-cream/50 hover:text-brand-cream'}`}
@@ -84,7 +98,7 @@ export default function RegistrationForm({ koorwils, sports }: RegistrationFormP
             </div>
           </div>
 
-          <form onSubmit={handleSubmit} className="grid md:grid-cols-2 gap-8">
+          <form onSubmit={handleInitialSubmit} className="grid md:grid-cols-2 gap-8">
             <div className="space-y-6">
               <div>
                 <label className="block text-[10px] uppercase tracking-[0.2em] text-brand-gold/70 font-bold mb-2 ml-1">
@@ -191,8 +205,8 @@ export default function RegistrationForm({ koorwils, sports }: RegistrationFormP
                   <div className="w-5 h-5 border-2 border-brand-dark border-t-transparent rounded-full animate-spin" />
                 ) : (
                   <>
-                    <Send size={20} />
-                    Kirim Pendaftaran
+                    <Shield size={20} />
+                    Validasi & Kirim Pendaftaran
                   </>
                 )}
               </button>
@@ -206,7 +220,7 @@ export default function RegistrationForm({ koorwils, sports }: RegistrationFormP
                     className="flex items-center gap-3 mt-4 text-green-400 justify-center font-medium"
                   >
                     <CheckCircle2 size={20} />
-                    Pendaftaran berhasil dikirim!
+                    Pendaftaran delegasi berhasil dikirim!
                   </motion.div>
                 )}
                 {status === 'error' && (
@@ -223,6 +237,65 @@ export default function RegistrationForm({ koorwils, sports }: RegistrationFormP
               </AnimatePresence>
             </div>
           </form>
+
+          {/* Verification Code Modal */}
+          <AnimatePresence>
+            {showCodeModal && (
+              <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                <motion.div 
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  onClick={() => setShowCodeModal(false)}
+                  className="absolute inset-0 bg-brand-dark/90 backdrop-blur-md"
+                />
+                <motion.div 
+                  initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                  className="relative w-full max-w-md bg-brand-forest border border-brand-gold/20 rounded-[32px] p-8 md:p-10 shadow-2xl overflow-hidden"
+                >
+                  <div className="absolute top-0 left-0 w-full h-1 bg-brand-gold" />
+                  
+                  <div className="text-center mb-8">
+                    <div className="w-16 h-16 bg-brand-gold/10 text-brand-gold rounded-2xl flex items-center justify-center mx-auto mb-4">
+                      <Shield size={32} />
+                    </div>
+                    <h3 className="text-2xl font-serif font-bold text-brand-cream uppercase tracking-wider mb-2">Otentikasi Koorwil</h3>
+                    <p className="text-brand-cream/60 text-sm">Masukan kode autentikasi khusus koorwil untuk melanjutkan pendaftaran.</p>
+                  </div>
+
+                  <div className="space-y-6">
+                    <div>
+                      <input 
+                        type="password" 
+                        value={verificationCode}
+                        onChange={e => setVerificationCode(e.target.value)}
+                        placeholder="Masukan Kode PORSAS"
+                        className="w-full bg-brand-dark/50 border border-brand-gold/30 rounded-2xl px-6 py-4 text-brand-gold text-center text-xl font-bold tracking-[0.3em] focus:outline-none focus:border-brand-gold transition-all"
+                        autoFocus
+                      />
+                    </div>
+                    <div className="flex gap-4">
+                      <button 
+                        onClick={() => setShowCodeModal(false)}
+                        className="flex-1 py-4 text-brand-cream/50 text-xs font-bold uppercase tracking-widest hover:text-brand-cream transition-colors"
+                      >
+                        Batal
+                      </button>
+                      <button 
+                        onClick={handleSubmit}
+                        disabled={!verificationCode || status === 'loading'}
+                        className="flex-[2] bg-brand-gold text-brand-dark py-4 rounded-xl font-bold uppercase tracking-widest hover:scale-105 transition-all disabled:opacity-50"
+                      >
+                        Submit Pendaftaran
+                      </button>
+                    </div>
+                  </div>
+                </motion.div>
+              </div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
     </div>

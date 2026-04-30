@@ -71,6 +71,7 @@ export interface MerchantConfig {
 export interface Registration {
   id: string;
   name: string;
+  type?: 'koorwil' | 'individual';
   koorwil?: string;
   sportId: string;
   sportName: string;

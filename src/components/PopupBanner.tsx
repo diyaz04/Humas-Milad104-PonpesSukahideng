@@ -191,7 +191,7 @@ export default function PopupBanner({ schedule, matches, registrations }: PopupB
                       {item.isPromo ? (
                         <div className="space-y-4 mt-8">
                           <a 
-                            href="#daftar-porsas" 
+                            href="#daftar-individu" 
                             onClick={() => setIsOpen(false)}
                             className="flex items-center justify-between w-full bg-brand-gold text-brand-dark px-6 py-4 rounded-2xl font-bold uppercase tracking-widest hover:scale-[1.02] transition-transform text-xs shadow-lg shadow-brand-gold/20"
                           >
@@ -199,7 +199,7 @@ export default function PopupBanner({ schedule, matches, registrations }: PopupB
                             <ChevronRight size={16} />
                           </a>
                           <a 
-                            href="#daftar-porsas" 
+                            href="#daftar-individu" 
                             onClick={() => setIsOpen(false)}
                             className="flex items-center justify-between w-full bg-brand-gold text-brand-dark px-6 py-4 rounded-2xl font-bold uppercase tracking-widest hover:scale-[1.02] transition-transform text-xs shadow-lg shadow-brand-gold/20"
                           >

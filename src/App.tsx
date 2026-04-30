@@ -29,6 +29,7 @@ import VideoSection from './components/VideoSection';
 import Schedule from './components/Schedule';
 import Porsas from './components/Porsas';
 import RegistrationForm from './components/RegistrationForm';
+import IndividualRegistration from './components/IndividualRegistration';
 import Bracket from './components/Bracket';
 import NewsSection from './components/NewsSection';
 import Merchandise from './components/Merchandise';
@@ -205,6 +206,8 @@ export default function App() {
         </section>
 
         <VideoSection />
+
+        <IndividualRegistration />
 
         <section id="agenda" className="py-24">
           <Schedule schedule={schedule} />
