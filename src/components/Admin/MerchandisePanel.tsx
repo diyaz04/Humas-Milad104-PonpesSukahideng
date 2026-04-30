@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { db, handleFirestoreError, OperationType, auth } from '../../lib/firebase';
+import imageCompression from 'browser-image-compression';
 import { collection, addDoc, onSnapshot, query, orderBy, deleteDoc, doc, updateDoc, setDoc, getDoc } from 'firebase/firestore';
-import { ShoppingBag, Plus, Trash2, Check, X, Camera, Calendar, Package, CreditCard, Save, AlertTriangle } from 'lucide-react';
+import { ShoppingBag, Plus, Trash2, Check, X, Camera, Calendar, Package, CreditCard, Save, AlertTriangle, Upload, Loader2 } from 'lucide-react';
 import { User } from 'firebase/auth';
 import { Product, ProductOrder, MerchantConfig } from '../../types';
 import ConfirmModal from './ConfirmModal';
@@ -16,6 +17,7 @@ export default function MerchandisePanel({ user }: MerchandisePanelProps) {
   const [orders, setOrders] = useState<ProductOrder[]>([]);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<{ id: string, type: 'product' | 'order' } | null>(null);
+  const [isCompressing, setIsCompressing] = useState(false);
   const [bankConfig, setBankConfig] = useState<MerchantConfig>({
     bankName: '',
     accountNumber: '',
@@ -29,6 +31,28 @@ export default function MerchandisePanel({ user }: MerchandisePanelProps) {
     description: '',
     isActive: true
   });
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsCompressing(true);
+    try {
+      const options = {
+        maxSizeMB: 0.2, // Compress more for better performance
+        maxWidthOrHeight: 800,
+        useWebWorker: true,
+      };
+      const compressedFile = await imageCompression(file, options);
+      const base64 = await imageCompression.getDataUrlFromFile(compressedFile);
+      setNewProduct({ ...newProduct, image: base64 });
+    } catch (error) {
+      console.error('Compression error:', error);
+      alert('Gagal mengompres gambar. Pastikan file adalah gambar yang valid.');
+    } finally {
+      setIsCompressing(false);
+    }
+  };
 
   useEffect(() => {
     const qP = query(collection(db, 'products'), orderBy('name'));
@@ -116,28 +140,52 @@ export default function MerchandisePanel({ user }: MerchandisePanelProps) {
           </h3>
           
           <div className="space-y-4 mb-8 bg-slate-50 p-6 rounded-2xl">
-            <input 
-              type="text" 
-              placeholder="Nama Produk..."
-              value={newProduct.name}
-              onChange={e => setNewProduct({ ...newProduct, name: e.target.value })}
-              className="w-full border-2 border-white rounded-xl p-3 outline-none"
-            />
-            <div className="grid grid-cols-2 gap-4">
-              <input 
-                type="number" 
-                placeholder="Harga (Rp)..."
-                value={newProduct.price || ''}
-                onChange={e => setNewProduct({ ...newProduct, price: parseInt(e.target.value) || 0 })}
-                className="w-full border-2 border-white rounded-xl p-3 outline-none"
-              />
-              <input 
-                type="text" 
-                placeholder="URL Gambar..."
-                value={newProduct.image}
-                onChange={e => setNewProduct({ ...newProduct, image: e.target.value })}
-                className="w-full border-2 border-white rounded-xl p-3 outline-none"
-              />
+            <div className="grid grid-cols-1 md:grid-cols-[1fr_120px] gap-4">
+              <div className="space-y-4">
+                <input 
+                  type="text" 
+                  placeholder="Nama Produk..."
+                  value={newProduct.name}
+                  onChange={e => setNewProduct({ ...newProduct, name: e.target.value })}
+                  className="w-full border-2 border-white rounded-xl p-3 outline-none focus:border-brand-gold/20 transition-all"
+                />
+                <input 
+                  type="number" 
+                  placeholder="Harga (Rp)..."
+                  value={newProduct.price || ''}
+                  onChange={e => setNewProduct({ ...newProduct, price: parseInt(e.target.value) || 0 })}
+                  className="w-full border-2 border-white rounded-xl p-3 outline-none focus:border-brand-gold/20 transition-all"
+                />
+              </div>
+              <div className="relative group">
+                <label className="block w-full h-[104px] bg-white border-2 border-dashed border-slate-200 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:border-brand-gold hover:bg-brand-gold/5 transition-all overflow-hidden">
+                  {isCompressing ? (
+                    <Loader2 className="animate-spin text-brand-gold" size={24} />
+                  ) : newProduct.image ? (
+                    <img src={newProduct.image} alt="Preview" className="w-full h-full object-cover" />
+                  ) : (
+                    <>
+                      <Upload className="text-slate-300 mb-1" size={20} />
+                      <span className="text-[8px] uppercase font-bold text-slate-400">Upload</span>
+                    </>
+                  )}
+                  <input 
+                    type="file" 
+                    accept="image/*" 
+                    className="hidden" 
+                    onChange={handleImageUpload} 
+                    disabled={isCompressing}
+                  />
+                </label>
+                {newProduct.image && (
+                    <button 
+                        onClick={() => setNewProduct({...newProduct, image: ''})}
+                        className="absolute -top-2 -right-2 p-1 bg-red-500 text-white rounded-full shadow-lg"
+                    >
+                        <X size={10} />
+                    </button>
+                )}
+              </div>
             </div>
             <textarea 
               placeholder="Deskripsi Singkat..."

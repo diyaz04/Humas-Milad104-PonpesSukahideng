@@ -153,8 +153,8 @@ export default function PorsasPanel({ koorwils, sports, registrations, matches }
     });
     
     // Header Styling
-    const brandGold = [184, 134, 11]; // #B8860B
-    const brandDark = [15, 23, 42];  // Slate 900
+    const brandGold: [number, number, number] = [184, 134, 11]; // #B8860B
+    const brandDark: [number, number, number] = [15, 23, 42];  // Slate 900
     
     // Decorative Header Bar
     doc.setFillColor(brandDark[0], brandDark[1], brandDark[2]);
