@@ -51,7 +51,7 @@ export default function Porsas({ sports }: PorsasProps) {
             <span className="text-brand-gold">& Seni Alumni</span>
           </h2>
           <p className="text-brand-cream/60 text-lg md:text-xl font-light leading-relaxed">
-            Ajang silaturahmi & kompetisi yang mempertemukan alumni santri Sukahideng. Selain olahraga bergengsi, PORSAS kali ini juga menghadirkan cabang lomba seni untuk individu.
+            Ajang silaturahmi & kompetisi yang mempertemukan alumni santri Sukahideng. Selain olahraga bergengsi, PORSAS kali ini juga menghadirkan penampilan seni yang dikoordinasikan oleh wilayah.
           </p>
         </div>
         
@@ -110,7 +110,7 @@ export default function Porsas({ sports }: PorsasProps) {
         <div className="mb-20">
           <h3 className="text-2xl font-serif font-bold text-brand-gold uppercase tracking-widest mb-10 flex items-center gap-4">
             <span className="h-px bg-brand-gold/30 flex-grow" />
-            Cabang Seni
+            Penampilan Seni
             <span className="h-px bg-brand-gold/30 flex-grow" />
           </h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
@@ -153,7 +153,7 @@ export default function Porsas({ sports }: PorsasProps) {
       <div className="mt-20 flex flex-col items-center gap-8 text-center">
         <div className="max-w-2xl">
           <h4 className="text-xl font-serif font-bold text-brand-gold uppercase tracking-[0.2em] mb-4">Mekanisme Pendaftaran</h4>
-          <p className="text-brand-cream/40 text-sm italic">Cabang olahraga & sebagian besar cabang seni dikoordinasikan oleh masing-masing Koorwil. Khusus kegiatan Gowes & lomba Karaoke Religi dapat mendaftar secara langsung.</p>
+          <p className="text-brand-cream/40 text-sm italic">Cabang olahraga & penampilan seni dikoordinasikan oleh masing-masing Koorwil. Khusus kegiatan Gowes & lomba Karaoke Religi dapat mendaftar secara langsung secara individu.</p>
         </div>
         
         <div className="flex flex-wrap gap-6 justify-center">

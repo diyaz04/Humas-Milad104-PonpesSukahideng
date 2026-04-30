@@ -34,8 +34,8 @@ export default function PopupBanner({ schedule, matches, registrations }: PopupB
       items.push({
         type: 'registration_promo',
         title: 'Info Pendaftaran',
-        subtitle: 'Terbuka Untuk Umum & Alumni',
-        details: 'Ayo bergabung dalam kemeriahan Milad ke-104! Segera daftarkan diri dan kabilah Anda.',
+        subtitle: 'Terbuka Untuk Umum & Alumni (H-1 Deadline)',
+        details: 'Ayo bergabung dalam kemeriahan Milad ke-104! Pendaftaran dibuka sampai dengan H-1 pelaksanaan.',
         isPromo: true
       });
       
@@ -214,6 +214,15 @@ export default function PopupBanner({ schedule, matches, registrations }: PopupB
                             <span>Daftar Tim PORSAS</span>
                             <ChevronRight size={16} />
                           </a>
+                          <div className="pt-2">
+                            <div className="flex items-center justify-between w-full bg-brand-dark/5 border border-brand-dark/10 px-6 py-4 rounded-2xl text-xs opacity-60">
+                              <div className="flex flex-col">
+                                <span className="font-bold uppercase tracking-widest text-brand-dark/40">Pendaftaran Bazar</span>
+                                <span className="italic text-[10px]">Akan Segera Hadir (Belum Ditentukan)</span>
+                              </div>
+                              <Clock size={16} className="text-brand-dark/20" />
+                            </div>
+                          </div>
                         </div>
                       ) : item.isMerch ? (
                         <div className="mt-8">

@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
+import * as XLSX from 'xlsx';
+import { jsPDF } from 'jspdf';
+import autoTable from 'jspdf-autotable';
 import { collection, addDoc, deleteDoc, doc, updateDoc, writeBatch } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import { Koorwil, Sport, Registration, Match } from '../../types';
@@ -100,6 +103,136 @@ export default function PorsasPanel({ koorwils, sports, registrations, matches }
     if (regFilter === 'all') return true;
     return r.type === regFilter;
   });
+
+  const [exportFilter, setExportFilter] = useState<string>('all');
+
+  const exportCategories = [
+    { id: 'all', name: 'Semua Kategori' },
+    // List individual sports and koorwil sports, excluding koorwil arts
+    ...Array.from(new Set(
+      registrations
+        .filter(r => r.type === 'individual' || r.category === 'olahraga')
+        .map(r => r.sportName)
+    )).filter(Boolean).sort().map(name => ({ id: name, name })),
+    // Add "Penampilan Seni" only for koorwil arts
+    ...(registrations.some(r => r.category === 'seni' && r.type === 'koorwil') ? [{ id: 'seni-koorwil', name: 'Penampilan Seni (Koorwil)' }] : [])
+  ];
+
+  const handleExportExcel = () => {
+    const dataToExport = registrations.filter(r => {
+      const matchesMainType = regFilter === 'all' || r.type === regFilter;
+      if (exportFilter === 'all') return matchesMainType;
+      // Grouping Koorwil Arts
+      if (exportFilter === 'seni-koorwil') return matchesMainType && r.category === 'seni' && r.type === 'koorwil';
+      // Specific branch matching (Individual or Olahraga)
+      return matchesMainType && r.sportName === exportFilter;
+    });
+
+    const worksheet = XLSX.utils.json_to_sheet(dataToExport.map(r => ({
+      'Peserta / Tim': r.name,
+      'Koorwil': r.koorwil || '-',
+      'Cabang / Penampilan': r.sportName,
+      'Kategori': r.category === 'seni' && r.type === 'koorwil' ? 'Penampilan Seni' : r.sportName,
+      'Gender': r.gender,
+      'Kontak': r.contact,
+      'Anggota / Detail': r.members
+    })));
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Registrasi");
+    const fileName = exportFilter === 'all' ? 'Semua_Pendaftar' : (exportFilter === 'seni-koorwil' ? 'Penampilan_Seni_Koorwil' : exportFilter.replace(/\s+/g, '_'));
+    XLSX.writeFile(workbook, `PORSAS_Registrasi_${fileName}.xlsx`);
+  };
+
+  const handleExportPDF = () => {
+    const doc = new jsPDF();
+    const dataToExport = registrations.filter(r => {
+      const matchesMainType = regFilter === 'all' || r.type === regFilter;
+      if (exportFilter === 'all') return matchesMainType;
+      if (exportFilter === 'seni-koorwil') return matchesMainType && r.category === 'seni' && r.type === 'koorwil';
+      return matchesMainType && r.sportName === exportFilter;
+    });
+    
+    // Header Styling
+    const brandGold = [184, 134, 11]; // #B8860B
+    const brandDark = [15, 23, 42];  // Slate 900
+    
+    // Decorative Header Bar
+    doc.setFillColor(brandDark[0], brandDark[1], brandDark[2]);
+    doc.rect(0, 0, 210, 40, 'F');
+    doc.setDrawColor(brandGold[0], brandGold[1], brandGold[2]);
+    doc.setLineWidth(1);
+    doc.line(0, 40, 210, 40);
+    
+    // Title
+    doc.setTextColor(255, 255, 255);
+    doc.setFont('times', 'bold');
+    doc.setFontSize(22);
+    doc.text('MILAD KE-104 & PORSAS', 105, 18, { align: 'center' });
+    
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(brandGold[0], brandGold[1], brandGold[2]);
+    doc.text('PONPES SUKAHIDENG - TASIKMALAYA', 105, 26, { align: 'center' });
+    
+    // Subtitle / Category
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(14);
+    const categoryTitle = exportFilter === 'all' ? 'SEMUA CABANG PERLOMBAAN' : (exportFilter === 'seni-koorwil' ? 'PENAMPILAN SENI (KOORWIL)' : exportFilter.toUpperCase());
+    doc.text(`DATA PENDAFTARAN: ${categoryTitle}`, 105, 34, { align: 'center' });
+    
+    // Summary Info Box
+    doc.setFillColor(248, 250, 252); // Slate 50
+    doc.roundedRect(15, 45, 180, 20, 3, 3, 'F');
+    doc.setFontSize(9);
+    doc.setTextColor(100, 116, 139); // Slate 500
+    doc.setFont('helvetica', 'bold');
+    doc.text('INFORMASI LAPORAN', 20, 52);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Total Pendaftar: ${dataToExport.length} Peserta/Tim`, 20, 58);
+    doc.text(`Dicetak Pada: ${new Date().toLocaleString('id-ID')}`, 130, 58);
+    
+    const tableData = dataToExport.map(r => [
+      r.name,
+      r.koorwil || '-',
+      r.category === 'seni' && r.type === 'koorwil' ? `${r.sportName} (Seni)` : r.sportName,
+      r.contact,
+      r.members
+    ]);
+
+    autoTable(doc, {
+      head: [['PESERTA / TIM', 'KOORWIL', 'CABANG / SENI', 'KONTAK', 'DETAIL ANGGOTA']],
+      body: tableData,
+      startY: 70,
+      theme: 'striped',
+      styles: { 
+        fontSize: 8, 
+        cellPadding: 4,
+        font: 'helvetica',
+      },
+      headStyles: { 
+        fillColor: brandGold,
+        textColor: [255, 255, 255],
+        fontStyle: 'bold',
+        halign: 'center'
+      },
+      columnStyles: {
+        0: { fontStyle: 'bold' },
+        3: { fontStyle: 'italic', font: 'courier' },
+        4: { cellWidth: 'auto' }
+      },
+      didDrawPage: (data) => {
+        // Footer
+        const str = `Halaman ${data.pageNumber}`;
+        doc.setFontSize(8);
+        doc.setTextColor(150);
+        doc.text(str, 195, 285, { align: 'right' });
+        doc.text('© 2026 Milad Ponpes Sukahideng ke-104', 15, 285);
+      }
+    });
+
+    const fileName = exportFilter === 'all' ? 'Semua_Pendaftar' : (exportFilter === 'seni-koorwil' ? 'Penampilan_Seni_Koorwil' : exportFilter.replace(/\s+/g, '_'));
+    doc.save(`PORSAS_Registrasi_${fileName}.pdf`);
+  };
 
   // Statistik Calculations
   const stats = {
@@ -396,16 +529,45 @@ export default function PorsasPanel({ koorwils, sports, registrations, matches }
       )}
 
       {activeTab === 'registrasi' && (
-        <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
+        <div className="space-y-6">
+          <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div className="flex flex-col gap-1 w-full md:w-auto">
+              <label className="text-[10px] uppercase tracking-widest text-slate-400 font-bold ml-1">Eksport Berdasarkan Cabang</label>
+              <select 
+                value={exportFilter}
+                onChange={e => setExportFilter(e.target.value)}
+                className="bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 text-xs font-bold text-brand-dark outline-none focus:border-brand-gold w-full md:w-64"
+              >
+                {exportCategories.map(cat => <option key={cat.id} value={cat.id}>{cat.name}</option>)}
+              </select>
+            </div>
+            
+            <div className="flex gap-4 w-full md:w-auto">
+              <button 
+                onClick={handleExportExcel}
+                className="flex-grow md:flex-grow-0 flex items-center justify-center gap-2 bg-green-500 text-white px-6 py-3 rounded-xl font-bold uppercase tracking-widest text-[10px] hover:bg-green-600 transition-all shadow-lg shadow-green-200"
+              >
+                <Save size={14} /> Excel
+              </button>
+              <button 
+                onClick={handleExportPDF}
+                className="flex-grow md:flex-grow-0 flex items-center justify-center gap-2 bg-red-500 text-white px-6 py-3 rounded-xl font-bold uppercase tracking-widest text-[10px] hover:bg-red-600 transition-all shadow-lg shadow-red-200"
+              >
+                <Activity size={14} /> PDF
+              </button>
+            </div>
+          </div>
+          
+          <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left">
               <thead className="bg-slate-50 text-[10px] uppercase tracking-widest text-slate-400 font-bold">
                 <tr>
                   <th className="px-8 py-4">Peserta / Tim</th>
                   <th className="px-8 py-4">Koorwil</th>
-                  <th className="px-8 py-4">Cabang</th>
+                  <th className="px-8 py-4">Cabang / Penampilan</th>
                   <th className="px-8 py-4">PIC / Kontak</th>
-                  <th className="px-8 py-4">Anggota</th>
+                  <th className="px-8 py-4">Anggota / Detail</th>
                   <th className="px-8 py-4 text-center">Aksi</th>
                 </tr>
               </thead>
@@ -423,15 +585,28 @@ export default function PorsasPanel({ koorwils, sports, registrations, matches }
                         <span className={`text-[8px] uppercase tracking-widest font-bold ${reg.gender === 'putra' ? 'text-blue-400' : 'text-pink-400'}`}>{reg.gender}</span>
                       </div>
                     </td>
-                    <td className="px-8 py-4 text-slate-500">{reg.koorwil || '-'}</td>
+                    <td className="px-8 py-4 text-slate-500 font-medium">{reg.koorwil || '-'}</td>
                     <td className="px-8 py-4">
                         <div className="flex flex-col gap-1">
-                          <span className="bg-brand-gold/10 text-brand-gold px-2 py-1 rounded text-[10px] font-bold uppercase w-fit">{reg.sportName}</span>
-                          <span className="text-[8px] uppercase text-slate-400 font-bold ml-1">{reg.category}</span>
+                          {reg.category === 'seni' ? (
+                            <>
+                              <span className="bg-purple-100 text-purple-600 px-2 py-1 rounded text-[10px] font-bold uppercase w-fit border border-purple-200">
+                                {reg.sportName}
+                              </span>
+                              <span className="text-[8px] uppercase text-purple-400 font-bold ml-1">Penampilan Seni</span>
+                            </>
+                          ) : (
+                            <>
+                              <span className="bg-brand-gold/10 text-brand-gold px-2 py-1 rounded text-[10px] font-bold uppercase w-fit border border-brand-gold/20">
+                                {reg.sportName}
+                              </span>
+                              <span className="text-[8px] uppercase text-slate-400 font-bold ml-1">{reg.category}</span>
+                            </>
+                          )}
                         </div>
                     </td>
                     <td className="px-8 py-4 text-slate-500 font-mono">{reg.contact}</td>
-                    <td className="px-8 py-4 truncate max-w-[200px] text-slate-400 italic">{reg.members}</td>
+                    <td className="px-8 py-4 truncate max-w-[200px] text-slate-400 italic font-light">{reg.members}</td>
                     <td className="px-8 py-4 text-center">
                         <button 
                           onClick={() => setDeleteConfirm({ id: reg.id, coll: 'registrations', name: reg.name, type: 'Registrasi' })}
@@ -446,7 +621,8 @@ export default function PorsasPanel({ koorwils, sports, registrations, matches }
             </table>
           </div>
         </div>
-      )}
+      </div>
+    )}
 
       {activeTab === 'bracket' && (
         <div className="space-y-8">

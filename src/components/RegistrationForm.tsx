@@ -16,6 +16,7 @@ export default function RegistrationForm({ koorwils, sports }: RegistrationFormP
     name: '',
     koorwil: '',
     sportId: '',
+    customSportName: '',
     members: '',
     contact: '',
     gender: 'putra' as 'putra' | 'putri'
@@ -30,7 +31,8 @@ export default function RegistrationForm({ koorwils, sports }: RegistrationFormP
 
   const handleInitialSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.name || (category === 'olahraga' && !formData.koorwil) || !formData.sportId || !formData.members || !formData.contact) {
+    const isSportValid = category === 'olahraga' ? !!formData.sportId : !!formData.customSportName;
+    if (!formData.name || !formData.koorwil || !isSportValid || !formData.members || !formData.contact) {
       alert("Harap isi semua kolom yang diperlukan.");
       return;
     }
@@ -49,11 +51,12 @@ export default function RegistrationForm({ koorwils, sports }: RegistrationFormP
         ...formData,
         category,
         type: 'koorwil',
-        sportName: selectedSport?.name || '',
+        sportId: category === 'seni' ? 'seni-penampilan' : formData.sportId,
+        sportName: category === 'seni' ? formData.customSportName : (selectedSport?.name || ''),
         timestamp: new Date().toISOString()
       });
       setStatus('success');
-      setFormData({ name: '', koorwil: '', sportId: '', members: '', contact: '', gender: 'putra' });
+      setFormData({ name: '', koorwil: '', sportId: '', customSportName: '', members: '', contact: '', gender: 'putra' });
       setVerificationCode('');
       setShowCodeModal(false);
       setTimeout(() => setStatus('idle'), 5000);
@@ -90,7 +93,7 @@ export default function RegistrationForm({ koorwils, sports }: RegistrationFormP
                 Olahraga
               </button>
               <button 
-                onClick={() => { setCategory('seni'); setFormData({ ...formData, sportId: '', koorwil: '' }); }}
+                onClick={() => { setCategory('seni'); setFormData({ ...formData, sportId: '' }); }}
                 className={`px-4 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all ${category === 'seni' ? 'bg-brand-gold text-brand-dark' : 'text-brand-cream/50 hover:text-brand-cream'}`}
               >
                 Seni
@@ -102,48 +105,59 @@ export default function RegistrationForm({ koorwils, sports }: RegistrationFormP
             <div className="space-y-6">
               <div>
                 <label className="block text-[10px] uppercase tracking-[0.2em] text-brand-gold/70 font-bold mb-2 ml-1">
-                  {selectedSport?.type === 'individu' ? 'Nama Peserta' : 'Nama Tim / Kabilah'}
+                  {category === 'seni' ? 'Nama Grup / Penampil' : (selectedSport?.type === 'individu' ? 'Nama Peserta' : 'Nama Tim / Kabilah')}
                 </label>
                 <input 
                   type="text" 
                   value={formData.name}
                   onChange={e => setFormData({ ...formData, name: e.target.value })}
-                  placeholder={selectedSport?.type === 'individu' ? "Contoh: Ahmad Fauzi" : "Contoh: El-Aziz FC"}
+                  placeholder={category === 'seni' ? "Contoh: Grup Hadroh El-Ihsan" : (selectedSport?.type === 'individu' ? "Contoh: Ahmad Fauzi" : "Contoh: El-Aziz FC")}
                   className="w-full bg-brand-dark/50 border border-brand-gold/20 rounded-2xl px-6 py-4 text-brand-cream focus:outline-none focus:border-brand-gold transition-all"
                   required
                 />
               </div>
 
-              {category === 'olahraga' && (
-                <div>
-                  <label className="block text-[10px] uppercase tracking-[0.2em] text-brand-gold/70 font-bold mb-2 ml-1">Asal Koorwil</label>
-                  <select 
-                    value={formData.koorwil}
-                    onChange={e => setFormData({ ...formData, koorwil: e.target.value })}
-                    className="w-full bg-brand-dark/50 border border-brand-gold/20 rounded-2xl px-6 py-4 text-brand-cream focus:outline-none focus:border-brand-gold transition-all appearance-none"
-                    required
-                  >
-                    <option value="" disabled>Pilih Wilayah</option>
-                    {koorwils.map(k => (
-                      <option key={k.id} value={k.name} className="bg-brand-dark">{k.name}</option>
-                    ))}
-                  </select>
-                </div>
-              )}
-
               <div>
-                <label className="block text-[10px] uppercase tracking-[0.2em] text-brand-gold/70 font-bold mb-2 ml-1">Cabang Perlombaan</label>
+                <label className="block text-[10px] uppercase tracking-[0.2em] text-brand-gold/70 font-bold mb-2 ml-1">Asal Koorwil</label>
                 <select 
-                  value={formData.sportId}
-                  onChange={e => setFormData({ ...formData, sportId: e.target.value })}
+                  value={formData.koorwil}
+                  onChange={e => setFormData({ ...formData, koorwil: e.target.value })}
                   className="w-full bg-brand-dark/50 border border-brand-gold/20 rounded-2xl px-6 py-4 text-brand-cream focus:outline-none focus:border-brand-gold transition-all appearance-none"
                   required
                 >
-                  <option value="" disabled>Pilih Cabang {category}</option>
-                  {filteredSports.map(s => (
-                    <option key={s.id} value={s.id} className="bg-brand-dark">{s.name} ({s.gender})</option>
+                  <option value="" disabled>Pilih Wilayah</option>
+                  {koorwils.map(k => (
+                    <option key={k.id} value={k.name} className="bg-brand-dark">{k.name}</option>
                   ))}
                 </select>
+              </div>
+
+              <div>
+                <label className="block text-[10px] uppercase tracking-[0.2em] text-brand-gold/70 font-bold mb-2 ml-1">
+                  {category === 'olahraga' ? 'Cabang Perlombaan' : 'Jenis Penampilan Seni'}
+                </label>
+                {category === 'olahraga' ? (
+                  <select 
+                    value={formData.sportId}
+                    onChange={e => setFormData({ ...formData, sportId: e.target.value })}
+                    className="w-full bg-brand-dark/50 border border-brand-gold/20 rounded-2xl px-6 py-4 text-brand-cream focus:outline-none focus:border-brand-gold transition-all appearance-none"
+                    required
+                  >
+                    <option value="" disabled>Pilih Cabang Olahraga</option>
+                    {filteredSports.map(s => (
+                      <option key={s.id} value={s.id} className="bg-brand-dark">{s.name} ({s.gender})</option>
+                    ))}
+                  </select>
+                ) : (
+                  <input 
+                    type="text" 
+                    value={formData.customSportName}
+                    onChange={e => setFormData({ ...formData, customSportName: e.target.value })}
+                    placeholder="Contoh: Hadroh / Teater / Tari"
+                    className="w-full bg-brand-dark/50 border border-brand-gold/20 rounded-2xl px-6 py-4 text-brand-cream focus:outline-none focus:border-brand-gold transition-all"
+                    required
+                  />
+                )}
               </div>
 
               <div className="grid grid-cols-2 gap-4">
@@ -183,12 +197,12 @@ export default function RegistrationForm({ koorwils, sports }: RegistrationFormP
             <div className="space-y-6">
               <div className="h-full flex flex-col">
                 <label className="block text-[10px] uppercase tracking-[0.2em] text-brand-gold/70 font-bold mb-2 ml-1 md:h-[22px]">
-                  {selectedSport?.type === 'individu' ? 'Detail Peserta (Nama, Angkatan, dsb)' : 'Daftar Nama Anggota Tim'}
+                  {category === 'seni' ? 'Daftar Nama Penampil' : (selectedSport?.type === 'individu' ? 'Detail Peserta (Nama, Angkatan, dsb)' : 'Daftar Nama Anggota Tim')}
                 </label>
                 <textarea 
                   value={formData.members}
                   onChange={e => setFormData({ ...formData, members: e.target.value })}
-                  placeholder={selectedSport?.type === 'individu' ? "Tuliskan data diri lengkap..." : "Tuliskan nama-nama anggota tim..."}
+                  placeholder={category === 'seni' ? "Tuliskan nama-nama pengisi acara / penampil..." : (selectedSport?.type === 'individu' ? "Tuliskan data diri lengkap..." : "Tuliskan nama-nama anggota tim...")}
                   className="flex-grow w-full bg-brand-dark/50 border border-brand-gold/20 rounded-2xl px-6 py-4 text-brand-cream focus:outline-none focus:border-brand-gold transition-all resize-none min-h-[200px]"
                   required
                 />
