@@ -136,6 +136,27 @@
         "status": { "type": "string", "enum": ["scheduled", "ongoing", "completed"] },
         "startTime": { "type": "string", "format": "date-time" }
       }
+    },
+    "Alumnus": {
+      "title": "Alumnus",
+      "description": "Database of alumni for confirmation and check-in",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "yearIn": { "type": "string" },
+        "phone": { "type": "string" },
+        "address": { "type": "string" },
+        "village": { "type": "string" },
+        "district": { "type": "string" },
+        "city": { "type": "string" },
+        "province": { "type": "string" },
+        "profession": { "type": "string" },
+        "status": { "type": "string", "enum": ["unconfirmed", "confirmed", "checked-in"] },
+        "registrationCode": { "type": "string" },
+        "confirmedAt": { "type": "string", "format": "date-time" },
+        "checkedInAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "yearIn", "status"]
     }
   },
   "firestore": {
@@ -166,6 +187,10 @@
     "matches": {
       "schema": "Match",
       "description": "Tournament bracket matches"
+    },
+    "alumni": {
+      "schema": "Alumnus",
+      "description": "Database of alumni and their attendance status"
     }
   }
 }

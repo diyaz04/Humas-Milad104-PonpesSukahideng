@@ -10,6 +10,7 @@ import JadwalPanel from './JadwalPanel';
 import PorsasPanel from './PorsasPanel';
 import MerchandisePanel from './MerchandisePanel';
 import DonationPanel from './DonationPanel';
+import RegistrationPanel from './RegistrationPanel';
 
 interface AdminDashboardProps {
   type: AdminType;
@@ -56,6 +57,7 @@ export default function AdminDashboard({
       case 'porsas': return 'Manajemen PORSAS';
       case 'pesanan': return 'Manajemen Pesanan Merchandise';
       case 'donasi': return 'Manajemen Wakaf & Donasi';
+      case 'registrasi': return 'Manajemen Alumni & Check-In';
       default: return 'Admin Panel';
     }
   };
@@ -74,7 +76,7 @@ export default function AdminDashboard({
     }
   };
 
-  const isAuthRequired = type === 'pesanan' || type === 'donasi';
+  const isAuthRequired = type === 'pesanan' || type === 'donasi' || type === 'registrasi';
 
   return (
     <motion.div 
@@ -125,6 +127,7 @@ export default function AdminDashboard({
                 {type === 'porsas' && <PorsasPanel koorwils={koorwils} sports={sports} registrations={registrations} matches={matches} />}
                 {type === 'pesanan' && <MerchandisePanel user={user} />}
                 {type === 'donasi' && <DonationPanel />}
+                {type === 'registrasi' && <RegistrationPanel />}
               </>
             ) : (
               <div className="flex flex-col items-center justify-center py-10 text-center">

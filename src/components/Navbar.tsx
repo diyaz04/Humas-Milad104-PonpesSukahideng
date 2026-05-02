@@ -5,9 +5,10 @@ import { motion } from 'motion/react';
 interface NavbarProps {
   onMenuOpen: () => void;
   onOpenDonation: () => void;
+  onOpenAlumni: () => void;
 }
 
-export default function Navbar({ onMenuOpen, onOpenDonation }: NavbarProps) {
+export default function Navbar({ onMenuOpen, onOpenDonation, onOpenAlumni }: NavbarProps) {
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -40,7 +41,7 @@ export default function Navbar({ onMenuOpen, onOpenDonation }: NavbarProps) {
         </div>
 
         <div className="hidden md:flex gap-10 items-center">
-          {['About', 'Multimedia', 'Agenda', 'Merchandise', 'Porsas', 'Berita'].map((item) => (
+          {['Multimedia', 'Agenda', 'Merchandise', 'Porsas', 'Berita'].map((item) => (
             <a 
               key={item} 
               href={item === 'Multimedia' ? '#video-content' : `#${item.toLowerCase()}`}
@@ -54,6 +55,12 @@ export default function Navbar({ onMenuOpen, onOpenDonation }: NavbarProps) {
             className="text-sm font-bold text-brand-gold hover:text-white tracking-widest transition-colors uppercase"
           >
             Donasi
+          </button>
+          <button 
+            onClick={onOpenAlumni}
+            className="text-sm font-bold text-brand-cream hover:text-brand-gold tracking-widest transition-colors uppercase"
+          >
+            Alumni
           </button>
           <a 
             href="#daftar-porsas" 

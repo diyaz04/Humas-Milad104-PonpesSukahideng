@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Bell, X, Clock, MapPin, ChevronRight, ShoppingBag, Heart } from 'lucide-react';
+import { Bell, X, Clock, MapPin, ChevronRight, ShoppingBag, Heart, Users } from 'lucide-react';
 import { format, parseISO, isAfter, isBefore, addMinutes, isSameDay } from 'date-fns';
 import { ScheduleItem, Match, Registration } from '../types';
 
@@ -9,9 +9,10 @@ interface PopupBannerProps {
   matches: Match[];
   registrations: Registration[];
   onOpenDonation: () => void;
+  onOpenAlumni: () => void;
 }
 
-export default function PopupBanner({ schedule, matches, registrations, onOpenDonation }: PopupBannerProps) {
+export default function PopupBanner({ schedule, matches, registrations, onOpenDonation, onOpenAlumni }: PopupBannerProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [currentContent, setCurrentContent] = useState<any[]>([]);
   const [hasShown, setHasShown] = useState(false);
@@ -32,6 +33,14 @@ export default function PopupBanner({ schedule, matches, registrations, onOpenDo
     const hMinus1 = parseISO('2026-07-14T00:00:00');
     
     if (isBefore(now, hMinus1)) {
+      items.push({
+        type: 'alumni_confirmation',
+        title: 'Konfirmasi Alumni',
+        subtitle: 'Pastikan Kehadiran Anda',
+        details: 'Konfirmasi kehadiran Alumni sekarang untuk mendapatkan kode registrasi unik Milad ke-104.',
+        isAlumni: true
+      });
+
       items.push({
         type: 'donation_promo',
         title: 'Wakaf & Donasi',
@@ -252,6 +261,16 @@ export default function PopupBanner({ schedule, matches, registrations, onOpenDo
                           >
                             <Heart size={18} className="fill-brand-dark" />
                             <span>Infaq & Donasi Sekarang</span>
+                          </button>
+                        </div>
+                      ) : item.isAlumni ? (
+                        <div className="mt-8">
+                          <button 
+                            onClick={() => { onOpenAlumni(); setIsOpen(false); }}
+                            className="flex items-center justify-center gap-3 w-full bg-brand-gold text-brand-dark py-5 rounded-2xl font-bold uppercase tracking-[0.2em] hover:scale-[1.02] transition-all text-xs shadow-xl shadow-brand-gold/20"
+                          >
+                            <Users size={18} className="fill-brand-dark" />
+                            <span>Konfirmasi Sekarang</span>
                           </button>
                         </div>
                       ) : (

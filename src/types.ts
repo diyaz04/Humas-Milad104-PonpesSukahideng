@@ -114,4 +114,22 @@ export interface Donation {
   timestamp: string;
 }
 
-export type AdminType = 'milad' | 'jadwal' | 'porsas' | 'pesanan' | 'donasi' | null;
+export interface Alumnus {
+  id: string;
+  name: string;
+  nameLowercase: string;
+  yearIn: string;
+  phone: string;
+  address: string;
+  village: string;
+  district: string;
+  city: string;
+  province: string;
+  profession: string;
+  status: 'unconfirmed' | 'confirmed' | 'checked-in';
+  registrationCode?: string;
+  confirmedAt?: string;
+  checkedInAt?: string;
+}
+
+export type AdminType = 'milad' | 'jadwal' | 'porsas' | 'pesanan' | 'donasi' | 'registrasi' | null;

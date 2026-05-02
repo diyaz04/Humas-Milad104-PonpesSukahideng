@@ -75,5 +75,13 @@ service cloud.firestore {
       allow create: if true;
       allow read, update, delete: if request.auth != null;
     }
+
+    // Alumni Database & Confirmation
+    match /alumni/{alumniId} {
+      allow create: if true;
+      allow read: if true; // Searching by name needs read access
+      allow update: if true; // Alumni can edit their data
+      allow delete: if request.auth != null; // Only admin can delete
+    }
   }
 }

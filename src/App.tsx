@@ -39,10 +39,12 @@ import PopupBanner from './components/PopupBanner';
 import NewsDetail from './components/NewsDetail';
 import ChatBot from './components/ChatBot';
 import Donation from './components/Donation';
+import AlumniConfirmation from './components/AlumniConfirmation';
 
 export default function App() {
   const [activeAdmin, setActiveAdmin] = useState<AdminType>(null);
   const [showDonation, setShowDonation] = useState(false);
+  const [showAlumni, setShowAlumni] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [settings, setSettings] = useState<Setting | null>(null);
   const [news, setNews] = useState<News[]>([]);
@@ -150,6 +152,7 @@ export default function App() {
     else if (keyword === 'porsas') setActiveAdmin('porsas');
     else if (keyword === 'pesanan') setActiveAdmin('pesanan');
     else if (keyword === 'donasi') setActiveAdmin('donasi');
+    else if (keyword === 'registrasi') setActiveAdmin('registrasi');
     else setActiveAdmin(null);
   };
 
@@ -174,6 +177,7 @@ export default function App() {
       <Navbar 
         onMenuOpen={() => setIsMenuOpen(true)} 
         onOpenDonation={() => setShowDonation(true)}
+        onOpenAlumni={() => setShowAlumni(true)}
       />
       
       <AnimatePresence>
@@ -191,11 +195,16 @@ export default function App() {
               <X size={32} />
             </button>
             <nav className="flex flex-col gap-8 mt-12 text-2xl font-serif text-brand-cream text-center">
-              <a href="#about" className="hover:text-brand-gold transition-colors" onClick={() => setIsMenuOpen(false)}>Tentang Milad</a>
               <a href="#video-content" className="hover:text-brand-gold transition-colors" onClick={() => setIsMenuOpen(false)}>Multimedia</a>
               <a href="#agenda" className="hover:text-brand-gold transition-colors" onClick={() => setIsMenuOpen(false)}>Agenda</a>
               <a href="#merchandise" className="hover:text-brand-gold transition-colors" onClick={() => setIsMenuOpen(false)}>Merchandise</a>
               <a href="#porsas" className="hover:text-brand-gold transition-colors" onClick={() => setIsMenuOpen(false)}>PORSAS</a>
+              <button 
+                onClick={() => { setShowAlumni(true); setIsMenuOpen(false); }}
+                className="text-brand-cream hover:text-brand-gold transition-colors text-left"
+              >
+                Konfirmasi Alumni
+              </button>
               <button 
                 onClick={() => { setShowDonation(true); setIsMenuOpen(false); }}
                 className="text-brand-gold font-bold hover:text-white transition-colors"
@@ -263,6 +272,7 @@ export default function App() {
         matches={matches} 
         registrations={registrations} 
         onOpenDonation={() => setShowDonation(true)}
+        onOpenAlumni={() => setShowAlumni(true)}
       />
       
       <ChatBot faqs={faqs} />
@@ -279,6 +289,20 @@ export default function App() {
                 <X size={24} />
               </button>
               <Donation />
+            </div>
+          </div>
+        )}
+        {showAlumni && (
+          <div className="fixed inset-0 z-[80] overflow-y-auto">
+            <div className="fixed inset-0 bg-brand-dark/20 backdrop-blur-sm" onClick={() => setShowAlumni(false)} />
+            <div className="relative min-h-screen flex items-center justify-center p-4">
+               <button 
+                onClick={() => setShowAlumni(false)}
+                className="absolute top-8 right-8 z-[90] p-3 bg-white text-brand-dark rounded-full shadow-2xl hover:bg-brand-gold hover:text-white transition-all transform hover:rotate-90"
+              >
+                <X size={24} />
+              </button>
+              <AlumniConfirmation />
             </div>
           </div>
         )}
