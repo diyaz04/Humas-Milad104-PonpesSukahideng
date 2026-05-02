@@ -36,7 +36,7 @@ export default function PopupBanner({ schedule, matches, registrations, onOpenDo
         type: 'donation_promo',
         title: 'Wakaf & Donasi',
         subtitle: 'Amal Jariyah Milad 104',
-        details: 'Mari berkontribusi dalam pembangunan dan kemajuan Pesantren melalui donasi Milad ke-104.',
+        details: 'Mari berkontribusi dalam suksesnya milad 104 pesantren Sukahideng',
         isDonation: true
       });
 

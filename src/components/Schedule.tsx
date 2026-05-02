@@ -16,10 +16,19 @@ export default function Schedule({ schedule }: ScheduleProps) {
     return d;
   }, [schedule]);
 
-  const filteredSchedule = useMemo(() => {
-    if (!filter) return schedule;
-    return schedule.filter(s => s.date === filter);
-  }, [schedule, filter]);
+  const groupedSchedule = useMemo(() => {
+    const sorted = [...schedule].sort((a, b) => {
+      if (a.date !== b.date) return a.date.localeCompare(b.date);
+      return a.startTime.localeCompare(b.startTime);
+    });
+    
+    const datesToProcess = filter ? [filter] : dates;
+    
+    return datesToProcess.map(date => ({
+      date,
+      items: sorted.filter(s => s.date === date)
+    }));
+  }, [schedule, dates, filter]);
 
   return (
     <div className="max-w-7xl mx-auto px-6">
@@ -52,46 +61,61 @@ export default function Schedule({ schedule }: ScheduleProps) {
         <div className="absolute left-8 md:left-1/2 top-0 bottom-0 w-px bg-brand-gold/20 -translate-x-1/2 hidden md:block" />
         
         <AnimatePresence mode="popLayout">
-          {filteredSchedule.map((item, idx) => (
-            <motion.div 
-              key={item.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              transition={{ delay: idx * 0.1 }}
-              className={`relative mb-12 md:w-1/2 ${idx % 2 === 0 ? 'md:pr-16 md:ml-0 md:text-right' : 'md:pl-16 md:ml-auto md:text-left'}`}
-            >
-              {/* Dot */}
-              <div className="absolute left-[-1.5px] md:left-1/2 top-1 w-4 h-4 bg-brand-gold rounded-full -translate-x-1/2 z-10 border-4 border-brand-cream" />
-              
-              <div className="bg-white p-6 md:p-8 rounded-[30px] shadow-sm hover:shadow-xl transition-all group border border-brand-gold/5">
-                <span className="inline-block px-3 py-1 bg-brand-gold/10 text-brand-gold text-[10px] font-bold uppercase tracking-widest rounded-full mb-4">
-                  {item.category}
-                </span>
-                <h3 className="text-xl md:text-2xl font-serif font-bold text-brand-dark mb-4 group-hover:text-brand-gold transition-colors">{item.name}</h3>
-                
-                <div className={`flex flex-col gap-2 text-sm text-brand-dark/60 font-medium ${idx % 2 === 0 ? 'md:items-end' : 'md:items-start'}`}>
-                  <div className="flex items-center gap-2">
-                    <Clock size={16} className="text-brand-gold" />
-                    <span>{item.startTime} - {item.endTime}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <MapPin size={16} className="text-brand-gold" />
-                    <span>{item.location}</span>
-                  </div>
+          {groupedSchedule.map((group, groupIdx) => (
+            <div key={group.date} className="relative">
+              {/* Date Header Badge */}
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="flex justify-start md:justify-center mb-12 sticky top-24 z-20 pointer-events-none"
+              >
+                <div className="bg-brand-dark text-brand-gold px-6 py-2 rounded-full shadow-xl shadow-brand-dark/20 text-[10px] font-bold uppercase tracking-widest pointer-events-auto border border-brand-gold/30">
+                  {format(parseISO(group.date), 'eeee, dd MMMM yyyy')}
                 </div>
+              </motion.div>
 
-                {item.description && (
-                  <p className="mt-4 text-brand-dark/50 text-sm leading-relaxed italic">
-                    {item.description}
-                  </p>
-                )}
-              </div>
-            </motion.div>
+              {group.items.map((item, idx) => (
+                <motion.div 
+                  key={item.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  transition={{ delay: idx * 0.1 }}
+                  className={`relative mb-12 md:w-1/2 ${idx % 2 === 0 ? 'md:pr-16 md:ml-0 md:text-right' : 'md:pl-16 md:ml-auto md:text-left'}`}
+                >
+                  {/* Dot */}
+                  <div className="absolute left-[-1.5px] md:left-1/2 top-1 w-4 h-4 bg-brand-gold rounded-full -translate-x-1/2 z-10 border-4 border-brand-cream" />
+                  
+                  <div className="bg-white p-6 md:p-8 rounded-[30px] shadow-sm hover:shadow-xl transition-all group border border-brand-gold/5">
+                    <span className="inline-block px-3 py-1 bg-brand-gold/10 text-brand-gold text-[10px] font-bold uppercase tracking-widest rounded-full mb-4">
+                      {item.category}
+                    </span>
+                    <h3 className="text-xl md:text-2xl font-serif font-bold text-brand-dark mb-4 group-hover:text-brand-gold transition-colors">{item.name}</h3>
+                    
+                    <div className={`flex flex-col gap-2 text-sm text-brand-dark/60 font-medium ${idx % 2 === 0 ? 'md:items-end' : 'md:items-start'}`}>
+                      <div className="flex items-center gap-2">
+                        <Clock size={16} className="text-brand-gold" />
+                        <span>{item.startTime} - {item.endTime}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <MapPin size={16} className="text-brand-gold" />
+                        <span>{item.location}</span>
+                      </div>
+                    </div>
+
+                    {item.description && (
+                      <p className="mt-4 text-brand-dark/50 text-sm leading-relaxed italic">
+                        {item.description}
+                      </p>
+                    )}
+                  </div>
+                </motion.div>
+              ))}
+            </div>
           ))}
         </AnimatePresence>
 
-        {filteredSchedule.length === 0 && (
+        {groupedSchedule.every(g => g.items.length === 0) && (
           <div className="text-center py-20 text-brand-dark/30 italic">
             Belum ada agenda yang terdaftar.
           </div>
