@@ -268,19 +268,40 @@ export default function AlumniConfirmation() {
                 </div>
 
                 <div className="flex flex-col md:flex-row gap-4 pt-6 border-t border-slate-100">
-                  <button 
-                    onClick={() => handleConfirm(selectedAlumni)}
-                    disabled={loading}
-                    className="flex-1 bg-brand-gold text-brand-dark py-5 rounded-2xl font-bold uppercase tracking-widest text-xs flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-95 transition-all shadow-xl shadow-brand-gold/20"
-                  >
-                    {loading ? <Loader2 className="animate-spin" /> : <><CheckCircle2 size={18} /> Konfirmasi Kehadiran</>}
-                  </button>
-                  <button 
-                    onClick={() => startEdit(selectedAlumni)}
-                    className="flex-1 bg-brand-dark text-white py-5 rounded-2xl font-bold uppercase tracking-widest text-xs flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-95 transition-all"
-                  >
-                    <Edit3 size={18} /> Edit / Lengkapi Data
-                  </button>
+                  {selectedAlumni.status !== 'unconfirmed' ? (
+                    <div className="w-full space-y-6">
+                      <div className="bg-green-50 border border-green-100 p-6 rounded-3xl text-center">
+                        <CheckCircle2 size={32} className="mx-auto text-green-500 mb-2" />
+                        <p className="text-brand-dark font-bold">Anda Sudah Melakukan Registrasi</p>
+                        <p className="text-xs text-slate-500 mt-1">Data Anda telah diverifikasi oleh sistem.</p>
+                      </div>
+                      <button 
+                        onClick={() => {
+                          setSuccessData({ name: selectedAlumni.name, code: selectedAlumni.registrationCode || '' });
+                          setMode('success');
+                        }}
+                        className="w-full bg-brand-dark text-white py-5 rounded-2xl font-bold uppercase tracking-widest text-xs flex items-center justify-center gap-3 hover:bg-brand-gold transition-all shadow-xl"
+                      >
+                        <QrCode size={18} /> Lihat Bukti Registrasi & QR Code
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      <button 
+                        onClick={() => handleConfirm(selectedAlumni)}
+                        disabled={loading}
+                        className="flex-1 bg-brand-gold text-brand-dark py-5 rounded-2xl font-bold uppercase tracking-widest text-xs flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-95 transition-all shadow-xl shadow-brand-gold/20"
+                      >
+                        {loading ? <Loader2 className="animate-spin" /> : <><CheckCircle2 size={18} /> Konfirmasi Kehadiran</>}
+                      </button>
+                      <button 
+                        onClick={() => startEdit(selectedAlumni)}
+                        className="flex-1 bg-brand-dark text-white py-5 rounded-2xl font-bold uppercase tracking-widest text-xs flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-95 transition-all"
+                      >
+                        <Edit3 size={18} /> Edit / Lengkapi Data
+                      </button>
+                    </>
+                  )}
                 </div>
               </motion.div>
             )}
