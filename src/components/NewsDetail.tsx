@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { motion } from 'motion/react';
-import { X, Calendar, Share2, ArrowLeft } from 'lucide-react';
+import { X, Calendar, Share2, ArrowLeft, Eye } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { News } from '../types';
+import { db } from '../lib/firebase';
+import { doc, updateDoc, increment } from 'firebase/firestore';
 
 interface NewsDetailProps {
   news: News;
@@ -10,6 +12,21 @@ interface NewsDetailProps {
 }
 
 export default function NewsDetail({ news, onClose }: NewsDetailProps) {
+  useEffect(() => {
+    const incrementViews = async () => {
+      try {
+        const newsRef = doc(db, 'news', news.id);
+        await updateDoc(newsRef, {
+          views: increment(1)
+        });
+      } catch (error) {
+        console.error("Error incrementing views:", error);
+      }
+    };
+
+    incrementViews();
+  }, [news.id]);
+
   const shareLink = () => {
     const url = `${window.location.origin}${window.location.pathname}?news=${news.id}`;
     if (navigator.share) {
@@ -56,9 +73,16 @@ export default function NewsDetail({ news, onClose }: NewsDetailProps) {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
         >
-          <div className="flex items-center gap-3 text-brand-gold font-bold uppercase tracking-widest text-xs mb-6">
-            <Calendar size={14} />
-            {format(parseISO(news.date), 'eeee, dd MMMM yyyy')}
+          <div className="flex flex-wrap items-center gap-6 mb-6">
+            <div className="flex items-center gap-3 text-brand-gold font-bold uppercase tracking-widest text-xs">
+              <Calendar size={14} />
+              {format(parseISO(news.date), 'eeee, dd MMMM yyyy')}
+            </div>
+            
+            <div className="flex items-center gap-2 text-brand-dark/40 font-bold uppercase tracking-widest text-xs">
+              <Eye size={14} />
+              {news.views || 0} Dilihat
+            </div>
           </div>
           
           <h1 className="text-4xl md:text-6xl font-serif font-bold text-brand-dark mb-8 leading-tight">

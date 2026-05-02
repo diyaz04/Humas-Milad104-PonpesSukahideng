@@ -69,5 +69,11 @@ service cloud.firestore {
       allow create: if true;
       allow read, update, delete: if request.auth != null;
     }
+
+    // Donations
+    match /donations/{docId} {
+      allow create: if true;
+      allow read, update, delete: if request.auth != null;
+    }
   }
 }

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { doc, setDoc, addDoc, collection, deleteDoc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import { Setting, News, FAQ } from '../../types';
-import { Plus, Trash2, Edit2, Check, Save, AlertCircle } from 'lucide-react';
+import { Plus, Trash2, Edit2, Check, Save, AlertCircle, Eye } from 'lucide-react';
 import FAQPanel from './FAQPanel';
 import ConfirmModal from './ConfirmModal';
 
@@ -153,9 +153,15 @@ export default function MiladPanel({ settings, news, faqs }: MiladPanelProps) {
           <div className="space-y-4">
             {news.map(item => (
               <div key={item.id} className="flex justify-between items-center p-4 bg-slate-50 rounded-2xl">
-                <div className="truncate pr-4">
+                <div className="truncate pr-4 flex-1">
                   <p className="font-bold text-brand-dark truncate">{item.title}</p>
-                  <p className="text-[10px] text-slate-400 uppercase font-bold">{new Date(item.date).toDateString()}</p>
+                  <div className="flex items-center gap-3">
+                    <p className="text-[10px] text-slate-400 uppercase font-bold">{new Date(item.date).toDateString()}</p>
+                    <div className="flex items-center gap-1 text-[10px] text-brand-gold font-bold">
+                      <Eye size={10} />
+                      {item.views || 0}
+                    </div>
+                  </div>
                 </div>
                 <button 
                   onClick={() => setDeleteNewsId(item.id)}

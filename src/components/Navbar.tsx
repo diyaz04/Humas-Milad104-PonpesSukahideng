@@ -4,9 +4,10 @@ import { motion } from 'motion/react';
 
 interface NavbarProps {
   onMenuOpen: () => void;
+  onOpenDonation: () => void;
 }
 
-export default function Navbar({ onMenuOpen }: NavbarProps) {
+export default function Navbar({ onMenuOpen, onOpenDonation }: NavbarProps) {
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -48,6 +49,12 @@ export default function Navbar({ onMenuOpen }: NavbarProps) {
               {item}
             </a>
           ))}
+          <button 
+            onClick={onOpenDonation}
+            className="text-sm font-bold text-brand-gold hover:text-white tracking-widest transition-colors uppercase"
+          >
+            Donasi
+          </button>
           <a 
             href="#daftar-porsas" 
             className="bg-brand-gold text-brand-dark px-6 py-2 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-brand-lightgold transition-all transform hover:scale-105"

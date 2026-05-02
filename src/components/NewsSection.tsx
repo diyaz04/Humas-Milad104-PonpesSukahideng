@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import { format, parseISO } from 'date-fns';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, Eye } from 'lucide-react';
 import { News } from '../types';
 
 interface NewsSectionProps {
@@ -40,6 +40,12 @@ export default function NewsSection({ news, onReadMore }: NewsSectionProps) {
               />
               <div className="absolute top-6 left-6 px-4 py-1 bg-white/90 backdrop-blur-sm rounded-full text-[10px] font-bold text-brand-dark uppercase tracking-widest">
                 {format(parseISO(item.date), 'dd MMM yyyy')}
+              </div>
+              
+              {/* Optional: View count badge on image */}
+              <div className="absolute top-6 right-6 px-3 py-1 bg-black/50 backdrop-blur-sm rounded-full text-[9px] font-bold text-white uppercase tracking-widest flex items-center gap-1.5 shadow-lg">
+                <Eye size={10} />
+                {item.views || 0}
               </div>
             </div>
             <div className="p-8">

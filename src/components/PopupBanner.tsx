@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Bell, X, Clock, MapPin, ChevronRight, ShoppingBag } from 'lucide-react';
+import { Bell, X, Clock, MapPin, ChevronRight, ShoppingBag, Heart } from 'lucide-react';
 import { format, parseISO, isAfter, isBefore, addMinutes, isSameDay } from 'date-fns';
 import { ScheduleItem, Match, Registration } from '../types';
 
@@ -8,9 +8,10 @@ interface PopupBannerProps {
   schedule: ScheduleItem[];
   matches: Match[];
   registrations: Registration[];
+  onOpenDonation: () => void;
 }
 
-export default function PopupBanner({ schedule, matches, registrations }: PopupBannerProps) {
+export default function PopupBanner({ schedule, matches, registrations, onOpenDonation }: PopupBannerProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [currentContent, setCurrentContent] = useState<any[]>([]);
   const [hasShown, setHasShown] = useState(false);
@@ -31,6 +32,14 @@ export default function PopupBanner({ schedule, matches, registrations }: PopupB
     const hMinus1 = parseISO('2026-07-14T00:00:00');
     
     if (isBefore(now, hMinus1)) {
+      items.push({
+        type: 'donation_promo',
+        title: 'Wakaf & Donasi',
+        subtitle: 'Amal Jariyah Milad 104',
+        details: 'Mari berkontribusi dalam pembangunan dan kemajuan Pesantren melalui donasi Milad ke-104.',
+        isDonation: true
+      });
+
       items.push({
         type: 'registration_promo',
         title: 'Info Pendaftaran',
@@ -234,6 +243,16 @@ export default function PopupBanner({ schedule, matches, registrations }: PopupB
                             <ShoppingBag size={18} />
                             <span>Beli Merchandise</span>
                           </a>
+                        </div>
+                      ) : item.isDonation ? (
+                        <div className="mt-8">
+                          <button 
+                            onClick={() => { onOpenDonation(); setIsOpen(false); }}
+                            className="flex items-center justify-center gap-3 w-full bg-brand-gold text-brand-dark py-5 rounded-2xl font-bold uppercase tracking-[0.2em] hover:scale-[1.02] transition-all text-xs shadow-xl shadow-brand-gold/20"
+                          >
+                            <Heart size={18} className="fill-brand-dark" />
+                            <span>Infaq & Donasi Sekarang</span>
+                          </button>
                         </div>
                       ) : (
                         <div className="space-y-3">

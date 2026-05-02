@@ -12,6 +12,7 @@ export interface News {
   content: string;
   date: string;
   imageUrl?: string;
+  views?: number;
 }
 
 export interface ScheduleItem {
@@ -104,4 +105,13 @@ export interface FAQ {
   order: number;
 }
 
-export type AdminType = 'milad' | 'jadwal' | 'porsas' | 'pesanan' | null;
+export interface Donation {
+  id: string;
+  name: string;
+  amount: number;
+  message?: string;
+  status: 'pending' | 'verified' | 'rejected';
+  timestamp: string;
+}
+
+export type AdminType = 'milad' | 'jadwal' | 'porsas' | 'pesanan' | 'donasi' | null;

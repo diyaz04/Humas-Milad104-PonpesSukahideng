@@ -38,9 +38,11 @@ import AdminDashboard from './components/Admin/AdminDashboard';
 import PopupBanner from './components/PopupBanner';
 import NewsDetail from './components/NewsDetail';
 import ChatBot from './components/ChatBot';
+import Donation from './components/Donation';
 
 export default function App() {
   const [activeAdmin, setActiveAdmin] = useState<AdminType>(null);
+  const [showDonation, setShowDonation] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [settings, setSettings] = useState<Setting | null>(null);
   const [news, setNews] = useState<News[]>([]);
@@ -147,6 +149,7 @@ export default function App() {
     else if (keyword === 'jadwal') setActiveAdmin('jadwal');
     else if (keyword === 'porsas') setActiveAdmin('porsas');
     else if (keyword === 'pesanan') setActiveAdmin('pesanan');
+    else if (keyword === 'donasi') setActiveAdmin('donasi');
     else setActiveAdmin(null);
   };
 
@@ -168,7 +171,10 @@ export default function App() {
 
   return (
     <div className="min-h-screen font-sans islamic-pattern selection:bg-brand-gold selection:text-brand-dark">
-      <Navbar onMenuOpen={() => setIsMenuOpen(true)} />
+      <Navbar 
+        onMenuOpen={() => setIsMenuOpen(true)} 
+        onOpenDonation={() => setShowDonation(true)}
+      />
       
       <AnimatePresence>
         {isMenuOpen && (
@@ -190,6 +196,12 @@ export default function App() {
               <a href="#agenda" className="hover:text-brand-gold transition-colors" onClick={() => setIsMenuOpen(false)}>Agenda</a>
               <a href="#merchandise" className="hover:text-brand-gold transition-colors" onClick={() => setIsMenuOpen(false)}>Merchandise</a>
               <a href="#porsas" className="hover:text-brand-gold transition-colors" onClick={() => setIsMenuOpen(false)}>PORSAS</a>
+              <button 
+                onClick={() => { setShowDonation(true); setIsMenuOpen(false); }}
+                className="text-brand-gold font-bold hover:text-white transition-colors"
+              >
+                Infaq & Donasi
+              </button>
               <a href="#berita" className="hover:text-brand-gold transition-colors" onClick={() => setIsMenuOpen(false)}>Berita</a>
             </nav>
           </motion.div>
@@ -246,11 +258,30 @@ export default function App() {
 
       <Footer onAdminTrigger={handleAdminAccess} />
 
-      <PopupBanner schedule={schedule} matches={matches} registrations={registrations} />
+      <PopupBanner 
+        schedule={schedule} 
+        matches={matches} 
+        registrations={registrations} 
+        onOpenDonation={() => setShowDonation(true)}
+      />
       
       <ChatBot faqs={faqs} />
 
       <AnimatePresence>
+        {showDonation && (
+          <div className="fixed inset-0 z-[80] overflow-y-auto">
+            <div className="fixed inset-0 bg-brand-dark/20 backdrop-blur-sm" onClick={() => setShowDonation(false)} />
+            <div className="relative min-h-screen flex items-center justify-center p-4">
+               <button 
+                onClick={() => setShowDonation(false)}
+                className="absolute top-8 right-8 z-[90] p-3 bg-white text-brand-dark rounded-full shadow-2xl hover:bg-brand-gold hover:text-white transition-all transform hover:rotate-90"
+              >
+                <X size={24} />
+              </button>
+              <Donation />
+            </div>
+          </div>
+        )}
         {selectedNews && (
           <NewsDetail 
             news={selectedNews} 
