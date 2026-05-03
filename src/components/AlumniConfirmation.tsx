@@ -48,9 +48,99 @@ export default function AlumniConfirmation() {
     setResults(matched.slice(0, 10)); // Show top 10 matches
   };
 
+  const [provinces, setProvinces] = useState<any[]>([]);
+  const [regencies, setRegencies] = useState<any[]>([]);
+  const [districts, setDistricts] = useState<any[]>([]);
+  const [villages, setVillages] = useState<any[]>([]);
+
+  const [selectedIds, setSelectedIds] = useState({
+    province: '',
+    regency: '',
+    district: '',
+    village: ''
+  });
+
+  const fetchProvinces = async () => {
+    try {
+      const res = await fetch('/api/proxy/wilayah/provinces.json');
+      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+      const data = await res.json();
+      setProvinces(data || []);
+    } catch (e) {
+      console.error('Failed to fetch provinces:', e);
+    }
+  };
+
+  const fetchRegencies = async (provinceId: string) => {
+    try {
+      const res = await fetch(`/api/proxy/wilayah/regencies/${provinceId}.json`);
+      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+      const data = await res.json();
+      setRegencies(data || []);
+    } catch (e) {
+      console.error('Failed to fetch regencies:', e);
+    }
+  };
+
+  const fetchDistricts = async (regencyId: string) => {
+    try {
+      const res = await fetch(`/api/proxy/wilayah/districts/${regencyId}.json`);
+      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+      const data = await res.json();
+      setDistricts(data || []);
+    } catch (e) {
+      console.error('Failed to fetch districts:', e);
+    }
+  };
+
+  const fetchVillages = async (districtId: string) => {
+    try {
+      const res = await fetch(`/api/proxy/wilayah/villages/${districtId}.json`);
+      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+      const data = await res.json();
+      setVillages(data || []);
+    } catch (e) {
+      console.error('Failed to fetch villages:', e);
+    }
+  };
+
   useEffect(() => {
     preloadAlumni();
+    fetchProvinces();
   }, []);
+
+  const handleProvinceChange = (id: string) => {
+    const name = provinces.find(p => p.id === id)?.name || '';
+    setSelectedIds({ province: id, regency: '', district: '', village: '' });
+    setFormData({ ...formData, province: name, city: '', district: '', village: '' });
+    setRegencies([]);
+    setDistricts([]);
+    setVillages([]);
+    if (id) fetchRegencies(id);
+  };
+
+  const handleRegencyChange = (id: string) => {
+    const name = regencies.find(r => r.id === id)?.name || '';
+    setSelectedIds(prev => ({ ...prev, regency: id, district: '', village: '' }));
+    setFormData({ ...formData, city: name, district: '', village: '' });
+    setDistricts([]);
+    setVillages([]);
+    if (id) fetchDistricts(id);
+  };
+
+  const handleDistrictChange = (id: string) => {
+    const name = districts.find(d => d.id === id)?.name || '';
+    setSelectedIds(prev => ({ ...prev, district: id, village: '' }));
+    setFormData({ ...formData, district: name, village: '' });
+    setVillages([]);
+    if (id) fetchVillages(id);
+  };
+
+  const handleVillageChange = (id: string) => {
+    const name = villages.find(v => v.id === id)?.name || '';
+    setSelectedIds(prev => ({ ...prev, village: id }));
+    setFormData({ ...formData, village: name });
+  };
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -114,6 +204,7 @@ export default function AlumniConfirmation() {
   };
 
   const startManual = () => {
+    setSelectedIds({ province: '', regency: '', district: '', village: '' });
     setFormData({
       name: '',
       yearIn: '',
@@ -380,48 +471,59 @@ export default function AlumniConfirmation() {
                       required
                     />
                   </div>
-                  <div className="grid grid-cols-2 gap-4 md:col-span-2">
-                    <div>
-                      <label className="block text-[10px] uppercase tracking-[0.2em] text-slate-400 font-bold mb-3 ml-1">Kelurahan/Desa</label>
-                      <input 
-                        type="text" 
-                        value={formData.village}
-                        onChange={e => setFormData({ ...formData, village: e.target.value })}
-                        className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-6 py-4 text-brand-dark text-sm focus:outline-none"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-[10px] uppercase tracking-[0.2em] text-slate-400 font-bold mb-3 ml-1">Kecamatan</label>
-                      <input 
-                        type="text" 
-                        value={formData.district}
-                        onChange={e => setFormData({ ...formData, district: e.target.value })}
-                        className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-6 py-4 text-brand-dark text-sm focus:outline-none"
-                        required
-                      />
-                    </div>
-                  </div>
-                   <div className="grid grid-cols-2 gap-4 md:col-span-2">
-                    <div>
-                      <label className="block text-[10px] uppercase tracking-[0.2em] text-slate-400 font-bold mb-3 ml-1">Kabupaten/Kota</label>
-                      <input 
-                        type="text" 
-                        value={formData.city}
-                        onChange={e => setFormData({ ...formData, city: e.target.value })}
-                        className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-6 py-4 text-brand-dark text-sm focus:outline-none"
-                        required
-                      />
-                    </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:col-span-2">
                     <div>
                       <label className="block text-[10px] uppercase tracking-[0.2em] text-slate-400 font-bold mb-3 ml-1">Provinsi</label>
-                      <input 
-                        type="text" 
-                        value={formData.province}
-                        onChange={e => setFormData({ ...formData, province: e.target.value })}
-                        className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-6 py-4 text-brand-dark text-sm focus:outline-none"
+                      <select 
+                        value={selectedIds.province}
+                        onChange={e => handleProvinceChange(e.target.value)}
+                        className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-6 py-4 text-brand-dark text-sm focus:outline-none focus:border-brand-gold transition-all appearance-none"
                         required
-                      />
+                      >
+                        <option value="">Pilih Provinsi</option>
+                        {provinces.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-[10px] uppercase tracking-[0.2em] text-slate-400 font-bold mb-3 ml-1">Kabupaten/Kota</label>
+                      <select 
+                        value={selectedIds.regency}
+                        onChange={e => handleRegencyChange(e.target.value)}
+                        disabled={!selectedIds.province}
+                        className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-6 py-4 text-brand-dark text-sm focus:outline-none focus:border-brand-gold transition-all appearance-none disabled:opacity-50"
+                        required
+                      >
+                        <option value="">Pilih Kabupaten/Kota</option>
+                        {regencies.map(r => <option key={r.id} value={r.id}>{r.name}</option>)}
+                      </select>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:col-span-2">
+                    <div>
+                      <label className="block text-[10px] uppercase tracking-[0.2em] text-slate-400 font-bold mb-3 ml-1">Kecamatan</label>
+                      <select 
+                        value={selectedIds.district}
+                        onChange={e => handleDistrictChange(e.target.value)}
+                        disabled={!selectedIds.regency}
+                        className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-6 py-4 text-brand-dark text-sm focus:outline-none focus:border-brand-gold transition-all appearance-none disabled:opacity-50"
+                        required
+                      >
+                        <option value="">Pilih Kecamatan</option>
+                        {districts.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-[10px] uppercase tracking-[0.2em] text-slate-400 font-bold mb-3 ml-1">Kelurahan/Desa</label>
+                      <select 
+                        value={selectedIds.village}
+                        onChange={e => handleVillageChange(e.target.value)}
+                        disabled={!selectedIds.district}
+                        className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-6 py-4 text-brand-dark text-sm focus:outline-none focus:border-brand-gold transition-all appearance-none disabled:opacity-50"
+                        required
+                      >
+                        <option value="">Pilih Kelurahan/Desa</option>
+                        {villages.map(v => <option key={v.id} value={v.id}>{v.name}</option>)}
+                      </select>
                     </div>
                   </div>
 

@@ -40,6 +40,104 @@ export default function RegistrationPanel() {
   }, []);
 
   const [isRepairing, setIsRepairing] = useState(false);
+  const [provinces, setProvinces] = useState<any[]>([]);
+  const [regencies, setRegencies] = useState<any[]>([]);
+  const [districts, setDistricts] = useState<any[]>([]);
+  const [villages, setVillages] = useState<any[]>([]);
+
+  const [selectedIds, setSelectedIds] = useState({
+    province: '',
+    regency: '',
+    district: '',
+    village: ''
+  });
+
+  const fetchProvinces = async () => {
+    try {
+      const res = await fetch('/api/proxy/wilayah/provinces.json');
+      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+      const data = await res.json();
+      setProvinces(data || []);
+    } catch (e) {
+      console.error('Failed to fetch provinces:', e);
+    }
+  };
+
+  const fetchRegencies = async (provinceId: string) => {
+    try {
+      const res = await fetch(`/api/proxy/wilayah/regencies/${provinceId}.json`);
+      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+      const data = await res.json();
+      setRegencies(data || []);
+      return data || [];
+    } catch (e) {
+      console.error('Failed to fetch regencies:', e);
+      return [];
+    }
+  };
+
+  const fetchDistricts = async (regencyId: string) => {
+    try {
+      const res = await fetch(`/api/proxy/wilayah/districts/${regencyId}.json`);
+      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+      const data = await res.json();
+      setDistricts(data || []);
+      return data || [];
+    } catch (e) {
+      console.error('Failed to fetch districts:', e);
+      return [];
+    }
+  };
+
+  const fetchVillages = async (districtId: string) => {
+    try {
+      const res = await fetch(`/api/proxy/wilayah/villages/${districtId}.json`);
+      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+      const data = await res.json();
+      setVillages(data || []);
+      return data || [];
+    } catch (e) {
+      console.error('Failed to fetch villages:', e);
+      return [];
+    }
+  };
+
+  useEffect(() => {
+    fetchProvinces();
+  }, []);
+
+  const handleProvinceChange = (id: string) => {
+    const name = provinces.find(p => p.id === id)?.name || '';
+    setSelectedIds({ province: id, regency: '', district: '', village: '' });
+    setFormData({ ...formData, province: name, city: '', district: '', village: '' });
+    setRegencies([]);
+    setDistricts([]);
+    setVillages([]);
+    if (id) fetchRegencies(id);
+  };
+
+  const handleRegencyChange = (id: string) => {
+    const name = regencies.find(r => r.id === id)?.name || '';
+    setSelectedIds(prev => ({ ...prev, regency: id, district: '', village: '' }));
+    setFormData({ ...formData, city: name, district: '', village: '' });
+    setDistricts([]);
+    setVillages([]);
+    if (id) fetchDistricts(id);
+  };
+
+  const handleDistrictChange = (id: string) => {
+    const name = districts.find(d => d.id === id)?.name || '';
+    setSelectedIds(prev => ({ ...prev, district: id, village: '' }));
+    setFormData({ ...formData, district: name, village: '' });
+    setVillages([]);
+    if (id) fetchVillages(id);
+  };
+
+  const handleVillageChange = (id: string) => {
+    const name = villages.find(v => v.id === id)?.name || '';
+    setSelectedIds(prev => ({ ...prev, village: id }));
+    setFormData({ ...formData, village: name });
+  };
 
   const repairData = async () => {
     if (!confirm("Sistem akan memperbarui seluruh data alumni untuk sinkronisasi pencarian. Lanjutkan?")) return;
@@ -293,7 +391,11 @@ export default function RegistrationPanel() {
                 {isRepairing ? 'Memproses...' : 'Sinkron Pencarian'}
               </button>
               <button 
-                onClick={() => { setFormData({ status: 'unconfirmed' }); setIsFormOpen(true); }}
+                onClick={() => { 
+                  setFormData({ status: 'unconfirmed' }); 
+                  setSelectedIds({ province: '', regency: '', district: '', village: '' });
+                  setIsFormOpen(true); 
+                }}
                 className="flex-1 bg-brand-dark text-white px-6 py-4 rounded-2xl text-[10px] font-bold uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-brand-gold transition-all shadow-lg"
               >
                 <Plus size={16} /> Tambah
@@ -339,7 +441,12 @@ export default function RegistrationPanel() {
                       <td className="px-8 py-6 text-right">
                         <div className="flex items-center justify-end gap-2">
                            <button 
-                            onClick={() => { setFormData(a); setSelectedAlumni(a); setIsFormOpen(true); }}
+                            onClick={() => { 
+                              setFormData(a); 
+                              setSelectedAlumni(a); 
+                              setSelectedIds({ province: '', regency: '', district: '', village: '' });
+                              setIsFormOpen(true); 
+                            }}
                             className="p-2 text-slate-400 hover:text-brand-dark"
                           >
                             <Edit2 size={16} />
@@ -540,7 +647,11 @@ export default function RegistrationPanel() {
               >
                  <p className="text-slate-400 font-medium mb-4 italic">Peserta belum terdaftar di database alumni?</p>
                  <button 
-                  onClick={() => { setFormData({ status: 'checked-in' }); setIsFormOpen(true); }}
+                  onClick={() => { 
+                     setFormData({ status: 'checked-in' }); 
+                     setSelectedIds({ province: '', regency: '', district: '', village: '' });
+                     setIsFormOpen(true); 
+                   }}
                   className="bg-brand-dark text-white px-8 py-3 rounded-2xl text-[10px] font-bold uppercase tracking-widest hover:bg-brand-gold transition-all"
                 >
                   Registrasi & Check-In Langsung
@@ -645,25 +756,71 @@ export default function RegistrationPanel() {
                     required
                   />
                 </div>
-                <div className="md:col-span-2">
-                  <label className="block text-[10px] uppercase tracking-[0.2em] text-slate-400 font-bold mb-3 ml-1">Alamat</label>
+                 <div className="md:col-span-2 space-y-4">
+                  <label className="block text-[10px] uppercase tracking-[0.2em] text-slate-400 font-bold mb-1 ml-1">Alamat Lengkap</label>
                   <textarea 
                     value={formData.address || ''}
                     onChange={e => setFormData({ ...formData, address: e.target.value })}
                     className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-6 py-4 text-brand-dark focus:outline-none focus:border-brand-gold transition-all resize-none"
                     rows={2}
+                    placeholder="Nama Jalan, Blok, No Rumah..."
                     required
                   />
-                </div>
-                 <div>
-                  <label className="block text-[10px] uppercase tracking-[0.2em] text-slate-400 font-bold mb-3 ml-1">Kabupaten/Kota</label>
-                  <input 
-                    type="text" 
-                    value={formData.city || ''}
-                    onChange={e => setFormData({ ...formData, city: e.target.value })}
-                    className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-6 py-4 text-brand-dark focus:outline-none focus:border-brand-gold transition-all"
-                    required
-                  />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-[10px] uppercase tracking-[0.2em] text-slate-400 font-bold mb-2">Provinsi</label>
+                      <select 
+                        value={selectedIds.province}
+                        onChange={e => handleProvinceChange(e.target.value)}
+                        className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-6 py-4 text-brand-dark text-sm focus:outline-none"
+                        required
+                      >
+                        <option value="">Pilih Provinsi</option>
+                        {provinces.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-[10px] uppercase tracking-[0.2em] text-slate-400 font-bold mb-2">Kabupaten/Kota</label>
+                      <select 
+                        value={selectedIds.regency}
+                        onChange={e => handleRegencyChange(e.target.value)}
+                        disabled={!selectedIds.province}
+                        className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-6 py-4 text-brand-dark text-sm focus:outline-none disabled:opacity-50"
+                        required
+                      >
+                        <option value="">Pilih Kabupaten/Kota</option>
+                        {regencies.map(r => <option key={r.id} value={r.id}>{r.name}</option>)}
+                      </select>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-[10px] uppercase tracking-[0.2em] text-slate-400 font-bold mb-2">Kecamatan</label>
+                      <select 
+                        value={selectedIds.district}
+                        onChange={e => handleDistrictChange(e.target.value)}
+                        disabled={!selectedIds.regency}
+                        className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-6 py-4 text-brand-dark text-sm focus:outline-none disabled:opacity-50"
+                        required
+                      >
+                        <option value="">Pilih Kecamatan</option>
+                        {districts.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-[10px] uppercase tracking-[0.2em] text-slate-400 font-bold mb-2">Kelurahan/Desa</label>
+                      <select 
+                        value={selectedIds.village}
+                        onChange={e => handleVillageChange(e.target.value)}
+                        disabled={!selectedIds.district}
+                        className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-6 py-4 text-brand-dark text-sm focus:outline-none disabled:opacity-50"
+                        required
+                      >
+                        <option value="">Pilih Kelurahan/Desa</option>
+                        {villages.map(v => <option key={v.id} value={v.id}>{v.name}</option>)}
+                      </select>
+                    </div>
+                  </div>
                 </div>
                 <div>
                   <label className="block text-[10px] uppercase tracking-[0.2em] text-slate-400 font-bold mb-3 ml-1">Status</label>
