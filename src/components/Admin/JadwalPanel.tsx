@@ -3,6 +3,8 @@ import { collection, addDoc, deleteDoc, doc, updateDoc } from 'firebase/firestor
 import { db } from '../../lib/firebase';
 import { ScheduleItem } from '../../types';
 import { Plus, Trash2, Edit2, Search, AlertCircle } from 'lucide-react';
+import { format, parseISO } from 'date-fns';
+import { id } from 'date-fns/locale';
 import ConfirmModal from './ConfirmModal';
 
 interface JadwalPanelProps {
@@ -166,7 +168,7 @@ export default function JadwalPanel({ schedule }: JadwalPanelProps) {
                 <tr key={item.id} className="hover:bg-slate-50/50 transition-colors">
                   <td className="px-8 py-6 font-bold text-brand-dark">{item.name}</td>
                   <td className="px-8 py-6 text-sm">
-                    <div className="text-slate-600 font-bold">{item.date}</div>
+                    <div className="text-slate-600 font-bold">{format(parseISO(item.date), 'eeee, dd MMM yyyy', { locale: id })}</div>
                     <div className="text-slate-400 text-xs">{item.startTime} - {item.endTime}</div>
                   </td>
                   <td className="px-8 py-6 text-sm text-slate-500">{item.location}</td>

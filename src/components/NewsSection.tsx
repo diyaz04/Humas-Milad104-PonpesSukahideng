@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import { format, parseISO } from 'date-fns';
+import { id } from 'date-fns/locale';
 import { ChevronRight, Eye } from 'lucide-react';
 import { News } from '../types';
 
@@ -39,7 +40,7 @@ export default function NewsSection({ news, onReadMore }: NewsSectionProps) {
                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
               />
               <div className="absolute top-6 left-6 px-4 py-1 bg-white/90 backdrop-blur-sm rounded-full text-[10px] font-bold text-brand-dark uppercase tracking-widest">
-                {format(parseISO(item.date), 'dd MMM yyyy')}
+                {format(parseISO(item.date), 'dd MMM yyyy', { locale: id })}
               </div>
               
               {/* Optional: View count badge on image */}

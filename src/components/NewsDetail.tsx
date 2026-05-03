@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { motion } from 'motion/react';
 import { X, Calendar, Share2, ArrowLeft, Eye } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
+import { id } from 'date-fns/locale';
 import { News } from '../types';
 import { db } from '../lib/firebase';
 import { doc, updateDoc, increment } from 'firebase/firestore';
@@ -76,7 +77,7 @@ export default function NewsDetail({ news, onClose }: NewsDetailProps) {
           <div className="flex flex-wrap items-center gap-6 mb-6">
             <div className="flex items-center gap-3 text-brand-gold font-bold uppercase tracking-widest text-xs">
               <Calendar size={14} />
-              {format(parseISO(news.date), 'eeee, dd MMMM yyyy')}
+              {format(parseISO(news.date), 'eeee, dd MMMM yyyy', { locale: id })}
             </div>
             
             <div className="flex items-center gap-2 text-brand-dark/40 font-bold uppercase tracking-widest text-xs">
@@ -89,7 +90,22 @@ export default function NewsDetail({ news, onClose }: NewsDetailProps) {
             {news.title}
           </h1>
 
-          {news.imageUrl && (
+          {news.images && news.images.length > 0 ? (
+            <div className={`grid gap-4 mb-12 ${news.images.length === 1 ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2'}`}>
+              {news.images.map((img, idx) => (
+                <div 
+                  key={idx} 
+                  className={`aspect-video rounded-[32px] overflow-hidden shadow-xl border-4 border-white ${news.images!.length === 3 && idx === 0 ? 'md:col-span-2' : ''}`}
+                >
+                  <img 
+                    src={img} 
+                    alt={`${news.title} ${idx + 1}`} 
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              ))}
+            </div>
+          ) : news.imageUrl && (
             <div className="aspect-video w-full rounded-[40px] overflow-hidden mb-12 shadow-2xl border-4 border-white">
               <img 
                 src={news.imageUrl} 

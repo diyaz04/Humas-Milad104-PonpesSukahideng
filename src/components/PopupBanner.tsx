@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Bell, X, Clock, MapPin, ChevronRight, ShoppingBag, Heart, Users } from 'lucide-react';
 import { format, parseISO, isAfter, isBefore, addMinutes, isSameDay } from 'date-fns';
+import { id } from 'date-fns/locale';
 import { ScheduleItem, Match, Registration } from '../types';
 
 interface PopupBannerProps {
@@ -124,7 +125,7 @@ export default function PopupBanner({ schedule, matches, registrations, onOpenDo
         title: isToday ? 'Kegiatan Berikutnya Hari Ini' : 'Kegiatan Mendatang',
         subtitle: s.category,
         details: s.name,
-        time: isToday ? `${s.startTime} WIB` : `${format(parseISO(s.date), 'dd MMM yyyy')}, ${s.startTime} WIB`,
+        time: isToday ? `${s.startTime} WIB` : `${format(parseISO(s.date), 'dd MMM yyyy', { locale: id })}, ${s.startTime} WIB`,
         location: s.location
       }));
     }

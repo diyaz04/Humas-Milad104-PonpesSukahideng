@@ -12,6 +12,7 @@ export interface News {
   content: string;
   date: string;
   imageUrl?: string;
+  images?: string[];
   views?: number;
 }
 

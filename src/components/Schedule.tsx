@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Calendar, Clock, MapPin, ChevronRight } from 'lucide-react';
 import { format, parseISO, isSameDay } from 'date-fns';
+import { id } from 'date-fns/locale';
 import { ScheduleItem } from '../types';
 
 interface ScheduleProps {
@@ -51,7 +52,7 @@ export default function Schedule({ schedule }: ScheduleProps) {
             onClick={() => setFilter(date)}
             className={`px-6 py-2 rounded-full text-xs font-bold uppercase tracking-widest transition-all ${filter === date ? 'bg-brand-dark text-brand-gold' : 'bg-transparent text-brand-dark/50 hover:text-brand-dark border border-brand-dark/10'}`}
           >
-            {format(parseISO(date), 'dd MMM yyyy')}
+            {format(parseISO(date), 'dd MMM yyyy', { locale: id })}
           </button>
         ))}
       </div>
@@ -70,7 +71,7 @@ export default function Schedule({ schedule }: ScheduleProps) {
                 className="flex justify-start md:justify-center mb-12 sticky top-24 z-20 pointer-events-none"
               >
                 <div className="bg-brand-dark text-brand-gold px-6 py-2 rounded-full shadow-xl shadow-brand-dark/20 text-[10px] font-bold uppercase tracking-widest pointer-events-auto border border-brand-gold/30">
-                  {format(parseISO(group.date), 'eeee, dd MMMM yyyy')}
+                  {format(parseISO(group.date), 'eeee, dd MMMM yyyy', { locale: id })}
                 </div>
               </motion.div>
 

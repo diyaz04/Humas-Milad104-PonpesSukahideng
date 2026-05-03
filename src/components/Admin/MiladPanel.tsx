@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { doc, setDoc, addDoc, collection, deleteDoc } from 'firebase/firestore';
-import { db } from '../../lib/firebase';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import imageCompression from 'browser-image-compression';
+import { db, storage } from '../../lib/firebase';
 import { Setting, News, FAQ } from '../../types';
-import { Plus, Trash2, Edit2, Check, Save, AlertCircle, Eye } from 'lucide-react';
+import { Plus, Trash2, Edit2, Check, Save, AlertCircle, Eye, X as CloseIcon, Loader2 } from 'lucide-react';
 import FAQPanel from './FAQPanel';
 import ConfirmModal from './ConfirmModal';
 
@@ -30,6 +32,43 @@ export default function MiladPanel({ settings, news, faqs }: MiladPanelProps) {
     imageUrl: ''
   });
 
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [previews, setPreviews] = useState<string[]>([]);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []) as File[];
+    if (files.length + selectedFiles.length > 3) {
+      alert("Maksimal 3 foto per berita.");
+      return;
+    }
+
+    const newFiles = [...selectedFiles];
+    const newPreviews = [...previews];
+
+    for (const file of files) {
+      newFiles.push(file);
+      newPreviews.push(URL.createObjectURL(file));
+    }
+
+    setSelectedFiles(newFiles);
+    setPreviews(newPreviews);
+  };
+
+  const removeFile = (index: number) => {
+    const newFiles = [...selectedFiles];
+    const newPreviews = [...previews];
+    
+    URL.revokeObjectURL(newPreviews[index]);
+    
+    newFiles.splice(index, 1);
+    newPreviews.splice(index, 1);
+    
+    setSelectedFiles(newFiles);
+    setPreviews(newPreviews);
+  };
+
   const saveSettings = async () => {
     await setDoc(doc(db, 'settings', 'general'), localSettings);
     alert("Pengaturan tersimpan!");
@@ -37,11 +76,51 @@ export default function MiladPanel({ settings, news, faqs }: MiladPanelProps) {
 
   const addNews = async () => {
     if (!newsForm.title || !newsForm.content) return;
-    await addDoc(collection(db, 'news'), {
-      ...newsForm,
-      date: new Date(newsForm.date).toISOString()
-    });
-    setNewsForm({ title: '', content: '', date: new Date().toISOString().split('T')[0], imageUrl: '' });
+    setIsUploading(true);
+    
+    try {
+      const imageUrls: string[] = [];
+      
+      // Process files sequentially to avoid overwhelming the connection and hitting retry limits
+      for (const file of selectedFiles) {
+        const options = {
+          maxSizeMB: 0.4,
+          maxWidthOrHeight: 1200,
+          useWebWorker: true
+        };
+        
+        const compressedFile = await imageCompression(file, options);
+        const fileName = `${Date.now()}-${file.name.replace(/\s+/g, '_')}`;
+        const storageRef = ref(storage, `news/${fileName}`);
+        
+        await uploadBytes(storageRef, compressedFile);
+        const downloadUrl = await getDownloadURL(storageRef);
+        imageUrls.push(downloadUrl);
+      }
+
+      await addDoc(collection(db, 'news'), {
+        ...newsForm,
+        date: new Date(newsForm.date).toISOString(),
+        images: imageUrls,
+        imageUrl: imageUrls[0] || newsForm.imageUrl // Set primary image
+      });
+      
+      setNewsForm({ title: '', content: '', date: new Date().toISOString().split('T')[0], imageUrl: '' });
+      setSelectedFiles([]);
+      setPreviews([]);
+      alert("Berita berhasil ditambahkan!");
+    } catch (err: any) {
+      console.error("Error adding news:", err);
+      if (err.code === 'storage/retry-limit-exceeded') {
+        alert("Gagal mengunggah foto: Waktu tunggu habis. Pastikan Firebase Storage sudah diaktifkan di Console dan koneksi internet stabil.");
+      } else if (err.code === 'storage/unauthorized') {
+        alert("Gagal mengunggah foto: Tidak ada izin. Pastikan Security Rules Storage sudah dikonfigurasi.");
+      } else {
+        alert("Gagal menambahkan berita: " + (err.message || "Terjadi kesalahan internal"));
+      }
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   const confirmDeleteNews = async () => {
@@ -132,18 +211,60 @@ export default function MiladPanel({ settings, news, faqs }: MiladPanelProps) {
               onChange={e => setNewsForm({...newsForm, date: e.target.value})}
               className="w-full border-2 border-slate-100 rounded-xl p-3 outline-none"
             />
+            <div className="space-y-4">
+              <label className="text-[10px] uppercase tracking-widest text-slate-400 font-bold mb-2 block">Upload Foto (Maks 3)</label>
+              <div className="grid grid-cols-3 gap-4">
+                {previews.map((preview, index) => (
+                  <div key={index} className="relative aspect-square rounded-xl overflow-hidden border-2 border-slate-100 group">
+                    <img src={preview} alt="Preview" className="w-full h-full object-cover" />
+                    <button 
+                      onClick={() => removeFile(index)}
+                      className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <CloseIcon size={12} />
+                    </button>
+                  </div>
+                ))}
+                {previews.length < 3 && (
+                  <button 
+                    onClick={() => fileInputRef.current?.click()}
+                    className="aspect-square rounded-xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center text-slate-400 hover:border-brand-gold hover:text-brand-gold transition-all"
+                  >
+                    <Plus size={24} />
+                    <span className="text-[10px] uppercase font-bold mt-2">Tambah</span>
+                  </button>
+                )}
+              </div>
+              <input 
+                type="file" 
+                ref={fileInputRef}
+                onChange={handleFileChange}
+                accept="image/*"
+                multiple
+                className="hidden"
+              />
+            </div>
+
             <input 
               type="text" 
-              placeholder="URL Gambar (opsional)" 
+              placeholder="URL Gambar (Jika tidak upload)" 
               value={newsForm.imageUrl}
               onChange={e => setNewsForm({...newsForm, imageUrl: e.target.value})}
               className="w-full border-2 border-slate-100 rounded-xl p-3 outline-none"
             />
             <button 
               onClick={addNews}
-              className="w-full bg-brand-gold text-brand-dark py-4 rounded-xl font-bold uppercase tracking-widest"
+              disabled={isUploading}
+              className="w-full bg-brand-gold text-brand-dark py-4 rounded-xl font-bold uppercase tracking-widest flex items-center justify-center gap-2 disabled:opacity-50"
             >
-              Publikasikan Berita
+              {isUploading ? (
+                <>
+                  <Loader2 size={18} className="animate-spin" />
+                  Mengunggah...
+                </>
+              ) : (
+                'Publikasikan Berita'
+              )}
             </button>
           </div>
         </div>
