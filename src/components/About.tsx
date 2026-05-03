@@ -43,7 +43,7 @@ export default function About({ settings }: AboutProps) {
       >
         <div className="aspect-[4/5] bg-brand-dark rounded-[40px] overflow-hidden shadow-2xl relative z-10 border-8 border-white">
           <img 
-            src="https://lh3.googleusercontent.com/d/1eW9mbN7ROp_nPDr4lKE0NpiAfNtZe6kT" 
+            src="https://lh3.googleusercontent.com/d/1MmKPl5WVlkLhO_W4HORKVyaSAeQKqM3c" 
             alt="Pesantren Sukahideng" 
             className="w-full h-full object-cover hover:scale-110 transition-all duration-700"
           />
