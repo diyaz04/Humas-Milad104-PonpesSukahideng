@@ -210,24 +210,24 @@ export default function Merchandise({ products }: MerchandiseProps) {
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="relative w-full max-w-4xl bg-white rounded-[40px] shadow-2xl overflow-hidden flex flex-col md:flex-row max-h-[90vh]"
+              className="relative w-full max-w-4xl bg-white rounded-[32px] md:rounded-[40px] shadow-2xl overflow-hidden flex flex-col md:flex-row max-h-[96vh] md:max-h-[90vh]"
             >
               <button 
                 onClick={() => setSelectedProduct(null)}
-                className="absolute top-6 right-6 z-10 w-10 h-10 bg-white shadow-xl rounded-full flex items-center justify-center text-slate-400 hover:text-brand-gold transition-colors"
+                className="absolute top-4 right-4 md:top-6 md:right-6 z-10 w-8 h-8 md:w-10 md:h-10 bg-white shadow-xl rounded-full flex items-center justify-center text-slate-400 hover:text-brand-gold transition-colors"
               >
-                <X size={20} />
+                <X size={18} />
               </button>
 
-              <div className="w-full md:w-1/2 bg-slate-50 flex items-center justify-center">
+              <div className="w-full md:w-1/2 bg-slate-50 flex items-center justify-center h-32 sm:h-48 md:h-auto">
                 {selectedProduct.image ? (
                     <img src={selectedProduct.image} alt={selectedProduct.name} className="w-full h-full object-cover" />
                 ) : (
-                    <Package size={100} className="text-slate-200" />
+                    <Package size={60} className="text-slate-200" />
                 )}
               </div>
 
-              <div className="w-full md:w-1/2 p-10 flex flex-col overflow-y-auto">
+              <div className="w-full md:w-1/2 p-6 md:p-10 flex flex-col overflow-y-auto">
                 <AnimatePresence mode="wait">
                   {currentStep === 'details' && (
                     <motion.div 
@@ -237,66 +237,66 @@ export default function Merchandise({ products }: MerchandiseProps) {
                       exit={{ opacity: 0, x: -20 }}
                       className="flex flex-col h-full"
                     >
-                        <div className="mb-8">
-                            <div className="flex items-center gap-2 text-brand-gold font-bold uppercase tracking-widest text-[10px] mb-2">
+                        <div className="mb-4 md:mb-8">
+                            <div className="flex items-center gap-2 text-brand-gold font-bold uppercase tracking-widest text-[8px] md:text-[10px] mb-1 md:mb-2">
                                 <Package size={12} /> Form Pemesanan
                             </div>
-                            <h3 className="text-3xl font-serif font-bold text-slate-800 mb-2">{selectedProduct.name}</h3>
-                            <p className="text-2xl font-mono font-bold text-brand-gold">Rp {selectedProduct.price.toLocaleString()}</p>
+                            <h3 className="text-xl md:text-3xl font-serif font-bold text-slate-800 mb-1 md:mb-2 line-clamp-1">{selectedProduct.name}</h3>
+                            <p className="text-lg md:text-2xl font-mono font-bold text-brand-gold">Rp {selectedProduct.price.toLocaleString()}</p>
                         </div>
 
-                        <form onSubmit={handleNextToPayment} className="space-y-4 flex-grow">
+                        <form onSubmit={handleNextToPayment} className="space-y-3 md:space-y-4 flex-grow">
                             <div>
-                                <label className="block text-[10px] uppercase font-bold tracking-widest text-slate-400 mb-2 ml-1">Nama Lengkap</label>
+                                <label className="block text-[8px] md:text-[10px] uppercase font-bold tracking-widest text-slate-400 mb-1 md:mb-2 ml-1">Nama Lengkap</label>
                                 <input 
                                     type="text" 
                                     required
                                     value={orderData.customerName}
                                     onChange={e => setOrderData({ ...orderData, customerName: e.target.value })}
-                                    className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl px-6 py-4 outline-none focus:border-brand-gold transition-all"
+                                    className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl md:rounded-2xl px-4 md:px-6 py-3 md:py-4 outline-none focus:border-brand-gold transition-all text-sm"
                                     placeholder="Nama Anda..."
                                 />
                             </div>
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-2 gap-3 md:gap-4">
                                 <div>
-                                    <label className="block text-[10px] uppercase font-bold tracking-widest text-slate-400 mb-2 ml-1">Kontak WA</label>
+                                    <label className="block text-[8px] md:text-[10px] uppercase font-bold tracking-widest text-slate-400 mb-1 md:mb-2 ml-1">Kontak WA</label>
                                     <input 
                                         type="tel" 
                                         required
                                         value={orderData.customerContact}
                                         onChange={e => setOrderData({ ...orderData, customerContact: e.target.value })}
-                                        className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl px-6 py-4 outline-none focus:border-brand-gold transition-all"
+                                        className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl md:rounded-2xl px-4 md:px-6 py-3 md:py-4 outline-none focus:border-brand-gold transition-all text-sm"
                                         placeholder="0812..."
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-[10px] uppercase font-bold tracking-widest text-slate-400 mb-2 ml-1">Jumlah</label>
+                                    <label className="block text-[8px] md:text-[10px] uppercase font-bold tracking-widest text-slate-400 mb-1 md:mb-2 ml-1">Jumlah</label>
                                     <input 
                                         type="number" 
                                         required
                                         min="1"
                                         value={orderData.quantity}
                                         onChange={e => setOrderData({ ...orderData, quantity: parseInt(e.target.value) || 1 })}
-                                        className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl px-6 py-4 outline-none focus:border-brand-gold transition-all font-mono"
+                                        className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl md:rounded-2xl px-4 md:px-6 py-3 md:py-4 outline-none focus:border-brand-gold transition-all font-mono text-sm"
                                     />
                                 </div>
                             </div>
                             <div>
-                                <label className="block text-[10px] uppercase font-bold tracking-widest text-slate-400 mb-2 ml-1">Alamat Lengkap Pengiriman</label>
+                                <label className="block text-[8px] md:text-[10px] uppercase font-bold tracking-widest text-slate-400 mb-1 md:mb-2 ml-1">Alamat Lengkap Pengiriman</label>
                                 <textarea 
                                     required
                                     value={orderData.address}
                                     onChange={e => setOrderData({ ...orderData, address: e.target.value })}
-                                    className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl px-6 py-4 outline-none focus:border-brand-gold transition-all h-24 text-sm"
+                                    className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl md:rounded-2xl px-4 md:px-6 py-3 md:py-4 outline-none focus:border-brand-gold transition-all h-20 md:h-24 text-sm"
                                     placeholder="Sertakan Kelurahan, Kecamatan, Kab/Kota, Prov..."
                                 />
                             </div>
 
                             <button 
                                 type="submit"
-                                className="w-full bg-brand-dark text-brand-gold py-5 rounded-3xl font-bold uppercase tracking-[0.2em] shadow-xl shadow-brand-dark/20 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-3 mt-4"
+                                className="w-full bg-brand-dark text-brand-gold py-4 md:py-5 rounded-2xl md:rounded-3xl font-bold uppercase tracking-[0.2em] shadow-xl shadow-brand-dark/20 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-3 mt-2 md:mt-4 text-sm"
                             >
-                                Lanjut Pembayaran <ArrowRight size={20} />
+                                Lanjut Pembayaran <ArrowRight size={18} />
                             </button>
                         </form>
                     </motion.div>
@@ -310,34 +310,34 @@ export default function Merchandise({ products }: MerchandiseProps) {
                       exit={{ opacity: 0, x: -20 }}
                       className="flex flex-col h-full text-center py-6"
                     >
-                        <div className="w-16 h-16 bg-brand-gold/10 text-brand-gold rounded-full flex items-center justify-center mb-6 mx-auto">
-                            <CreditCard size={28} />
+                        <div className="w-12 h-12 md:w-16 md:h-16 bg-brand-gold/10 text-brand-gold rounded-full flex items-center justify-center mb-4 md:mb-6 mx-auto">
+                            <CreditCard size={24} className="md:size-[28px]" />
                         </div>
-                        <h3 className="text-2xl font-serif font-bold text-slate-800 mb-2">Instruksi Pembayaran</h3>
-                        <p className="text-slate-500 text-sm mb-8 leading-relaxed">
+                        <h3 className="text-xl md:text-2xl font-serif font-bold text-slate-800 mb-1 md:mb-2">Instruksi Pembayaran</h3>
+                        <p className="text-slate-500 text-[10px] md:text-sm mb-4 md:mb-8 leading-relaxed">
                             Mohon lakukan transfer sesuai total biaya di bawah ini. Harap membayar terlebih dahulu sebelum melanjutkan ke tahap konfirmasi.
                         </p>
 
-                        <div className="bg-slate-50 rounded-3xl p-8 mb-8 border border-slate-100">
-                            <span className="text-[10px] uppercase font-bold tracking-widest text-slate-400 block mb-2">Total Transfer</span>
-                            <div className="text-3xl font-mono font-bold text-brand-dark mb-6">
+                        <div className="bg-slate-50 rounded-2xl md:rounded-3xl p-4 md:p-8 mb-4 md:mb-8 border border-slate-100">
+                            <span className="text-[8px] md:text-[10px] uppercase font-bold tracking-widest text-slate-400 block mb-1 md:mb-2">Total Transfer</span>
+                            <div className="text-2xl md:text-3xl font-mono font-bold text-brand-dark mb-4 md:mb-6">
                                 Rp {(selectedProduct.price * orderData.quantity).toLocaleString()}
                             </div>
                             
                             {!bankConfig ? (
-                                <div className="p-8 text-center text-slate-400 italic text-xs">
+                                <div className="p-4 md:p-8 text-center text-slate-400 italic text-[10px] md:text-xs">
                                     Memuat data rekening...
                                 </div>
                             ) : (
-                                <div className="space-y-4 text-left font-sans">
-                                    <div className="p-4 bg-white rounded-2xl border border-brand-gold/20 flex items-center justify-between">
+                                <div className="space-y-3 md:space-y-4 text-left font-sans">
+                                    <div className="p-3 md:p-4 bg-white rounded-xl md:rounded-2xl border border-brand-gold/20 flex items-center justify-between">
                                         <div className="flex-grow">
-                                            <span className="text-[8px] uppercase font-bold text-slate-400 block mb-1">Nama Bank</span>
-                                            <span className="font-bold text-sm text-brand-dark">{bankConfig.bankName}</span>
+                                            <span className="text-[7px] md:text-[8px] uppercase font-bold text-slate-400 block mb-0.5 md:mb-1">Nama Bank</span>
+                                            <span className="font-bold text-xs md:text-sm text-brand-dark">{bankConfig.bankName}</span>
                                         </div>
                                         <div className="text-right">
-                                            <span className="text-[8px] uppercase font-bold text-slate-400 block mb-1">Atas Nama</span>
-                                            <span className="font-bold text-[10px] text-brand-dark uppercase">{bankConfig.accountName}</span>
+                                            <span className="text-[7px] md:text-[8px] uppercase font-bold text-slate-400 block mb-0.5 md:mb-1">Atas Nama</span>
+                                            <span className="font-bold text-[9px] md:text-[10px] text-brand-dark uppercase">{bankConfig.accountName}</span>
                                         </div>
                                     </div>
                                     <button 
@@ -347,13 +347,13 @@ export default function Merchandise({ products }: MerchandiseProps) {
                                                 alert('Nomor rekening disalin!');
                                             }
                                         }}
-                                        className="w-full flex items-center justify-between p-4 bg-brand-dark text-white rounded-2xl group hover:bg-brand-gold hover:text-brand-dark transition-all"
+                                        className="w-full flex items-center justify-between p-3 md:p-4 bg-brand-dark text-white rounded-xl md:rounded-2xl group hover:bg-brand-gold hover:text-brand-dark transition-all"
                                     >
                                         <div className="text-left">
-                                            <span className="text-[8px] uppercase font-bold text-white/50 group-hover:text-brand-dark/50 block mb-1">Nomor Rekening (Klik Salin)</span>
-                                            <span className="font-mono font-bold text-xl">{bankConfig.accountNumber}</span>
+                                            <span className="text-[7px] md:text-[8px] uppercase font-bold text-white/50 group-hover:text-brand-dark/50 block mb-0.5 md:mb-1">Nomor Rekening (Klik Salin)</span>
+                                            <span className="font-mono font-bold text-lg md:text-xl">{bankConfig.accountNumber}</span>
                                         </div>
-                                        <Copy size={20} className="opacity-50 group-hover:opacity-100" />
+                                        <Copy size={16} className="opacity-50 group-hover:opacity-100" />
                                     </button>
                                 </div>
                             )}
@@ -367,13 +367,13 @@ export default function Merchandise({ products }: MerchandiseProps) {
                                 }
                                 setCurrentStep('payment-proof');
                             }}
-                            className="w-full bg-brand-gold text-brand-dark py-5 rounded-3xl font-bold uppercase tracking-[0.2em] shadow-xl shadow-brand-gold/20 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-3"
+                            className="w-full bg-brand-gold text-brand-dark py-4 md:py-5 rounded-2xl md:rounded-3xl font-bold uppercase tracking-[0.2em] shadow-xl shadow-brand-gold/20 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-3 text-sm"
                         >
-                            Saya Sudah Bayar <ChevronRight size={20} />
+                            Saya Sudah Bayar <ChevronRight size={18} />
                         </button>
                         <button 
                             onClick={() => setCurrentStep('details')}
-                            className="text-slate-400 text-xs font-bold uppercase tracking-widest mt-6 hover:text-brand-dark transition-colors"
+                            className="text-slate-400 text-[10px] md:text-xs font-bold uppercase tracking-widest mt-4 md:mt-6 hover:text-brand-dark transition-colors"
                         >
                             Kembali Edit Pesanan
                         </button>
@@ -388,15 +388,15 @@ export default function Merchandise({ products }: MerchandiseProps) {
                       exit={{ opacity: 0, x: -20 }}
                       className="flex flex-col h-full"
                     >
-                        <div className="mb-8">
-                            <div className="flex items-center gap-2 text-brand-gold font-bold uppercase tracking-widest text-[10px] mb-2">
+                        <div className="mb-4 md:mb-8">
+                            <div className="flex items-center gap-2 text-brand-gold font-bold uppercase tracking-widest text-[8px] md:text-[10px] mb-1 md:mb-2">
                                 <Camera size={12} /> Konfirmasi Pembayaran
                             </div>
-                            <h3 className="text-2xl font-serif font-bold text-slate-800">Lampirkan Bukti Transfer</h3>
+                            <h3 className="text-xl md:text-2xl font-serif font-bold text-slate-800">Lampirkan Bukti Transfer</h3>
                         </div>
 
-                        <div className="space-y-6 flex-grow">
-                            <p className="text-slate-500 text-sm leading-relaxed bg-brand-gold/5 p-4 rounded-2xl border border-brand-gold/10">
+                        <div className="space-y-4 md:space-y-6 flex-grow">
+                            <p className="text-slate-500 text-[10px] md:text-sm leading-relaxed bg-brand-gold/5 p-3 md:p-4 rounded-xl md:rounded-2xl border border-brand-gold/10">
                                 Harap pastikan foto bukti transfer terlihat jelas mencantumkan 
                                 <span className="font-bold text-brand-dark"> nominal</span>, 
                                 <span className="font-bold text-brand-dark"> tanggal</span>, dan 
@@ -404,15 +404,14 @@ export default function Merchandise({ products }: MerchandiseProps) {
                             </p>
 
                             <div className="relative">
-                                <label className="block text-[10px] uppercase font-bold tracking-widest text-slate-400 mb-2 ml-1">Unggah Bukti Pembayaran</label>
-                                <label className="flex flex-col items-center justify-center w-full h-48 bg-slate-50 border-2 border-dashed border-slate-200 rounded-3xl cursor-pointer hover:bg-slate-100 hover:border-brand-gold transition-all overflow-hidden group">
+                                <label className="block text-[8px] md:text-[10px] uppercase font-bold tracking-widest text-slate-400 mb-1 md:mb-2 ml-1">Unggah Bukti Pembayaran</label>
+                                <label className="flex flex-col items-center justify-center w-full h-32 md:h-48 bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl md:rounded-3xl cursor-pointer hover:bg-slate-100 hover:border-brand-gold transition-all overflow-hidden group">
                                     {orderData.paymentProof ? (
                                         <img src={orderData.paymentProof} alt="Bukti" className="w-full h-full object-contain" />
                                     ) : (
-                                        <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                            <Camera className="w-10 h-10 text-slate-300 group-hover:text-brand-gold mb-3 transition-colors" />
-                                            <p className="text-xs text-slate-400 font-medium">Klik untuk pilih foto bukti</p>
-                                            <p className="text-[10px] text-slate-300 mt-1 italic">Gambar akan dikompresi otomatis</p>
+                                        <div className="flex flex-col items-center justify-center py-4">
+                                            <Camera className="w-8 h-8 md:w-10 md:h-10 text-slate-300 group-hover:text-brand-gold mb-2 transition-colors" />
+                                            <p className="text-[10px] md:text-xs text-slate-400 font-medium">Klik untuk pilih foto bukti</p>
                                         </div>
                                     )}
                                     <input 
@@ -426,17 +425,17 @@ export default function Merchandise({ products }: MerchandiseProps) {
                             </div>
                         </div>
 
-                        <div className="space-y-4 mt-8">
+                        <div className="space-y-3 md:space-y-4 mt-6 md:mt-8">
                             <button 
                                 onClick={handleSubmit}
                                 disabled={!orderData.paymentProof || status === 'loading'}
-                                className="w-full bg-brand-dark text-brand-gold py-5 rounded-3xl font-bold uppercase tracking-[0.2em] shadow-xl shadow-brand-dark/20 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:scale-100"
+                                className="w-full bg-brand-dark text-brand-gold py-4 md:py-5 rounded-2xl md:rounded-3xl font-bold uppercase tracking-[0.2em] shadow-xl shadow-brand-dark/20 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:scale-100 text-sm"
                             >
-                                {status === 'loading' ? 'Menyimpan...' : <>Selesaikan Pesanan <Package size={20} /></>}
+                                {status === 'loading' ? 'Menyimpan...' : <>Selesaikan Pesanan <Package size={18} /></>}
                             </button>
                             <button 
                                 onClick={() => setCurrentStep('payment-instruction')}
-                                className="w-full py-4 text-slate-400 text-xs font-bold uppercase tracking-widest hover:text-brand-dark"
+                                className="w-full py-2 text-slate-400 text-[10px] md:text-xs font-bold uppercase tracking-widest hover:text-brand-dark"
                             >
                                 Lihat Ulang Instruksi Bayar
                             </button>

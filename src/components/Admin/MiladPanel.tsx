@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { doc, setDoc, addDoc, collection, deleteDoc } from 'firebase/firestore';
+import { doc, setDoc, addDoc, collection, deleteDoc, updateDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import imageCompression from 'browser-image-compression';
 import { db, storage } from '../../lib/firebase';
@@ -16,6 +16,7 @@ interface MiladPanelProps {
 
 export default function MiladPanel({ settings, news, faqs }: MiladPanelProps) {
   const [deleteNewsId, setDeleteNewsId] = useState<string | null>(null);
+  const [editingNewsId, setEditingNewsId] = useState<string | null>(null);
 
   const [localSettings, setLocalSettings] = useState<Setting>(settings || {
     heroTitle: '',
@@ -34,8 +35,39 @@ export default function MiladPanel({ settings, news, faqs }: MiladPanelProps) {
 
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
+  const [existingImages, setExistingImages] = useState<string[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleEditNews = (item: News) => {
+    setEditingNewsId(item.id);
+    setNewsForm({
+      title: item.title,
+      content: item.content,
+      date: item.date.split('T')[0],
+      imageUrl: item.imageUrl || ''
+    });
+    setExistingImages(item.images || []);
+    setPreviews([]);
+    setSelectedFiles([]);
+    
+    // Scroll to form
+    window.scrollTo({ top: 300, behavior: 'smooth' });
+  };
+
+  const cancelEdit = () => {
+    setEditingNewsId(null);
+    setNewsForm({ title: '', content: '', date: new Date().toISOString().split('T')[0], imageUrl: '' });
+    setExistingImages([]);
+    setPreviews([]);
+    setSelectedFiles([]);
+  };
+
+  const removeExistingImage = (index: number) => {
+    const newImages = [...existingImages];
+    newImages.splice(index, 1);
+    setExistingImages(newImages);
+  };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []) as File[];
@@ -79,7 +111,7 @@ export default function MiladPanel({ settings, news, faqs }: MiladPanelProps) {
     setIsUploading(true);
     
     try {
-      const imageUrls: string[] = [];
+      const imageUrls: string[] = [...existingImages];
       
       // Process files sequentially to avoid overwhelming the connection and hitting retry limits
       for (const file of selectedFiles) {
@@ -98,25 +130,32 @@ export default function MiladPanel({ settings, news, faqs }: MiladPanelProps) {
         imageUrls.push(downloadUrl);
       }
 
-      await addDoc(collection(db, 'news'), {
+      const newsData = {
         ...newsForm,
         date: new Date(newsForm.date).toISOString(),
         images: imageUrls,
-        imageUrl: imageUrls[0] || newsForm.imageUrl // Set primary image
-      });
-      
-      setNewsForm({ title: '', content: '', date: new Date().toISOString().split('T')[0], imageUrl: '' });
-      setSelectedFiles([]);
-      setPreviews([]);
-      alert("Berita berhasil ditambahkan!");
-    } catch (err: any) {
-      console.error("Error adding news:", err);
-      if (err.code === 'storage/retry-limit-exceeded') {
-        alert("Gagal mengunggah foto: Waktu tunggu habis. Pastikan Firebase Storage sudah diaktifkan di Console dan koneksi internet stabil.");
-      } else if (err.code === 'storage/unauthorized') {
-        alert("Gagal mengunggah foto: Tidak ada izin. Pastikan Security Rules Storage sudah dikonfigurasi.");
+        imageUrl: imageUrls[0] || newsForm.imageUrl
+      };
+
+      if (editingNewsId) {
+        await updateDoc(doc(db, 'news', editingNewsId), newsData);
+        alert("Berita berhasil diperbarui!");
       } else {
-        alert("Gagal menambahkan berita: " + (err.message || "Terjadi kesalahan internal"));
+        await addDoc(collection(db, 'news'), {
+          ...newsData,
+          views: 0
+        });
+        alert("Berita berhasil ditambahkan!");
+      }
+      
+      cancelEdit();
+    } catch (err: any) {
+      console.error("Error saving news:", err);
+      const action = editingNewsId ? "memperbarui" : "menambahkan";
+      if (err.code === 'storage/retry-limit-exceeded') {
+        alert(`Gagal mengunggah foto: Waktu tunggu habis. Pastikan Firebase Storage sudah diaktifkan di Console.`);
+      } else {
+        alert(`Gagal ${action} berita: ` + (err.message || "Terjadi kesalahan internal"));
       }
     } finally {
       setIsUploading(false);
@@ -190,51 +229,88 @@ export default function MiladPanel({ settings, news, faqs }: MiladPanelProps) {
 
       <div className="space-y-8">
         <div className="bg-white p-8 rounded-3xl shadow-sm border border-slate-100">
-          <h3 className="text-2xl font-serif font-bold text-brand-dark mb-8 border-b pb-4">Tambah Berita</h3>
+          <div className="flex justify-between items-center mb-8 border-b pb-4">
+            <h3 className="text-2xl font-serif font-bold text-brand-dark">
+              {editingNewsId ? 'Edit Berita' : 'Tambah Berita'}
+            </h3>
+            {editingNewsId && (
+              <button 
+                onClick={cancelEdit}
+                className="text-xs font-bold text-red-500 uppercase tracking-widest hover:bg-red-50 px-3 py-1 rounded-full transition-colors"
+              >
+                Batal Edit
+              </button>
+            )}
+          </div>
           <div className="space-y-4">
             <input 
               type="text" 
               placeholder="Judul Berita" 
               value={newsForm.title}
               onChange={e => setNewsForm({...newsForm, title: e.target.value})}
-              className="w-full border-2 border-slate-100 rounded-xl p-3 outline-none"
+              className="w-full border-2 border-slate-100 rounded-xl p-3 outline-none focus:border-brand-gold"
             />
             <textarea 
               placeholder="Isi Berita" 
               value={newsForm.content}
               onChange={e => setNewsForm({...newsForm, content: e.target.value})}
-              className="w-full border-2 border-slate-100 rounded-xl p-3 outline-none h-32"
+              className="w-full border-2 border-slate-100 rounded-xl p-3 outline-none h-32 focus:border-brand-gold"
             />
             <input 
               type="date" 
               value={newsForm.date}
               onChange={e => setNewsForm({...newsForm, date: e.target.value})}
-              className="w-full border-2 border-slate-100 rounded-xl p-3 outline-none"
+              className="w-full border-2 border-slate-100 rounded-xl p-3 outline-none focus:border-brand-gold"
             />
-            <div className="space-y-4">
-              <label className="text-[10px] uppercase tracking-widest text-slate-400 font-bold mb-2 block">Upload Foto (Maks 3)</label>
-              <div className="grid grid-cols-3 gap-4">
-                {previews.map((preview, index) => (
-                  <div key={index} className="relative aspect-square rounded-xl overflow-hidden border-2 border-slate-100 group">
-                    <img src={preview} alt="Preview" className="w-full h-full object-cover" />
-                    <button 
-                      onClick={() => removeFile(index)}
-                      className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                    >
-                      <CloseIcon size={12} />
-                    </button>
-                  </div>
-                ))}
-                {previews.length < 3 && (
-                  <button 
-                    onClick={() => fileInputRef.current?.click()}
-                    className="aspect-square rounded-xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center text-slate-400 hover:border-brand-gold hover:text-brand-gold transition-all"
-                  >
-                    <Plus size={24} />
-                    <span className="text-[10px] uppercase font-bold mt-2">Tambah</span>
-                  </button>
-                )}
+            
+            {(existingImages.length > 0 || previews.length > 0) && (
+              <div className="space-y-4">
+                <label className="text-[10px] uppercase tracking-widest text-slate-400 font-bold block">Foto Saat Ini & Baru</label>
+                <div className="grid grid-cols-3 gap-4">
+                  {/* Existing Images */}
+                  {existingImages.map((url, index) => (
+                    <div key={`existing-${index}`} className="relative aspect-square rounded-xl overflow-hidden border-2 border-brand-gold/20 group">
+                      <img src={url} alt="Existing" className="w-full h-full object-cover" />
+                      <button 
+                        onClick={() => removeExistingImage(index)}
+                        className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <CloseIcon size={12} />
+                      </button>
+                      <div className="absolute bottom-0 left-0 right-0 bg-brand-gold/80 text-[8px] text-center font-bold text-brand-dark uppercase py-0.5">Lama</div>
+                    </div>
+                  ))}
+                  
+                  {/* New Previews */}
+                  {previews.map((preview, index) => (
+                    <div key={`new-${index}`} className="relative aspect-square rounded-xl overflow-hidden border-2 border-slate-100 group">
+                      <img src={preview} alt="Preview" className="w-full h-full object-cover" />
+                      <button 
+                        onClick={() => removeFile(index)}
+                        className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <CloseIcon size={12} />
+                      </button>
+                      <div className="absolute bottom-0 left-0 right-0 bg-green-500/80 text-[8px] text-center font-bold text-white uppercase py-0.5">Baru</div>
+                    </div>
+                  ))}
+                </div>
               </div>
+            )}
+
+            <div className="space-y-4">
+              <label className="text-[10px] uppercase tracking-widest text-slate-400 font-bold mb-2 block">
+                Tambah Foto {editingNewsId ? `(Sisa Kuota: ${3 - (existingImages.length + selectedFiles.length)})` : '(Maks 3)'}
+              </label>
+              {(existingImages.length + selectedFiles.length) < 3 && (
+                <button 
+                  onClick={() => fileInputRef.current?.click()}
+                  className="w-full py-4 rounded-xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center text-slate-400 hover:border-brand-gold hover:text-brand-gold transition-all"
+                >
+                  <Plus size={24} />
+                  <span className="text-[10px] uppercase font-bold mt-2 font-sans">Pilih Foto</span>
+                </button>
+              )}
               <input 
                 type="file" 
                 ref={fileInputRef}
@@ -255,15 +331,15 @@ export default function MiladPanel({ settings, news, faqs }: MiladPanelProps) {
             <button 
               onClick={addNews}
               disabled={isUploading}
-              className="w-full bg-brand-gold text-brand-dark py-4 rounded-xl font-bold uppercase tracking-widest flex items-center justify-center gap-2 disabled:opacity-50"
+              className={`w-full py-4 rounded-xl font-bold uppercase tracking-widest flex items-center justify-center gap-2 transition-all shadow-lg ${editingNewsId ? 'bg-brand-dark text-brand-gold' : 'bg-brand-gold text-brand-dark'} disabled:opacity-50`}
             >
               {isUploading ? (
                 <>
                   <Loader2 size={18} className="animate-spin" />
-                  Mengunggah...
+                  {editingNewsId ? 'Memperbarui...' : 'Mengunggah...'}
                 </>
               ) : (
-                'Publikasikan Berita'
+                editingNewsId ? 'Simpan Perubahan Berita' : 'Publikasikan Berita'
               )}
             </button>
           </div>
@@ -284,12 +360,21 @@ export default function MiladPanel({ settings, news, faqs }: MiladPanelProps) {
                     </div>
                   </div>
                 </div>
-                <button 
-                  onClick={() => setDeleteNewsId(item.id)}
-                  className="p-2 text-red-500 hover:bg-red-50 rounded-lg"
-                >
-                  <Trash2 size={18} />
-                </button>
+                <div className="flex items-center gap-2">
+                  <button 
+                    onClick={() => handleEditNews(item)}
+                    className="p-2 text-brand-dark/40 hover:text-brand-gold hover:bg-brand-gold/10 rounded-lg transition-colors"
+                    title="Edit Berita"
+                  >
+                    <Edit2 size={18} />
+                  </button>
+                  <button 
+                    onClick={() => setDeleteNewsId(item.id)}
+                    className="p-2 text-red-500/40 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                  >
+                    <Trash2 size={18} />
+                  </button>
+                </div>
               </div>
             ))}
           </div>
