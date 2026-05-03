@@ -41,11 +41,11 @@ export default function About({ settings }: AboutProps) {
         transition={{ duration: 1 }}
         className="relative"
       >
-        <div className="aspect-[4/5] bg-brand-dark rounded-[40px] overflow-hidden shadow-2xl relative z-10 border-8 border-white">
+        <div className="aspect-[2/3] bg-brand-dark rounded-[40px] overflow-hidden shadow-2xl relative z-10 border-8 border-white">
           <img 
             src="https://lh3.googleusercontent.com/d/1MmKPl5WVlkLhO_W4HORKVyaSAeQKqM3c" 
             alt="Pesantren Sukahideng" 
-            className="w-full h-full object-cover hover:scale-110 transition-all duration-700"
+            className="w-full h-full object-cover object-center hover:scale-110 transition-all duration-700"
           />
         </div>
         
