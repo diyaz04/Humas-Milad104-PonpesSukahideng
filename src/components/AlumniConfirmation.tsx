@@ -62,7 +62,7 @@ export default function AlumniConfirmation() {
 
   const fetchProvinces = async () => {
     try {
-      const res = await fetch('/api/proxy/wilayah/provinces.json');
+      const res = await fetch('https://cdn.statically.io/gh/emsifa/api-wilayah-indonesia/master/api/provinces.json');
       if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
       const data = await res.json();
       setProvinces(data || []);
@@ -73,7 +73,7 @@ export default function AlumniConfirmation() {
 
   const fetchRegencies = async (provinceId: string) => {
     try {
-      const res = await fetch(`/api/proxy/wilayah/regencies/${provinceId}.json`);
+      const res = await fetch(`https://cdn.statically.io/gh/emsifa/api-wilayah-indonesia/master/api/regencies/${provinceId}.json`);
       if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
       const data = await res.json();
       setRegencies(data || []);
@@ -84,7 +84,7 @@ export default function AlumniConfirmation() {
 
   const fetchDistricts = async (regencyId: string) => {
     try {
-      const res = await fetch(`/api/proxy/wilayah/districts/${regencyId}.json`);
+      const res = await fetch(`https://cdn.statically.io/gh/emsifa/api-wilayah-indonesia/master/api/districts/${regencyId}.json`);
       if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
       const data = await res.json();
       setDistricts(data || []);
@@ -95,7 +95,7 @@ export default function AlumniConfirmation() {
 
   const fetchVillages = async (districtId: string) => {
     try {
-      const res = await fetch(`/api/proxy/wilayah/villages/${districtId}.json`);
+      const res = await fetch(`https://cdn.statically.io/gh/emsifa/api-wilayah-indonesia/master/api/villages/${districtId}.json`);
       if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
       const data = await res.json();
       setVillages(data || []);
