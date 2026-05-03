@@ -201,7 +201,7 @@ export default function App() {
               <a href="#porsas" className="hover:text-brand-gold transition-colors" onClick={() => setIsMenuOpen(false)}>PORSAS</a>
               <button 
                 onClick={() => { setShowAlumni(true); setIsMenuOpen(false); }}
-                className="text-brand-cream hover:text-brand-gold transition-colors text-left"
+                className="text-brand-cream hover:text-brand-gold transition-colors"
               >
                 Konfirmasi Alumni
               </button>
