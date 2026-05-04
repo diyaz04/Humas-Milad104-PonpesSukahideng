@@ -204,11 +204,25 @@ export default function App() {
               <X size={32} />
             </button>
             <nav className="flex flex-col gap-8 mt-12 text-2xl font-serif text-brand-cream text-center">
-              <a href="#video-content" className="hover:text-brand-gold transition-colors" onClick={() => setIsMenuOpen(false)}>Multimedia</a>
-              <a href="#agenda" className="hover:text-brand-gold transition-colors" onClick={() => setIsMenuOpen(false)}>Agenda</a>
-              <a href="#merchandise" className="hover:text-brand-gold transition-colors" onClick={() => setIsMenuOpen(false)}>Merchandise</a>
-              <a href="#porsas" className="hover:text-brand-gold transition-colors" onClick={() => setIsMenuOpen(false)}>PORSAS</a>
-              <a href="#pusat-informasi" className="hover:text-brand-gold transition-colors" onClick={() => setIsMenuOpen(false)}>Dokumen</a>
+              {[
+                { name: 'Beranda', href: '#hero' },
+                { name: 'Tentang', href: '#about' },
+                { name: 'Multimedia', href: '#video-content' },
+                { name: 'Agenda', href: '#agenda' },
+                { name: 'Merchandise', href: '#merchandise' },
+                { name: 'PORSAS', href: '#porsas' },
+                { name: 'Dokumen', href: '#pusat-informasi' },
+                { name: 'Berita', href: '#berita' }
+              ].map((item) => (
+                <a 
+                  key={item.name}
+                  href={item.href} 
+                  className="hover:text-brand-gold transition-colors" 
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  {item.name}
+                </a>
+              ))}
               <button 
                 onClick={() => { setShowAlumni(true); setIsMenuOpen(false); }}
                 className="text-brand-cream hover:text-brand-gold transition-colors"
@@ -217,11 +231,10 @@ export default function App() {
               </button>
               <button 
                 onClick={() => { setShowDonation(true); setIsMenuOpen(false); }}
-                className="text-brand-gold font-bold hover:text-white transition-colors"
+                className="text-brand-gold font-bold hover:text-white transition-all"
               >
                 Infaq & Donasi
               </button>
-              <a href="#berita" className="hover:text-brand-gold transition-colors" onClick={() => setIsMenuOpen(false)}>Berita</a>
             </nav>
           </motion.div>
         )}
