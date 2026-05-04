@@ -208,6 +208,7 @@ export default function App() {
               <a href="#agenda" className="hover:text-brand-gold transition-colors" onClick={() => setIsMenuOpen(false)}>Agenda</a>
               <a href="#merchandise" className="hover:text-brand-gold transition-colors" onClick={() => setIsMenuOpen(false)}>Merchandise</a>
               <a href="#porsas" className="hover:text-brand-gold transition-colors" onClick={() => setIsMenuOpen(false)}>PORSAS</a>
+              <a href="#pusat-informasi" className="hover:text-brand-gold transition-colors" onClick={() => setIsMenuOpen(false)}>Dokumen</a>
               <button 
                 onClick={() => { setShowAlumni(true); setIsMenuOpen(false); }}
                 className="text-brand-cream hover:text-brand-gold transition-colors"

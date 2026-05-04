@@ -8,8 +8,6 @@ interface InfoCenterProps {
 }
 
 export default function InfoCenter({ documents }: InfoCenterProps) {
-  if (documents.length === 0) return null;
-
   return (
     <div id="pusat-informasi" className="py-24 relative overflow-hidden bg-slate-50/50">
       {/* Decorative background */}
@@ -29,43 +27,52 @@ export default function InfoCenter({ documents }: InfoCenterProps) {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {documents.map((doc, index) => (
-            <motion.div
-              key={doc.id}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: index * 0.1 }}
-              className="group bg-white p-8 rounded-[40px] border border-slate-100 shadow-xl shadow-slate-200/40 hover:shadow-2xl hover:shadow-brand-gold/20 hover:-translate-y-2 transition-all duration-500 flex flex-col h-full"
-            >
-              <div className="flex items-start justify-between mb-8">
-                <div className="w-16 h-16 bg-brand-gold/10 text-brand-gold rounded-2xl flex items-center justify-center group-hover:bg-brand-gold group-hover:text-brand-dark transition-colors duration-500">
-                  <FileText size={32} />
+        {documents.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-20 px-8 bg-white rounded-[40px] border border-dashed border-slate-200 shadow-sm transition-all">
+            <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-300 mb-4">
+              <FileText size={32} />
+            </div>
+            <p className="text-slate-400 font-medium font-serif italic text-lg text-center">Data belum tersedia. Silakan cek kembali beberapa saat lagi atau hubungi panitia.</p>
+          </div>
+        ) : (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {documents.map((doc, index) => (
+              <motion.div
+                key={doc.id}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.1 }}
+                className="group bg-white p-8 rounded-[40px] border border-slate-100 shadow-xl shadow-slate-200/40 hover:shadow-2xl hover:shadow-brand-gold/20 hover:-translate-y-2 transition-all duration-500 flex flex-col h-full"
+              >
+                <div className="flex items-start justify-between mb-8">
+                  <div className="w-16 h-16 bg-brand-gold/10 text-brand-gold rounded-2xl flex items-center justify-center group-hover:bg-brand-gold group-hover:text-brand-dark transition-colors duration-500">
+                    <FileText size={32} />
+                  </div>
+                  <span className="px-4 py-1.5 bg-slate-50 text-[10px] font-bold text-slate-400 uppercase tracking-widest rounded-full border border-slate-100 shadow-sm">
+                    {doc.category || 'Dokumen'}
+                  </span>
                 </div>
-                <span className="px-4 py-1.5 bg-slate-50 text-[10px] font-bold text-slate-400 uppercase tracking-widest rounded-full border border-slate-100 shadow-sm">
-                  {doc.category || 'Dokumen'}
-                </span>
-              </div>
 
-              <h3 className="text-2xl font-serif font-bold text-brand-dark mb-8 group-hover:text-brand-gold transition-colors leading-tight">
-                {doc.title}
-              </h3>
-              
-              <div className="mt-auto">
-                <a 
-                  href={doc.url} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="w-full inline-flex items-center justify-center gap-3 px-8 py-4 bg-brand-dark text-brand-gold rounded-2xl font-bold text-[11px] uppercase tracking-[0.2em] hover:bg-brand-gold hover:text-brand-dark transition-all shadow-lg shadow-brand-dark/10 group/btn"
-                >
-                  <Download size={18} className="group-hover/btn:translate-y-0.5 transition-transform" /> 
-                  Unduh Dokumen
-                </a>
-              </div>
-            </motion.div>
-          ))}
-        </div>
+                <h3 className="text-2xl font-serif font-bold text-brand-dark mb-8 group-hover:text-brand-gold transition-colors leading-tight">
+                  {doc.title}
+                </h3>
+                
+                <div className="mt-auto">
+                  <a 
+                    href={doc.url} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="w-full inline-flex items-center justify-center gap-3 px-8 py-4 bg-brand-dark text-brand-gold rounded-2xl font-bold text-[11px] uppercase tracking-[0.2em] hover:bg-brand-gold hover:text-brand-dark transition-all shadow-lg shadow-brand-dark/10 group/btn"
+                  >
+                    <Download size={18} className="group-hover/btn:translate-y-0.5 transition-transform" /> 
+                    Unduh Dokumen
+                  </a>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

@@ -41,10 +41,10 @@ export default function Navbar({ onMenuOpen, onOpenDonation, onOpenAlumni }: Nav
         </div>
 
         <div className="hidden md:flex gap-10 items-center">
-          {['Multimedia', 'Agenda', 'Merchandise', 'Porsas', 'Berita'].map((item) => (
+          {['Multimedia', 'Agenda', 'Merchandise', 'Porsas', 'Dokumen', 'Berita'].map((item) => (
             <a 
               key={item} 
-              href={item === 'Multimedia' ? '#video-content' : `#${item.toLowerCase()}`}
+              href={item === 'Multimedia' ? '#video-content' : item === 'Dokumen' ? '#pusat-informasi' : `#${item.toLowerCase()}`}
               className="text-sm font-medium text-brand-cream/80 hover:text-brand-gold tracking-widest transition-colors uppercase"
             >
               {item}
