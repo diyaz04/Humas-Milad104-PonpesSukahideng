@@ -115,7 +115,7 @@ export default function PorsasPanel({ koorwils, sports, registrations, matches }
         .map(r => r.sportName)
     )).filter(Boolean).sort().map(name => ({ id: name, name })),
     // Add "Penampilan Seni" only for koorwil arts
-    ...(registrations.some(r => r.category === 'seni' && r.type === 'koorwil') ? [{ id: 'seni-koorwil', name: 'Penampilan Seni (Koorwil)' }] : [])
+    ...(registrations.some(r => r.category === 'seni' && r.type === 'koorwil') ? [{ id: 'seni-koorwil', name: 'Penampilan Seni (Korwil)' }] : [])
   ];
 
   const handleExportExcel = () => {
@@ -131,7 +131,7 @@ export default function PorsasPanel({ koorwils, sports, registrations, matches }
     const worksheet = XLSX.utils.json_to_sheet(dataToExport.map(r => ({
       'Peserta / Tim': r.name,
       'Status': r.participantType || '-',
-      'Koorwil': r.koorwil || '-',
+      'Korwil': r.koorwil || '-',
       'Cabang / Penampilan': r.sportName,
       'Kategori': r.category === 'seni' && r.type === 'koorwil' ? 'Penampilan Seni' : r.sportName,
       'Gender': r.gender,
@@ -140,7 +140,7 @@ export default function PorsasPanel({ koorwils, sports, registrations, matches }
     })));
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Registrasi");
-    const fileName = exportFilter === 'all' ? 'Semua_Pendaftar' : (exportFilter === 'seni-koorwil' ? 'Penampilan_Seni_Koorwil' : exportFilter.replace(/\s+/g, '_'));
+    const fileName = exportFilter === 'all' ? 'Semua_Pendaftar' : (exportFilter === 'seni-koorwil' ? 'Penampilan_Seni_Korwil' : exportFilter.replace(/\s+/g, '_'));
     XLSX.writeFile(workbook, `PORSAS_Registrasi_${fileName}.xlsx`);
   };
 
@@ -178,7 +178,7 @@ export default function PorsasPanel({ koorwils, sports, registrations, matches }
     // Subtitle / Category
     doc.setTextColor(255, 255, 255);
     doc.setFontSize(14);
-    const categoryTitle = exportFilter === 'all' ? 'SEMUA CABANG PERLOMBAAN' : (exportFilter === 'seni-koorwil' ? 'PENAMPILAN SENI (KOORWIL)' : exportFilter.toUpperCase());
+    const categoryTitle = exportFilter === 'all' ? 'SEMUA CABANG PERLOMBAAN' : (exportFilter === 'seni-koorwil' ? 'PENAMPILAN SENI (KORWIL)' : exportFilter.toUpperCase());
     doc.text(`DATA PENDAFTARAN: ${categoryTitle}`, 105, 34, { align: 'center' });
     
     // Summary Info Box
@@ -232,7 +232,7 @@ export default function PorsasPanel({ koorwils, sports, registrations, matches }
       }
     });
 
-    const fileName = exportFilter === 'all' ? 'Semua_Pendaftar' : (exportFilter === 'seni-koorwil' ? 'Penampilan_Seni_Koorwil' : exportFilter.replace(/\s+/g, '_'));
+    const fileName = exportFilter === 'all' ? 'Semua_Pendaftar' : (exportFilter === 'seni-koorwil' ? 'Penampilan_Seni_Korwil' : exportFilter.replace(/\s+/g, '_'));
     doc.save(`PORSAS_Registrasi_${fileName}.pdf`);
   };
 
@@ -284,7 +284,7 @@ export default function PorsasPanel({ koorwils, sports, registrations, matches }
                 onClick={() => setRegFilter('koorwil')}
                 className={`px-4 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all ${regFilter === 'koorwil' ? 'bg-white shadow-sm text-brand-dark' : 'text-slate-400'}`}
               >
-                Koorwil
+                Korwil
               </button>
               <button 
                 onClick={() => setRegFilter('individual')}
@@ -317,7 +317,7 @@ export default function PorsasPanel({ koorwils, sports, registrations, matches }
                             <Layout size={24} />
                         </div>
                         <div>
-                            <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold">Via Koorwil</p>
+                            <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold">Via Korwil</p>
                             <h4 className="text-2xl font-bold text-brand-dark">{stats.koorwilCount}</h4>
                         </div>
                     </div>
@@ -423,11 +423,11 @@ export default function PorsasPanel({ koorwils, sports, registrations, matches }
       {activeTab === 'master' && (
         <div className="grid md:grid-cols-2 gap-8">
           <div className="bg-white p-8 rounded-3xl shadow-sm border border-slate-100">
-            <h3 className="font-serif font-bold text-xl mb-6">Daftar Koorwil</h3>
+            <h3 className="font-serif font-bold text-xl mb-6">Daftar Korwil</h3>
             <div className="flex gap-2 mb-6">
               <input 
                 type="text" 
-                placeholder="Tambah Koorwil..."
+                placeholder="Tambah Korwil..."
                 value={newKoorwil}
                 onChange={e => setNewKoorwil(e.target.value)}
                 className="flex-grow border-2 border-slate-100 rounded-xl p-3 outline-none"
@@ -439,9 +439,9 @@ export default function PorsasPanel({ koorwils, sports, registrations, matches }
                 <div key={k.id} className="flex justify-between items-center p-3 bg-slate-50 rounded-xl">
                   <span className="font-medium text-slate-700">{k.name}</span>
                   <button 
-                    onClick={() => setDeleteConfirm({ id: k.id, coll: 'koorwils', name: k.name, type: 'Koorwil' })} 
+                    onClick={() => setDeleteConfirm({ id: k.id, coll: 'koorwils', name: k.name, type: 'Korwil' })} 
                     className="text-red-400 hover:text-red-600 hover:bg-red-50 p-2 rounded-lg transition-all"
-                    title="Hapus Koorwil"
+                    title="Hapus Korwil"
                   >
                     <Trash2 size={16} />
                   </button>
@@ -566,7 +566,7 @@ export default function PorsasPanel({ koorwils, sports, registrations, matches }
               <thead className="bg-slate-50 text-[10px] uppercase tracking-widest text-slate-400 font-bold">
                 <tr>
                   <th className="px-8 py-4">Peserta / Tim</th>
-                  <th className="px-8 py-4">Koorwil</th>
+                  <th className="px-8 py-4">Korwil</th>
                   <th className="px-8 py-4">Cabang / Penampilan</th>
                   <th className="px-8 py-4">PIC / Kontak</th>
                   <th className="px-8 py-4">Anggota / Detail</th>

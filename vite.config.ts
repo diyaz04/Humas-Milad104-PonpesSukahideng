@@ -21,12 +21,12 @@ export default defineConfig(({mode}) => {
           display: 'standalone',
           icons: [
             {
-              src: 'https://placehold.co/192x192/0f172a/white?text=MS',
+              src: 'https://lh3.googleusercontent.com/d/10ePHDITHyany16gFdE6axqBjSwr2UROr',
               sizes: '192x192',
               type: 'image/png'
             },
             {
-              src: 'https://placehold.co/512x512/0f172a/white?text=Milad+Sukahideng',
+              src: 'https://lh3.googleusercontent.com/d/10ePHDITHyany16gFdE6axqBjSwr2UROr',
               sizes: '512x512',
               type: 'image/png'
             }

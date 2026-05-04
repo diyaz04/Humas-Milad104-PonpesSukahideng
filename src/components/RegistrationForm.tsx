@@ -41,7 +41,7 @@ export default function RegistrationForm({ koorwils, sports }: RegistrationFormP
 
   const handleSubmit = async () => {
     if (verificationCode !== 'porsasmilad104') {
-      alert("Kode Verifikasi Koorwil salah!");
+      alert("Kode Verifikasi Korwil salah!");
       return;
     }
 
@@ -80,7 +80,7 @@ export default function RegistrationForm({ koorwils, sports }: RegistrationFormP
                 <Shield size={28} />
               </div>
               <div>
-                <h2 className="text-3xl md:text-4xl font-serif font-bold text-brand-cream uppercase tracking-wider">Halaman Koorwil</h2>
+                <h2 className="text-3xl md:text-4xl font-serif font-bold text-brand-cream uppercase tracking-wider">Halaman Korwil</h2>
                 <p className="text-brand-gold/60 text-sm font-medium italic">Pendaftaran Peserta PORSAS delegasi Wilayah</p>
               </div>
             </div>
@@ -118,7 +118,7 @@ export default function RegistrationForm({ koorwils, sports }: RegistrationFormP
               </div>
 
               <div>
-                <label className="block text-[10px] uppercase tracking-[0.2em] text-brand-gold/70 font-bold mb-2 ml-1">Asal Koorwil</label>
+                <label className="block text-[10px] uppercase tracking-[0.2em] text-brand-gold/70 font-bold mb-2 ml-1">Asal Korwil</label>
                 <select 
                   value={formData.koorwil}
                   onChange={e => setFormData({ ...formData, koorwil: e.target.value })}
@@ -275,7 +275,7 @@ export default function RegistrationForm({ koorwils, sports }: RegistrationFormP
                     <div className="w-16 h-16 bg-brand-gold/10 text-brand-gold rounded-2xl flex items-center justify-center mx-auto mb-4">
                       <Shield size={32} />
                     </div>
-                    <h3 className="text-2xl font-serif font-bold text-brand-cream uppercase tracking-wider mb-2">Otentikasi Koorwil</h3>
+                    <h3 className="text-2xl font-serif font-bold text-brand-cream uppercase tracking-wider mb-2">Otentikasi Korwil</h3>
                     <p className="text-brand-cream/60 text-sm">Masukan kode autentikasi khusus koorwil untuk melanjutkan pendaftaran.</p>
                   </div>
 

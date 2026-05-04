@@ -153,13 +153,13 @@ export default function Porsas({ sports }: PorsasProps) {
       <div className="mt-20 flex flex-col items-center gap-8 text-center">
         <div className="max-w-2xl">
           <h4 className="text-xl font-serif font-bold text-brand-gold uppercase tracking-[0.2em] mb-4">Mekanisme Pendaftaran</h4>
-          <p className="text-brand-cream/40 text-sm italic">Cabang olahraga & penampilan seni dikoordinasikan oleh masing-masing Koorwil. Khusus kegiatan Gowes & lomba Karaoke Religi dapat mendaftar secara langsung secara individu.</p>
+          <p className="text-brand-cream/40 text-sm italic">Cabang olahraga & penampilan seni dikoordinasikan oleh masing-masing Korwil. Khusus kegiatan Gowes & lomba Karaoke Religi dapat mendaftar secara langsung secara individu.</p>
         </div>
         
         <div className="flex flex-wrap gap-6 justify-center">
           <a href="#daftar-porsas" className="group flex items-center gap-4 bg-brand-gold text-brand-dark px-10 py-5 rounded-3xl font-bold uppercase tracking-widest hover:bg-brand-lightgold transition-all shadow-xl shadow-brand-gold/20">
             <Shield size={20} />
-            Daftar via Koorwil
+            Daftar via Korwil
             <motion.div animate={{ x: [0, 5, 0] }} transition={{ repeat: Infinity, duration: 1.5 }}>
               <ChevronRight size={18} />
             </motion.div>

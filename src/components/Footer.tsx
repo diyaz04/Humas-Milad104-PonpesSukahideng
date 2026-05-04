@@ -97,14 +97,32 @@ export default function Footer({ onAdminTrigger }: FooterProps) {
 
         <div>
           <h3 className="text-xl font-serif font-bold text-brand-cream/80 uppercase tracking-widest mb-8">Kontak Kami</h3>
-          <ul className="space-y-4 text-sm text-brand-cream/50 font-medium tracking-wide">
-            <li className="flex gap-4 items-center">
-              <div className="w-10 h-10 rounded-full bg-brand-forest/50 flex items-center justify-center text-brand-gold">
-                <Send size={18} />
+          <ul className="space-y-6 text-sm text-brand-cream/50 font-medium tracking-wide">
+            <li className="space-y-4">
+              <div className="flex gap-4 items-center">
+                <div className="w-10 h-10 rounded-full bg-brand-forest/50 flex items-center justify-center text-brand-gold shrink-0">
+                  <Send size={18} />
+                </div>
+                <div>
+                  <p className="text-brand-gold font-bold uppercase tracking-wider text-[10px] mb-1">Diyaz Najib</p>
+                  <a href="https://wa.me/6285950319228" target="_blank" rel="noopener noreferrer" className="text-brand-cream/80 hover:text-brand-gold transition-colors font-mono">0859 5031 9228</a>
+                </div>
               </div>
-              <span>Humas Panitia Milad Pondok Pesantren Sukahideng Ke-104</span>
+              <div className="flex gap-4 items-center">
+                <div className="w-10 h-10 rounded-full bg-brand-forest/50 flex items-center justify-center text-brand-gold shrink-0">
+                  <Send size={18} />
+                </div>
+                <div>
+                  <p className="text-brand-gold font-bold uppercase tracking-wider text-[10px] mb-1">Yasir Arafat</p>
+                  <a href="https://wa.me/6281214261343" target="_blank" rel="noopener noreferrer" className="text-brand-cream/80 hover:text-brand-gold transition-colors font-mono">0812 1426 1343</a>
+                </div>
+              </div>
+              <p className="text-[10px] text-brand-cream/40 italic leading-snug pt-2 border-t border-brand-gold/10">
+                Panitia Bid. Humas dan Publikasi<br />
+                Milad 104 Pesantren Sukahideng
+              </p>
             </li>
-            <li className="leading-relaxed">
+            <li className="leading-relaxed text-xs">
               Kp. Bageur Desa Sukarapih Kecamatan Sukarame Kabupaten Tasikmalaya, Jawa Barat
             </li>
           </ul>
