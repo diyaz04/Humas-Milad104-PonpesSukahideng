@@ -133,4 +133,4 @@ export interface Alumnus {
   checkedInAt?: string;
 }
 
-export type AdminType = 'milad' | 'jadwal' | 'porsas' | 'pesanan' | 'donasi' | 'registrasi' | null;
+export type AdminType = 'milad' | 'jadwal' | 'porsas' | 'pesanan' | 'donasi' | 'registrasi' | 'super' | null;

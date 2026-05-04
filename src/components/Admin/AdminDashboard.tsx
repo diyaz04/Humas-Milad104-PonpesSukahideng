@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import { X, Lock, LogOut, Mail, Key } from 'lucide-react';
+import { X, Lock, LogOut, Mail, Key, LayoutDashboard, Calendar, Trophy, ShoppingBag, Heart, Users, Settings } from 'lucide-react';
 import { User } from 'firebase/auth';
 import { auth, signInWithEmailAndPassword } from '../../lib/firebase';
 import { Setting, News, ScheduleItem, Koorwil, Sport, Registration, Match, FAQ, AdminType } from '../../types';
@@ -49,8 +49,12 @@ export default function AdminDashboard({
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState<Exclude<AdminType, 'super' | null>>(
+    type === 'super' ? 'milad' : (type || 'milad')
+  );
   
   const getTitle = () => {
+    if (type === 'super') return 'Super Admin Panel';
     switch (type) {
       case 'milad': return 'Admin Konten Landing Page';
       case 'jadwal': return 'Kelola Agenda & Jadwal';
@@ -76,7 +80,18 @@ export default function AdminDashboard({
     }
   };
 
-  const isAuthRequired = type === 'pesanan' || type === 'donasi' || type === 'registrasi';
+  const isAuthRequired = type === 'super' || type === 'pesanan' || type === 'donasi' || type === 'registrasi';
+
+  const tabs = [
+    { id: 'milad', label: 'Konten', icon: LayoutDashboard },
+    { id: 'jadwal', label: 'Agenda', icon: Calendar },
+    { id: 'porsas', label: 'PORSAS', icon: Trophy },
+    { id: 'pesanan', label: 'Pesanan', icon: ShoppingBag },
+    { id: 'donasi', label: 'Donasi', icon: Heart },
+    { id: 'registrasi', label: 'Alumni', icon: Users },
+  ];
+
+  const currentTab = type === 'super' ? activeTab : type;
 
   return (
     <motion.div 
@@ -88,7 +103,7 @@ export default function AdminDashboard({
       <div className="bg-brand-dark px-8 py-4 flex justify-between items-center text-brand-cream border-b border-brand-gold/20">
         <div className="flex items-center gap-4">
           <div className="w-10 h-10 bg-brand-gold rounded-xl flex items-center justify-center text-brand-dark">
-            <Lock size={20} />
+            {type === 'super' ? <Settings size={20} /> : <Lock size={20} />}
           </div>
           <div>
             <h2 className="font-serif font-bold text-xl text-brand-gold">{getTitle()}</h2>
@@ -96,6 +111,23 @@ export default function AdminDashboard({
           </div>
         </div>
         
+        {type === 'super' && (
+          <div className="hidden lg:flex items-center gap-2 bg-brand-forest/20 p-1 rounded-xl border border-brand-gold/10">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id as any)}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all ${
+                  activeTab === tab.id ? 'bg-brand-gold text-brand-dark' : 'text-brand-gold/60 hover:text-brand-gold'
+                }`}
+              >
+                <tab.icon size={14} />
+                {tab.label}
+              </button>
+            ))}
+          </div>
+        )}
+
         <div className="flex items-center gap-6">
           {user && (
             <button 
@@ -114,20 +146,37 @@ export default function AdminDashboard({
         </div>
       </div>
 
-      <div className="flex-grow p-8 overflow-y-auto bg-slate-50">
+      {type === 'super' && (
+        <div className="lg:hidden bg-brand-dark/95 px-8 py-2 overflow-x-auto border-b border-brand-gold/10 flex gap-4 no-scrollbar">
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id as any)}
+              className={`flex-shrink-0 flex items-center gap-2 px-3 py-2 rounded-lg text-[9px] font-bold uppercase tracking-widest transition-all ${
+                activeTab === tab.id ? 'text-brand-gold border-b-2 border-brand-gold' : 'text-brand-gold/40'
+              }`}
+            >
+              <tab.icon size={12} />
+              {tab.label}
+            </button>
+          ))}
+        </div>
+      )}
+
+      <div className="flex-grow p-4 md:p-8 overflow-y-auto bg-slate-50">
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="max-w-6xl mx-auto"
+            className="max-w-7xl mx-auto"
           >
             {(!isAuthRequired || (user && auth.currentUser)) ? (
               <>
-                {type === 'milad' && <MiladPanel settings={settings} news={news} faqs={faqs} />}
-                {type === 'jadwal' && <JadwalPanel schedule={schedule} />}
-                {type === 'porsas' && <PorsasPanel koorwils={koorwils} sports={sports} registrations={registrations} matches={matches} />}
-                {type === 'pesanan' && <MerchandisePanel user={user} />}
-                {type === 'donasi' && <DonationPanel />}
-                {type === 'registrasi' && <RegistrationPanel />}
+                {currentTab === 'milad' && <MiladPanel settings={settings} news={news} faqs={faqs} />}
+                {currentTab === 'jadwal' && <JadwalPanel schedule={schedule} />}
+                {currentTab === 'porsas' && <PorsasPanel koorwils={koorwils} sports={sports} registrations={registrations} matches={matches} />}
+                {currentTab === 'pesanan' && <MerchandisePanel user={user} />}
+                {currentTab === 'donasi' && <DonationPanel />}
+                {currentTab === 'registrasi' && <RegistrationPanel />}
               </>
             ) : (
               <div className="flex flex-col items-center justify-center py-10 text-center">
@@ -136,7 +185,7 @@ export default function AdminDashboard({
                 </div>
                 <h3 className="text-2xl font-serif font-bold text-brand-dark mb-2">Autentikasi Diperlukan</h3>
                 <p className="text-slate-500 mb-8 max-w-sm">
-                  Bagian Manajemen Pesanan memerlukan login untuk alasan keamanan.
+                  {type === 'super' ? 'Super Admin Panel memerlukan login administrator untuk akses penuh.' : 'Bagian ini memerlukan login untuk alasan keamanan.'}
                 </p>
 
                 <div className="w-full max-w-md bg-white p-8 rounded-[32px] shadow-xl shadow-slate-200 border border-slate-100">
@@ -199,3 +248,4 @@ export default function AdminDashboard({
     </motion.div>
   );
 }
+
