@@ -3,7 +3,7 @@ import { motion } from 'motion/react';
 import { X, Lock, LogOut, Mail, Key, LayoutDashboard, Calendar, Trophy, ShoppingBag, Heart, Users, Settings } from 'lucide-react';
 import { User } from 'firebase/auth';
 import { auth, signInWithEmailAndPassword } from '../../lib/firebase';
-import { Setting, News, ScheduleItem, Koorwil, Sport, Registration, Match, FAQ, AdminType } from '../../types';
+import { Setting, News, ScheduleItem, Koorwil, Sport, Registration, Match, FAQ, AdminType, DocumentResource } from '../../types';
 
 import MiladPanel from './MiladPanel';
 import JadwalPanel from './JadwalPanel';
@@ -27,6 +27,7 @@ interface AdminDashboardProps {
   sports: Sport[];
   registrations: Registration[];
   matches: Match[];
+  documents: DocumentResource[];
 }
 
 export default function AdminDashboard({ 
@@ -43,7 +44,8 @@ export default function AdminDashboard({
   koorwils,
   sports,
   registrations,
-  matches
+  matches,
+  documents
 }: AdminDashboardProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -171,7 +173,7 @@ export default function AdminDashboard({
           >
             {(!isAuthRequired || (user && auth.currentUser)) ? (
               <>
-                {currentTab === 'milad' && <MiladPanel settings={settings} news={news} faqs={faqs} />}
+                {currentTab === 'milad' && <MiladPanel settings={settings} news={news} faqs={faqs} documents={documents} />}
                 {currentTab === 'jadwal' && <JadwalPanel schedule={schedule} />}
                 {currentTab === 'porsas' && <PorsasPanel koorwils={koorwils} sports={sports} registrations={registrations} matches={matches} />}
                 {currentTab === 'pesanan' && <MerchandisePanel user={user} />}

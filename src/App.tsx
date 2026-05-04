@@ -19,7 +19,7 @@ import {
   X
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Setting, News, ScheduleItem, Koorwil, Sport, Registration, Match, FAQ, AdminType, Product } from './types';
+import { Setting, News, ScheduleItem, Koorwil, Sport, Registration, Match, FAQ, AdminType, Product, DocumentResource } from './types';
 
 // Components
 import Navbar from './components/Navbar';
@@ -40,6 +40,7 @@ import NewsDetail from './components/NewsDetail';
 import ChatBot from './components/ChatBot';
 import Donation from './components/Donation';
 import AlumniConfirmation from './components/AlumniConfirmation';
+import InfoCenter from './components/InfoCenter';
 
 export default function App() {
   const [activeAdmin, setActiveAdmin] = useState<AdminType>(null);
@@ -56,6 +57,7 @@ export default function App() {
   const [products, setProducts] = useState<Product[]>([]);
   const [registrations, setRegistrations] = useState<Registration[]>([]);
   const [matches, setMatches] = useState<Match[]>([]);
+  const [documents, setDocuments] = useState<DocumentResource[]>([]);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
@@ -132,6 +134,11 @@ export default function App() {
       setFaqs(snap.docs.map(d => ({ id: d.id, ...d.data() } as FAQ)));
     }, (err) => handleFirestoreError(err, OperationType.LIST, 'faqs'));
 
+    // Listen for documents
+    const unsubDocs = onSnapshot(query(collection(db, 'documents'), orderBy('updatedAt', 'desc')), (snap) => {
+      setDocuments(snap.docs.map(d => ({ id: d.id, ...d.data() } as DocumentResource)));
+    }, (err) => handleFirestoreError(err, OperationType.LIST, 'documents'));
+
     return () => {
       unsubAuth();
       unsubSettings();
@@ -143,6 +150,7 @@ export default function App() {
       unsubRegs();
       unsubMatches();
       unsubFaqs();
+      unsubDocs();
     };
   }, []);
 
@@ -253,6 +261,8 @@ export default function App() {
           </div>
         </section>
 
+        <InfoCenter documents={documents} />
+
         <section id="berita" className="py-24">
           <NewsSection 
             news={news} 
@@ -334,6 +344,7 @@ export default function App() {
             sports={sports}
             registrations={registrations}
             matches={matches}
+            documents={documents}
           />
         )}
       </AnimatePresence>

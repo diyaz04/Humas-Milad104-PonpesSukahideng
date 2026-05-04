@@ -8,11 +8,20 @@ service cloud.firestore {
     }
 
     function isAdmin() {
-      return request.auth != null && request.auth.token.email == 'miladponpessukahideng@gmail.com';
+      return request.auth != null && (
+        request.auth.token.email == 'miladponpessukahideng@gmail.com' ||
+        request.auth.token.email == 'adminmilad104@milad104.com'
+      );
     }
 
     function isValidId(id) {
        return id is string && id.size() <= 128;
+    }
+
+    // Documents (Juknis & Proposal)
+    match /documents/{docId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
     }
 
     // Settings

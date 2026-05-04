@@ -157,6 +157,18 @@
         "checkedInAt": { "type": "string", "format": "date-time" }
       },
       "required": ["name", "yearIn", "status"]
+    },
+    "Document": {
+      "title": "Document Resource",
+      "description": "PDF resources such as Juknis or Proposals",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "url": { "type": "string" },
+        "category": { "type": "string" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "url"]
     }
   },
   "firestore": {
@@ -191,6 +203,10 @@
     "alumni": {
       "schema": "Alumnus",
       "description": "Database of alumni and their attendance status"
+    },
+    "documents": {
+      "schema": "Document",
+      "description": "Publicly accessible documents like PDF rules or proposals"
     }
   }
 }

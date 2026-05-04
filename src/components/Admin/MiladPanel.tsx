@@ -3,8 +3,8 @@ import { doc, setDoc, addDoc, collection, deleteDoc, updateDoc } from 'firebase/
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import imageCompression from 'browser-image-compression';
 import { db, storage } from '../../lib/firebase';
-import { Setting, News, FAQ } from '../../types';
-import { Plus, Trash2, Edit2, Check, Save, AlertCircle, Eye, X as CloseIcon, Loader2 } from 'lucide-react';
+import { Setting, News, FAQ, DocumentResource } from '../../types';
+import { Plus, Trash2, Edit2, Check, Save, AlertCircle, Eye, X as CloseIcon, Loader2, FileText, Download, Upload } from 'lucide-react';
 import FAQPanel from './FAQPanel';
 import ConfirmModal from './ConfirmModal';
 
@@ -12,11 +12,21 @@ interface MiladPanelProps {
   settings: Setting | null;
   news: News[];
   faqs: FAQ[];
+  documents: DocumentResource[];
 }
 
-export default function MiladPanel({ settings, news, faqs }: MiladPanelProps) {
+export default function MiladPanel({ settings, news, faqs, documents }: MiladPanelProps) {
   const [deleteNewsId, setDeleteNewsId] = useState<string | null>(null);
   const [editingNewsId, setEditingNewsId] = useState<string | null>(null);
+  const [deleteDocId, setDeleteDocId] = useState<string | null>(null);
+
+  // Document state
+  const [docForm, setDocForm] = useState({
+    title: '',
+    url: '',
+    category: 'PORSAS'
+  });
+  const [isAddingDoc, setIsAddingDoc] = useState(false);
 
   const [localSettings, setLocalSettings] = useState<Setting>(settings || {
     heroTitle: '',
@@ -166,6 +176,38 @@ export default function MiladPanel({ settings, news, faqs }: MiladPanelProps) {
     if (deleteNewsId) {
       await deleteDoc(doc(db, 'news', deleteNewsId));
       setDeleteNewsId(null);
+    }
+  };
+
+  const handleAddDocument = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!docForm.title || !docForm.url) return;
+    
+    setIsAddingDoc(true);
+    try {
+      const docData = {
+        title: docForm.title.trim(),
+        url: docForm.url.trim(),
+        category: docForm.category,
+        updatedAt: new Date().toISOString()
+      };
+
+      await addDoc(collection(db, 'documents'), docData);
+
+      setDocForm({ title: '', url: '', category: 'PORSAS' });
+      alert("Dokumen berhasil ditambahkan!");
+    } catch (err: any) {
+      console.error("Error adding document:", err);
+      alert("Gagal menambahkan dokumen: " + (err.message || "Terjadi kesalahan internal"));
+    } finally {
+      setIsAddingDoc(false);
+    }
+  };
+
+  const confirmDeleteDoc = async () => {
+    if (deleteDocId) {
+      await deleteDoc(doc(db, 'documents', deleteDocId));
+      setDeleteDocId(null);
     }
   };
 
@@ -382,8 +424,110 @@ export default function MiladPanel({ settings, news, faqs }: MiladPanelProps) {
       </div>
 
       <div className="md:col-span-2">
-        <FAQPanel faqs={faqs} />
+        <div className="grid md:grid-cols-2 gap-12">
+          {/* Document Management Section */}
+          <div className="bg-white p-8 rounded-3xl shadow-sm border border-slate-100">
+            <h3 className="text-2xl font-serif font-bold text-brand-dark mb-6 flex items-center gap-2">
+              <FileText className="text-brand-gold" /> Kelola Juknis & Proposal
+            </h3>
+            
+            <form onSubmit={handleAddDocument} className="space-y-6 mb-8 p-6 bg-slate-50 rounded-2xl border border-slate-100">
+              <div>
+                <label className="text-[10px] uppercase tracking-widest text-slate-400 font-bold mb-2 block">Judul Dokumen</label>
+                <input 
+                  type="text" 
+                  placeholder="Contoh: Juknis PORSAS 2026"
+                  value={docForm.title}
+                  onChange={e => setDocForm({...docForm, title: e.target.value})}
+                  className="w-full border-2 border-slate-100 rounded-xl p-3 outline-none focus:border-brand-gold"
+                  required
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-[10px] uppercase tracking-widest text-slate-400 font-bold mb-2 block">Kategori</label>
+                  <select 
+                    value={docForm.category}
+                    onChange={e => setDocForm({...docForm, category: e.target.value})}
+                    className="w-full border-2 border-slate-100 rounded-xl p-3 outline-none focus:border-brand-gold bg-white"
+                  >
+                    <option value="PORSAS">PORSAS</option>
+                    <option value="Proposal">Proposal</option>
+                    <option value="Lainnya">Lainnya</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-[10px] uppercase tracking-widest text-slate-400 font-bold mb-2 block">Link / URL Dokumen</label>
+                  <input 
+                    type="text" 
+                    placeholder="Wajib diisi (Google Drive, dll)"
+                    value={docForm.url}
+                    onChange={e => setDocForm({...docForm, url: e.target.value})}
+                    className="w-full border-2 border-slate-100 rounded-xl p-3 outline-none focus:border-brand-gold"
+                    required
+                  />
+                </div>
+              </div>
+
+              <button 
+                type="submit"
+                disabled={isAddingDoc}
+                className="w-full bg-brand-dark text-brand-gold py-4 rounded-xl font-bold uppercase tracking-widest flex items-center justify-center gap-2 disabled:opacity-50"
+              >
+                {isAddingDoc ? <Loader2 size={18} className="animate-spin" /> : <Plus size={18} />}
+                {isAddingDoc ? 'Sedang Menambah...' : 'Tambah Dokumen'}
+              </button>
+            </form>
+
+            <div className="space-y-3">
+              {documents.map(doc => (
+                <div key={doc.id} className="flex justify-between items-center p-4 bg-slate-50 rounded-2xl border border-slate-100 group">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-brand-gold/10 text-brand-gold rounded-xl flex items-center justify-center">
+                      <FileText size={20} />
+                    </div>
+                    <div>
+                      <p className="font-bold text-brand-dark text-sm">{doc.title}</p>
+                      <p className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">{doc.category}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <a 
+                      href={doc.url} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="p-2 text-slate-400 hover:text-brand-gold transition-colors"
+                      title="Lihat"
+                    >
+                      <Eye size={18} />
+                    </a>
+                    <button 
+                      onClick={() => setDeleteDocId(doc.id)}
+                      className="p-2 text-slate-400 hover:text-red-500 transition-colors"
+                      title="Hapus"
+                    >
+                      <Trash2 size={18} />
+                    </button>
+                  </div>
+                </div>
+              ))}
+              {documents.length === 0 && (
+                <p className="text-center py-8 text-slate-300 text-sm italic">Belum ada dokumen yang diunggah.</p>
+              )}
+            </div>
+          </div>
+
+          <FAQPanel faqs={faqs} />
+        </div>
       </div>
+
+      <ConfirmModal 
+        isOpen={deleteDocId !== null}
+        onClose={() => setDeleteDocId(null)}
+        onConfirm={confirmDeleteDoc}
+        title="Hapus Dokumen?"
+        message="Apakah Anda yakin ingin menghapus dokumen ini?"
+      />
 
       <ConfirmModal 
         isOpen={deleteNewsId !== null}

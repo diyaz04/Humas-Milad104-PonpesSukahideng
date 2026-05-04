@@ -133,4 +133,12 @@ export interface Alumnus {
   checkedInAt?: string;
 }
 
+export interface DocumentResource {
+  id: string;
+  title: string;
+  url: string;
+  category?: string;
+  updatedAt?: string;
+}
+
 export type AdminType = 'milad' | 'jadwal' | 'porsas' | 'pesanan' | 'donasi' | 'registrasi' | 'super' | null;
