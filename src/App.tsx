@@ -225,15 +225,15 @@ export default function App() {
               ))}
               <button 
                 onClick={() => { setShowAlumni(true); setIsMenuOpen(false); }}
-                className="text-brand-cream hover:text-brand-gold transition-colors"
+                className="hover:text-brand-gold transition-colors"
               >
                 Konfirmasi Alumni
               </button>
               <button 
                 onClick={() => { setShowDonation(true); setIsMenuOpen(false); }}
-                className="text-brand-gold font-bold hover:text-white transition-all"
+                className="hover:text-brand-gold transition-colors"
               >
-                Infaq & Donasi
+                Donasi
               </button>
             </nav>
           </motion.div>

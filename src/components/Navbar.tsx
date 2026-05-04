@@ -130,13 +130,13 @@ export default function Navbar({ onMenuOpen, onOpenDonation, onOpenAlumni }: Nav
                   <div className="border-t border-brand-gold/10 my-2 pt-2">
                     <button 
                       onClick={() => { onOpenDonation(); setShowMore(false); }}
-                      className="w-full text-left px-6 py-2.5 text-xs font-bold text-brand-gold hover:bg-white/5 transition-all uppercase tracking-widest"
+                      className="w-full text-left px-6 py-2.5 text-xs font-bold text-brand-cream/70 hover:text-brand-gold hover:bg-white/5 transition-all uppercase tracking-widest"
                     >
                       Donasi
                     </button>
                     <button 
                       onClick={() => { onOpenAlumni(); setShowMore(false); }}
-                      className="w-full text-left px-6 py-2.5 text-xs font-bold text-brand-cream hover:text-brand-gold hover:bg-white/5 transition-all uppercase tracking-widest"
+                      className="w-full text-left px-6 py-2.5 text-xs font-bold text-brand-cream/70 hover:text-brand-gold hover:bg-white/5 transition-all uppercase tracking-widest"
                     >
                       Konfirmasi Alumni
                     </button>
