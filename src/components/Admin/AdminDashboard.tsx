@@ -12,7 +12,6 @@ import MerchandisePanel from './MerchandisePanel';
 import DonationPanel from './DonationPanel';
 import RegistrationPanel from './RegistrationPanel';
 import CheckInPanel from './CheckInPanel';
-import VenuePanel from './VenuePanel';
 
 interface AdminDashboardProps {
   type: AdminType;
@@ -67,7 +66,6 @@ export default function AdminDashboard({
       case 'donasi': return 'Manajemen Wakaf & Donasi';
       case 'registrasi': return 'Manajemen Alumni & Check-In';
       case 'heregistrasi': return 'Sistem Heregistrasi Peserta';
-      case 'denah': return 'Manajemen Denah & Lokasi';
       default: return 'Admin Panel';
     }
   };
@@ -86,7 +84,7 @@ export default function AdminDashboard({
     }
   };
 
-  const isAuthRequired = type === 'super' || type === 'pesanan' || type === 'donasi' || type === 'registrasi' || type === 'denah' || type === 'heregistrasi';
+  const isAuthRequired = type === 'super' || type === 'pesanan' || type === 'donasi' || type === 'registrasi' || type === 'heregistrasi';
 
   const tabs = [
     { id: 'milad', label: 'Konten', icon: LayoutDashboard },
@@ -96,7 +94,6 @@ export default function AdminDashboard({
     { id: 'donasi', label: 'Donasi', icon: Heart },
     { id: 'registrasi', label: 'Alumni', icon: Users },
     { id: 'heregistrasi', label: 'Check-In', icon: UserCheck },
-    { id: 'denah', label: 'Denah', icon: MapPin },
   ];
 
   const currentTab = type === 'super' ? activeTab : type;
@@ -186,7 +183,6 @@ export default function AdminDashboard({
                 {currentTab === 'donasi' && <DonationPanel />}
                 {currentTab === 'registrasi' && <RegistrationPanel />}
                 {currentTab === 'heregistrasi' && <CheckInPanel />}
-                {currentTab === 'denah' && <VenuePanel />}
               </>
             ) : (
               <div className="flex flex-col items-center justify-center py-10 text-center">

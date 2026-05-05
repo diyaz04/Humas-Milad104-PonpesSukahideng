@@ -49,7 +49,6 @@ export default function Navbar({ onMenuOpen, onOpenDonation, onOpenAlumni }: Nav
   ];
 
   const moreLinks = [
-    { name: 'Denah', href: '#denah' },
     { name: 'Merchandise', href: '#merchandise' },
     { name: 'PORSAS', href: '#porsas' },
     { name: 'Dokumen', href: '#pusat-informasi' },

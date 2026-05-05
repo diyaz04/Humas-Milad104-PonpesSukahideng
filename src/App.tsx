@@ -19,7 +19,7 @@ import {
   X
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Setting, News, ScheduleItem, Koorwil, Sport, Registration, Match, FAQ, AdminType, Product, DocumentResource, VenuePoint, VenueRoute } from './types';
+import { Setting, News, ScheduleItem, Koorwil, Sport, Registration, Match, FAQ, AdminType, Product, DocumentResource } from './types';
 
 // Components
 import Navbar from './components/Navbar';
@@ -27,7 +27,6 @@ import Hero from './components/Hero';
 import About from './components/About';
 import VideoSection from './components/VideoSection';
 import Schedule from './components/Schedule';
-import VenueSection from './components/VenueSection';
 import Porsas from './components/Porsas';
 import RegistrationForm from './components/RegistrationForm';
 import IndividualRegistration from './components/IndividualRegistration';
@@ -59,8 +58,6 @@ export default function App() {
   const [registrations, setRegistrations] = useState<Registration[]>([]);
   const [matches, setMatches] = useState<Match[]>([]);
   const [documents, setDocuments] = useState<DocumentResource[]>([]);
-  const [venuePoints, setVenuePoints] = useState<VenuePoint[]>([]);
-  const [venueRoutes, setVenueRoutes] = useState<VenueRoute[]>([]);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
@@ -142,16 +139,6 @@ export default function App() {
       setDocuments(snap.docs.map(d => ({ id: d.id, ...d.data() } as DocumentResource)));
     }, (err) => handleFirestoreError(err, OperationType.LIST, 'documents'));
 
-    // Listen for venue points
-    const unsubVenue = onSnapshot(collection(db, 'venue_points'), (snap) => {
-      setVenuePoints(snap.docs.map(d => ({ id: d.id, ...d.data() } as VenuePoint)));
-    }, (err) => handleFirestoreError(err, OperationType.LIST, 'venue_points'));
-
-    // Listen for venue routes
-    const unsubRoutes = onSnapshot(collection(db, 'venue_routes'), (snap) => {
-      setVenueRoutes(snap.docs.map(d => ({ id: d.id, ...d.data() } as VenueRoute)));
-    }, (err) => handleFirestoreError(err, OperationType.LIST, 'venue_routes'));
-
     return () => {
       unsubAuth();
       unsubSettings();
@@ -164,8 +151,6 @@ export default function App() {
       unsubMatches();
       unsubFaqs();
       unsubDocs();
-      unsubVenue();
-      unsubRoutes();
     };
   }, []);
 
@@ -177,7 +162,6 @@ export default function App() {
     else if (keyword === 'donasi') setActiveAdmin('donasi');
     else if (keyword === 'registrasi') setActiveAdmin('registrasi');
     else if (keyword === 'heregistrasi') setActiveAdmin('heregistrasi');
-    else if (keyword === 'denah') setActiveAdmin('denah');
     else if (keyword === 'superadmin') setActiveAdmin('super');
     else setActiveAdmin(null);
   };
@@ -226,7 +210,6 @@ export default function App() {
                 { name: 'Tentang', href: '#about' },
                 { name: 'Multimedia', href: '#video-content' },
                 { name: 'Agenda', href: '#agenda' },
-                { name: 'Denah', href: '#denah' },
                 { name: 'Merchandise', href: '#merchandise' },
                 { name: 'PORSAS', href: '#porsas' },
                 { name: 'Dokumen', href: '#pusat-informasi' },
@@ -273,10 +256,6 @@ export default function App() {
 
         <section id="agenda" className="py-24">
           <Schedule schedule={schedule} />
-        </section>
-
-        <section id="denah" className="py-24 bg-slate-50">
-          <VenueSection points={venuePoints} routes={venueRoutes} />
         </section>
 
         <section id="merchandise" className="py-24 bg-white">
