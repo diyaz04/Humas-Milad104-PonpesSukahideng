@@ -219,6 +219,7 @@ export default function App() {
                 { name: 'Tentang', href: '#about' },
                 { name: 'Multimedia', href: '#video-content' },
                 { name: 'Agenda', href: '#agenda' },
+                { name: 'Denah', href: '#denah' },
                 { name: 'Merchandise', href: '#merchandise' },
                 { name: 'PORSAS', href: '#porsas' },
                 { name: 'Dokumen', href: '#pusat-informasi' },
