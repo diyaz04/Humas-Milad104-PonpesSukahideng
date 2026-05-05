@@ -161,6 +161,7 @@ export default function App() {
     else if (keyword === 'pesanan') setActiveAdmin('pesanan');
     else if (keyword === 'donasi') setActiveAdmin('donasi');
     else if (keyword === 'registrasi') setActiveAdmin('registrasi');
+    else if (keyword === 'heregistrasi') setActiveAdmin('heregistrasi');
     else if (keyword === 'superadmin') setActiveAdmin('super');
     else setActiveAdmin(null);
   };
