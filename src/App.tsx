@@ -31,6 +31,7 @@ import Porsas from './components/Porsas';
 import RegistrationForm from './components/RegistrationForm';
 import IndividualRegistration from './components/IndividualRegistration';
 import Bracket from './components/Bracket';
+import MedalLeaderboard from './components/MedalLeaderboard';
 import NewsSection from './components/NewsSection';
 import Merchandise from './components/Merchandise';
 import Footer from './components/Footer';
@@ -269,6 +270,9 @@ export default function App() {
             <Porsas sports={sports} />
             <div id="daftar-porsas" className="mt-32">
               <RegistrationForm koorwils={koorwils} sports={sports} />
+            </div>
+            <div id="klasemen-porsas" className="mt-32">
+              <MedalLeaderboard sports={sports} matches={matches} registrations={registrations} koorwils={koorwils} />
             </div>
             <div id="bagan-porsas" className="mt-32">
               <Bracket sports={sports} matches={matches} registrations={registrations} />
