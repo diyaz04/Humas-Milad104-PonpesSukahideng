@@ -141,4 +141,14 @@ export interface DocumentResource {
   updatedAt?: string;
 }
 
-export type AdminType = 'milad' | 'jadwal' | 'porsas' | 'pesanan' | 'donasi' | 'registrasi' | 'heregistrasi' | 'super' | null;
+export interface VenuePoint {
+  id: string;
+  name: string;
+  description: string;
+  latitude: number;
+  longitude: number;
+  category: 'utama' | 'parkir' | 'makan' | 'istirahat' | 'porsas' | 'lainnya';
+  icon?: string;
+}
+
+export type AdminType = 'milad' | 'jadwal' | 'porsas' | 'pesanan' | 'donasi' | 'registrasi' | 'heregistrasi' | 'denah' | 'super' | null;

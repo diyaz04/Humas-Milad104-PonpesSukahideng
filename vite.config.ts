@@ -12,6 +12,9 @@ export default defineConfig(({mode}) => {
       tailwindcss(),
       VitePWA({
         registerType: 'autoUpdate',
+        workbox: {
+          maximumFileSizeToCacheInBytes: 4000000, // Increase to 4MB
+        },
         manifest: {
           name: 'Milad 104 Sukahideng & PORSAS',
           short_name: 'MiladSukahideng',
