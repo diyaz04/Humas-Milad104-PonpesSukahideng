@@ -19,7 +19,7 @@ import {
   X
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Setting, News, ScheduleItem, Koorwil, Sport, Registration, Match, FAQ, AdminType, Product, DocumentResource, VenuePoint } from './types';
+import { Setting, News, ScheduleItem, Koorwil, Sport, Registration, Match, FAQ, AdminType, Product, DocumentResource, VenuePoint, VenueRoute } from './types';
 
 // Components
 import Navbar from './components/Navbar';
@@ -60,6 +60,7 @@ export default function App() {
   const [matches, setMatches] = useState<Match[]>([]);
   const [documents, setDocuments] = useState<DocumentResource[]>([]);
   const [venuePoints, setVenuePoints] = useState<VenuePoint[]>([]);
+  const [venueRoutes, setVenueRoutes] = useState<VenueRoute[]>([]);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
@@ -146,6 +147,11 @@ export default function App() {
       setVenuePoints(snap.docs.map(d => ({ id: d.id, ...d.data() } as VenuePoint)));
     }, (err) => handleFirestoreError(err, OperationType.LIST, 'venue_points'));
 
+    // Listen for venue routes
+    const unsubRoutes = onSnapshot(collection(db, 'venue_routes'), (snap) => {
+      setVenueRoutes(snap.docs.map(d => ({ id: d.id, ...d.data() } as VenueRoute)));
+    }, (err) => handleFirestoreError(err, OperationType.LIST, 'venue_routes'));
+
     return () => {
       unsubAuth();
       unsubSettings();
@@ -159,6 +165,7 @@ export default function App() {
       unsubFaqs();
       unsubDocs();
       unsubVenue();
+      unsubRoutes();
     };
   }, []);
 
@@ -269,7 +276,7 @@ export default function App() {
         </section>
 
         <section id="denah" className="py-24 bg-slate-50">
-          <VenueSection points={venuePoints} />
+          <VenueSection points={venuePoints} routes={venueRoutes} />
         </section>
 
         <section id="merchandise" className="py-24 bg-white">

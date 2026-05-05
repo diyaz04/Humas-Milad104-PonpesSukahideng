@@ -183,6 +183,29 @@
         "icon": { "type": "string" }
       },
       "required": ["name", "latitude", "longitude", "category"]
+    },
+    "VenueRoute": {
+      "title": "Venue Route",
+      "description": "Path/route for activities like gowes or jalan santai",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "type": { "type": "string", "enum": ["gowes", "jalan-santai", "pawai"] },
+        "points": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "lat": { "type": "number" },
+              "lng": { "type": "number" }
+            }
+          }
+        },
+        "color": { "type": "string" },
+        "distance": { "type": "string" }
+      },
+      "required": ["name", "type", "points"]
     }
   },
   "firestore": {
@@ -225,6 +248,10 @@
     "venue_points": {
       "schema": "VenuePoint",
       "description": "Points of interest for the event map/layout"
+    },
+    "venue_routes": {
+      "schema": "VenueRoute",
+      "description": "Tracking paths for gowes, walking, etc."
     }
   }
 }

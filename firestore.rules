@@ -2,9 +2,9 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
-    // Global Deny
-    match /{document=**} {
-      allow read, write: if false;
+    // Testing venue_routes availability
+    match /venue_routes/{docId} {
+      allow read, write: if true;
     }
 
     function isAdmin() {

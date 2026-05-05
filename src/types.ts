@@ -147,8 +147,21 @@ export interface VenuePoint {
   description: string;
   latitude: number;
   longitude: number;
-  category: 'utama' | 'parkir' | 'makan' | 'istirahat' | 'porsas' | 'lainnya';
+  category: 'utama' | 'parkir' | 'makan' | 'istirahat' | 'porsas' | 'bazar' | 'stage' | 'lainnya';
+  type?: 'point' | 'area';
+  width?: number; // In relative coordinate units or percentage
+  height?: number;
   icon?: string;
+}
+
+export interface VenueRoute {
+  id: string;
+  name: string;
+  description: string;
+  type: 'gowes' | 'jalan-santai' | 'pawai';
+  points: { lat: number; lng: number }[];
+  color?: string;
+  distance?: string;
 }
 
 export type AdminType = 'milad' | 'jadwal' | 'porsas' | 'pesanan' | 'donasi' | 'registrasi' | 'heregistrasi' | 'denah' | 'super' | null;
