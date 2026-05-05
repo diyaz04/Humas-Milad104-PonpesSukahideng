@@ -5,9 +5,10 @@ import { Alumnus } from '../../types';
 import { 
   Search, ScanLine, Check, X, Loader2, ArrowRight, 
   Users, UserCheck, Clock, UserPlus, ShieldCheck,
-  User, MapPin, Calendar, Smartphone, Plus
+  User, MapPin, Calendar, Smartphone, Plus, Download, FileSpreadsheet
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import * as XLSX from 'xlsx';
 
 export default function CheckInPanel() {
   const [search, setSearch] = useState('');
@@ -16,6 +17,7 @@ export default function CheckInPanel() {
   const [qrInput, setQrInput] = useState('');
   const [stats, setStats] = useState({ total: 0, checkedIn: 0 });
   const [checkedInAlumni, setCheckedInAlumni] = useState<Alumnus[]>([]);
+  const [allCheckedInAlumni, setAllCheckedInAlumni] = useState<Alumnus[]>([]);
   const [lastCheckIn, setLastCheckIn] = useState<Alumnus | null>(null);
   const [showManualModal, setShowManualModal] = useState(false);
   
@@ -38,6 +40,11 @@ export default function CheckInPanel() {
         total: confirmed.length,
         checkedIn: checkedIn.length
       });
+      
+      setAllCheckedInAlumni([...checkedIn].sort((a, b) => 
+        new Date(b.checkedInAt || 0).getTime() - new Date(a.checkedInAt || 0).getTime()
+      ));
+
       // Sort by check-in time and take top 5
       const recent = [...checkedIn]
         .filter(a => a.checkedInAt)
@@ -173,6 +180,24 @@ export default function CheckInPanel() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleExportExcel = () => {
+    if (allCheckedInAlumni.length === 0) return;
+    
+    const exportData = allCheckedInAlumni.map(a => ({
+      'Nama': a.name,
+      'Angkatan': a.yearIn,
+      'Wilayah': a.city,
+      'Telepon/WA': a.phone,
+      'Status': 'Hadir',
+      'Waktu Hadir': a.checkedInAt ? new Date(a.checkedInAt).toLocaleString('id-ID') : '-'
+    }));
+
+    const ws = XLSX.utils.json_to_sheet(exportData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Daftar Hadir");
+    XLSX.writeFile(wb, `Kehadiran_Milad104_${new Date().toISOString().split('T')[0]}.xlsx`);
   };
 
   return (
@@ -311,7 +336,15 @@ export default function CheckInPanel() {
           <div className="h-10 w-px bg-slate-200 mx-2 hidden md:block" />
           <div>
             <h2 className="text-2xl font-serif font-bold text-brand-dark">Sistem Heregistrasi</h2>
-            <p className="text-slate-500 text-[10px] uppercase font-bold tracking-widest">Check-in Kehadiran Milad ke-104</p>
+            <div className="flex items-center gap-4">
+              <p className="text-slate-500 text-[10px] uppercase font-bold tracking-widest">Check-in Kehadiran Milad ke-104</p>
+              <button 
+                onClick={handleExportExcel}
+                className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-widest flex items-center gap-1.5 hover:bg-green-200 transition-all border border-green-200"
+              >
+                <Download size={12} /> Export Excel
+              </button>
+            </div>
           </div>
         </div>
         
@@ -607,6 +640,83 @@ export default function CheckInPanel() {
                 </li>
               ))}
             </ul>
+          </div>
+        </div>
+
+        {/* Attendance List Table Section */}
+        <div className="lg:col-span-3">
+          <div className="bg-white rounded-[40px] shadow-xl border border-slate-100 overflow-hidden">
+            <div className="p-8 border-b border-slate-50 flex items-center justify-between bg-slate-50/30">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-brand-dark rounded-xl flex items-center justify-center text-brand-gold shadow-lg">
+                  <FileSpreadsheet size={20} />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-brand-dark">Daftar Kehadiran Real-time</h3>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Seluruh Alumni Yang Telah Hadir</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-4">
+                <div className="text-right hidden sm:block">
+                  <p className="text-xs font-bold text-brand-dark">{allCheckedInAlumni.length} Orang</p>
+                  <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Total Kehadiran</p>
+                </div>
+                <button 
+                  onClick={handleExportExcel}
+                  className="bg-brand-dark text-brand-gold px-6 py-3 rounded-2xl text-[10px] font-bold uppercase tracking-widest flex items-center gap-2 hover:bg-brand-gold hover:text-brand-dark transition-all shadow-lg"
+                >
+                  <Download size={16} /> Export Ke Excel
+                </button>
+              </div>
+            </div>
+            
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-slate-50/50">
+                    <th className="px-8 py-5 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Alumni</th>
+                    <th className="px-8 py-5 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Wilayah</th>
+                    <th className="px-8 py-5 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Kode Reg</th>
+                    <th className="px-8 py-5 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Waktu Hadir</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-50">
+                  {allCheckedInAlumni.slice(0, 100).map((a) => (
+                    <tr key={a.id} className="hover:bg-slate-50/30 transition-colors">
+                      <td className="px-8 py-6">
+                        <p className="font-bold text-brand-dark">{a.name}</p>
+                        <p className="text-[10px] text-slate-400 font-bold uppercase">Angkatan {a.yearIn}</p>
+                      </td>
+                      <td className="px-8 py-6">
+                        <p className="text-xs text-brand-dark font-medium">{a.city || '-'}</p>
+                      </td>
+                      <td className="px-8 py-6 font-mono text-xs font-bold text-brand-gold">
+                        {a.registrationCode || '-'}
+                      </td>
+                      <td className="px-8 py-6">
+                        <div className="flex items-center gap-2">
+                          <Clock size={12} className="text-green-500" />
+                          <span className="text-[10px] font-bold text-slate-500 uppercase tracking-tight">
+                            {a.checkedInAt ? new Date(a.checkedInAt).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }) : '-'}
+                          </span>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                  {allCheckedInAlumni.length === 0 && (
+                    <tr>
+                      <td colSpan={4} className="px-8 py-20 text-center text-slate-400 italic">Belum ada alumni yang hadir.</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+            
+            {allCheckedInAlumni.length > 100 && (
+              <div className="p-6 bg-slate-50/50 text-center border-t border-slate-50">
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">Menampilkan 100 dari {allCheckedInAlumni.length} data. Gunakan export untuk data lengkap.</p>
+              </div>
+            )}
           </div>
         </div>
       </div>
