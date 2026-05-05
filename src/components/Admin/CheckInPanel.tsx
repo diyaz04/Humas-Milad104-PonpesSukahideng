@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { db, handleFirestoreError, OperationType } from '../../lib/firebase';
-import { collection, query, where, getDocs, updateDoc, doc, onSnapshot, orderBy, addDoc } from 'firebase/firestore';
+import { collection, query, where, getDocs, updateDoc, doc, onSnapshot, orderBy, addDoc, deleteField } from 'firebase/firestore';
 import { Alumnus } from '../../types';
 import { 
   Search, ScanLine, Check, X, Loader2, ArrowRight, 
   Users, UserCheck, Clock, UserPlus, ShieldCheck,
-  User, MapPin, Calendar, Smartphone, Plus, Download, FileSpreadsheet
+  User, MapPin, Calendar, Smartphone, Plus, Download, FileSpreadsheet, Trash2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import * as XLSX from 'xlsx';
@@ -20,6 +20,7 @@ export default function CheckInPanel() {
   const [allCheckedInAlumni, setAllCheckedInAlumni] = useState<Alumnus[]>([]);
   const [lastCheckIn, setLastCheckIn] = useState<Alumnus | null>(null);
   const [showManualModal, setShowManualModal] = useState(false);
+  const [duplicateWarning, setDuplicateWarning] = useState<Alumnus | null>(null);
   
   // Manual Form State
   const [manualForm, setManualForm] = useState({
@@ -80,7 +81,7 @@ export default function CheckInPanel() {
 
   const performCheckIn = async (alumni: Alumnus) => {
     if (alumni.status === 'checked-in') {
-      alert(`${alumni.name} sudah melakukan check-in.`);
+      setDuplicateWarning(alumni);
       return;
     }
 
@@ -182,6 +183,42 @@ export default function CheckInPanel() {
     }
   };
 
+  const handleCancelCheckIn = async (alumni: Alumnus) => {
+    // Gunakan konfirmasi yang lebih jelas
+    const confirmed = window.confirm(`BATALKAN kehadiran untuk ${alumni.name}?\n\nStatus akan dikembalikan ke "Terkonfirmasi" dan data waktu hadir akan dihapus.`);
+    if (!confirmed) return;
+    
+    setLoading(true);
+    try {
+      console.log("Memulai pembatalan check-in untuk ID:", alumni.id);
+      const alumniRef = doc(db, 'alumni', alumni.id);
+      
+      // Update status kembali ke confirmed dan hapus field checkedInAt secara permanen
+      await updateDoc(alumniRef, {
+        status: 'confirmed',
+        checkedInAt: deleteField()
+      });
+      
+      // Bersihkan state temporer jika orang ini adalah yang terakhir di-check-in
+      if (lastCheckIn?.id === alumni.id) {
+        setLastCheckIn(null);
+      }
+      
+      // Force update state lokal untuk respon lebih cepat
+      setAllCheckedInAlumni(prev => prev.filter(item => item.id !== alumni.id));
+      
+      // Berikan notifikasi sukses
+      alert(`BERHASIL: Status kehadiran ${alumni.name} telah dibatalkan.`);
+      
+    } catch (error) {
+      console.error("Gagal membatalkan check-in:", error);
+      alert("TERJADI ERROR: Tidak dapat membatalkan status. Periksa koneksi internet atau izin akses Anda.");
+      handleFirestoreError(error, OperationType.WRITE, 'alumni');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleExportExcel = () => {
     if (allCheckedInAlumni.length === 0) return;
     
@@ -202,6 +239,52 @@ export default function CheckInPanel() {
 
   return (
     <div className="max-w-6xl mx-auto space-y-8 animate-in fade-in duration-500">
+      {/* Duplicate Warning Modal */}
+      <AnimatePresence>
+        {duplicateWarning && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setDuplicateWarning(null)}
+              className="absolute inset-0 bg-red-950/80 backdrop-blur-md"
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="relative w-full max-w-md bg-white rounded-[40px] shadow-2xl overflow-hidden border border-red-100"
+            >
+              <div className="bg-red-600 p-8 text-center text-white relative">
+                <div className="absolute inset-0 islamic-pattern opacity-10" />
+                <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-white/30">
+                  <ShieldCheck size={32} />
+                </div>
+                <h3 className="text-xl font-bold uppercase tracking-widest">Double Check-In!</h3>
+              </div>
+              <div className="p-8 text-center space-y-4">
+                <p className="text-slate-500 font-medium">Alumni bernama:</p>
+                <div className="bg-slate-50 p-6 rounded-3xl border border-slate-100">
+                  <p className="text-2xl font-serif font-bold text-brand-dark">{duplicateWarning.name}</p>
+                  <p className="text-[10px] font-bold text-red-500 uppercase tracking-widest mt-1">Sudah Terdata Hadir</p>
+                </div>
+                <div className="flex flex-col gap-2 text-xs text-slate-400 font-bold uppercase tracking-tighter">
+                  <p>Check-in pada: {duplicateWarning.checkedInAt ? new Date(duplicateWarning.checkedInAt).toLocaleString('id-ID') : '-'}</p>
+                  <p>Kode: {duplicateWarning.registrationCode}</p>
+                </div>
+                <button 
+                  onClick={() => setDuplicateWarning(null)}
+                  className="w-full bg-brand-dark text-brand-gold py-4 rounded-2xl font-bold uppercase tracking-widest text-xs hover:bg-brand-gold hover:text-brand-dark transition-all shadow-lg"
+                >
+                  Dimengerti
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
       {/* Manual Registration Modal */}
       <AnimatePresence>
         {showManualModal && (
@@ -678,6 +761,7 @@ export default function CheckInPanel() {
                     <th className="px-8 py-5 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Wilayah</th>
                     <th className="px-8 py-5 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Kode Reg</th>
                     <th className="px-8 py-5 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Waktu Hadir</th>
+                    <th className="px-8 py-5 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Aksi</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-50">
@@ -700,6 +784,15 @@ export default function CheckInPanel() {
                             {a.checkedInAt ? new Date(a.checkedInAt).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }) : '-'}
                           </span>
                         </div>
+                      </td>
+                      <td className="px-8 py-6">
+                        <button 
+                          onClick={() => handleCancelCheckIn(a)}
+                          className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
+                          title="Batalkan Kehadiran"
+                        >
+                          <Trash2 size={16} />
+                        </button>
                       </td>
                     </tr>
                   ))}
