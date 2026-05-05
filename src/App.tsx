@@ -25,6 +25,7 @@ import { Setting, News, ScheduleItem, Koorwil, Sport, Registration, Match, FAQ, 
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import About from './components/About';
+import WishWall from './components/WishWall';
 import VideoSection from './components/VideoSection';
 import Schedule from './components/Schedule';
 import Porsas from './components/Porsas';
@@ -209,6 +210,7 @@ export default function App() {
               {[
                 { name: 'Beranda', href: '#hero' },
                 { name: 'Tentang', href: '#about' },
+                { name: 'Ucapan', href: '#wish-wall' },
                 { name: 'Multimedia', href: '#video-content' },
                 { name: 'Agenda', href: '#agenda' },
                 { name: 'Merchandise', href: '#merchandise' },
@@ -249,6 +251,10 @@ export default function App() {
         
         <section id="about" className="py-24 bg-white/30">
           <About settings={settings} />
+        </section>
+
+        <section id="wish-wall">
+          <WishWall />
         </section>
 
         <VideoSection />

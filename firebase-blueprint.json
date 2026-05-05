@@ -206,6 +206,22 @@
         "distance": { "type": "string" }
       },
       "required": ["name", "type", "points"]
+    },
+    "Wish": {
+      "title": "Anniversary Wish",
+      "description": "Messages sent by alumni, students, and public",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "role": { "type": "string", "enum": ["alumni", "santri", "umum"] },
+        "angkatan": { "type": "string" },
+        "message": { "type": "string" },
+        "template": { "type": "number" },
+        "likes": { "type": "number" },
+        "status": { "type": "string", "enum": ["pending", "approved"] },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "role", "message", "template", "status", "timestamp"]
     }
   },
   "firestore": {
@@ -252,6 +268,10 @@
     "venue_routes": {
       "schema": "VenueRoute",
       "description": "Tracking paths for gowes, walking, etc."
+    },
+    "wishes": {
+      "schema": "Wish",
+      "description": "Public wishes and messages for the 104th anniversary"
     }
   }
 }

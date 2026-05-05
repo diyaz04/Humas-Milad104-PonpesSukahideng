@@ -141,4 +141,16 @@ export interface DocumentResource {
   updatedAt?: string;
 }
 
+export interface Wish {
+  id: string;
+  name: string;
+  role: 'alumni' | 'santri' | 'umum';
+  angkatan?: string;
+  message: string;
+  template: 1 | 2 | 3;
+  status: 'pending' | 'approved';
+  timestamp: string;
+  likes: number;
+}
+
 export type AdminType = 'milad' | 'jadwal' | 'porsas' | 'pesanan' | 'donasi' | 'registrasi' | 'heregistrasi' | 'super' | null;

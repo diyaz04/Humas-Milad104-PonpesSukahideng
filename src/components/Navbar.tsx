@@ -44,6 +44,7 @@ export default function Navbar({ onMenuOpen, onOpenDonation, onOpenAlumni }: Nav
   const primaryLinks = [
     { name: 'Beranda', href: '#hero' },
     { name: 'Tentang', href: '#about' },
+    { name: 'Ucapan', href: '#wish-wall' },
     { name: 'Multimedia', href: '#video-content' },
     { name: 'Agenda', href: '#agenda' },
   ];
