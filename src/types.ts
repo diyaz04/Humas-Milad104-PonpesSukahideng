@@ -141,4 +141,4 @@ export interface DocumentResource {
   updatedAt?: string;
 }
 
-export type AdminType = 'milad' | 'jadwal' | 'porsas' | 'pesanan' | 'donasi' | 'registrasi' | 'super' | null;
+export type AdminType = 'milad' | 'jadwal' | 'porsas' | 'pesanan' | 'donasi' | 'registrasi' | 'heregistrasi' | 'super' | null;

@@ -14,7 +14,7 @@ import { motion, AnimatePresence } from 'motion/react';
 export default function RegistrationPanel() {
   const [alumni, setAlumni] = useState<Alumnus[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'management' | 'confirmed' | 'checkin'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'management' | 'confirmed' | 'present' | 'checkin'>('dashboard');
   const [search, setSearch] = useState('');
   const [selectedAlumni, setSelectedAlumni] = useState<Alumnus | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -213,11 +213,11 @@ export default function RegistrationPanel() {
     reader.readAsBinaryString(file);
   };
 
-  const handleExport = () => {
-    const ws = XLSX.utils.json_to_sheet(alumni);
+  const handleExport = (data: Alumnus[], filename: string) => {
+    const ws = XLSX.utils.json_to_sheet(data);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Alumni");
-    XLSX.writeFile(wb, "Data_Alumni_Milad104.xlsx");
+    XLSX.writeFile(wb, `${filename}.xlsx`);
   };
 
   const handleCheckIn = async (alumniItem: Alumnus) => {
@@ -270,6 +270,7 @@ export default function RegistrationPanel() {
   );
 
   const confirmedAlumni = alumni.filter(a => a.status === 'confirmed' || a.status === 'checked-in');
+  const presentAlumni = alumni.filter(a => a.status === 'checked-in');
 
   return (
     <div className="space-y-8">
@@ -278,8 +279,9 @@ export default function RegistrationPanel() {
         {[
           { id: 'dashboard', icon: Users, label: 'Dashboard' },
           { id: 'management', icon: FileSpreadsheet, label: 'Database Alumni' },
-          { id: 'confirmed', icon: CheckCircle2, label: 'Data Konfirmasi' },
-          { id: 'checkin', icon: ScanLine, label: 'Check-In Peserta' },
+          { id: 'confirmed', icon: CheckCircle2, label: 'Konfirmasi' },
+          { id: 'present', icon: UserCheck, label: 'Sudah Hadir' },
+          { id: 'checkin', icon: ScanLine, label: 'Check-In' },
         ].map(tab => (
           <button
             key={tab.id}
@@ -377,7 +379,7 @@ export default function RegistrationPanel() {
                 <input type="file" className="hidden" accept=".xlsx,.xls,.csv" onChange={handleImport} />
               </label>
               <button 
-                onClick={handleExport}
+                onClick={() => handleExport(alumni, "Data_Alumni_Full")}
                 className="flex-1 bg-white border border-slate-100 text-brand-dark px-6 py-4 rounded-2xl text-[10px] font-bold uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-slate-50 transition-all shadow-sm"
               >
                 <Download size={16} /> Export
@@ -473,7 +475,7 @@ export default function RegistrationPanel() {
           <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
             <h3 className="text-xl font-bold text-brand-dark">Daftar Alumni Terkonfirmasi</h3>
             <button 
-              onClick={handleExport}
+              onClick={() => handleExport(confirmedAlumni, "Data_Alumni_Konfirmasi")}
               className="bg-white border border-slate-100 text-brand-dark px-6 py-4 rounded-2xl text-[10px] font-bold uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-slate-50 transition-all shadow-sm"
             >
               <Download size={16} /> Export ke Excel
@@ -521,6 +523,60 @@ export default function RegistrationPanel() {
                   {confirmedAlumni.length === 0 && (
                     <tr>
                       <td colSpan={5} className="px-8 py-20 text-center text-slate-400 italic">Belum ada alumni yang melakukan konfirmasi.</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'present' && (
+        <div className="space-y-6">
+          <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+            <h3 className="text-xl font-bold text-brand-dark">Daftar Alumni Hadir (Checked-In)</h3>
+            <button 
+              onClick={() => handleExport(presentAlumni, "Data_Alumni_Kehadiran")}
+              className="bg-brand-dark text-brand-gold px-6 py-4 rounded-2xl text-[10px] font-bold uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-brand-gold hover:text-brand-dark transition-all shadow-lg"
+            >
+              <Download size={16} /> Export Kehadiran
+            </button>
+          </div>
+
+          <div className="bg-white rounded-[40px] shadow-xl border border-slate-100 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-slate-50/50">
+                    <th className="px-8 py-5 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Alumni</th>
+                    <th className="px-8 py-5 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Kontak & Wilayah</th>
+                    <th className="px-8 py-5 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Kode Reg</th>
+                    <th className="px-8 py-5 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Waktu Hadir</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-50">
+                  {presentAlumni.map((a) => (
+                    <tr key={a.id} className="hover:bg-slate-50/30 transition-colors">
+                      <td className="px-8 py-6">
+                        <p className="font-bold text-brand-dark">{a.name}</p>
+                        <p className="text-[10px] text-slate-400 font-bold uppercase">Angkatan {a.yearIn}</p>
+                      </td>
+                      <td className="px-8 py-6">
+                        <p className="text-xs text-brand-dark font-medium">{a.phone || '-'}</p>
+                        <p className="text-[10px] text-slate-400 font-bold uppercase">{a.city || '-'}</p>
+                      </td>
+                      <td className="px-8 py-6 font-mono text-xs font-bold text-brand-dark">
+                        {a.registrationCode}
+                      </td>
+                      <td className="px-8 py-6 text-[10px] text-brand-gold font-bold">
+                        {a.checkedInAt ? new Date(a.checkedInAt).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }) : '-'}
+                      </td>
+                    </tr>
+                  ))}
+                  {presentAlumni.length === 0 && (
+                    <tr>
+                      <td colSpan={4} className="px-8 py-20 text-center text-slate-400 italic">Belum ada alumni yang hadir (checked-in).</td>
                     </tr>
                   )}
                 </tbody>
