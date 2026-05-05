@@ -86,7 +86,7 @@ export default function AdminDashboard({
     }
   };
 
-  const isAuthRequired = type === 'super' || type === 'pesanan' || type === 'donasi' || type === 'registrasi';
+  const isAuthRequired = type === 'super' || type === 'pesanan' || type === 'donasi' || type === 'registrasi' || type === 'denah' || type === 'heregistrasi';
 
   const tabs = [
     { id: 'milad', label: 'Konten', icon: LayoutDashboard },

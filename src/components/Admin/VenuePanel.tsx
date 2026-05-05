@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { db, handleFirestoreError, OperationType } from '../../lib/firebase';
+import { db, auth, handleFirestoreError, OperationType } from '../../lib/firebase';
 import { collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore';
 import { VenuePoint } from '../../types';
 import { 
@@ -39,6 +39,11 @@ export default function VenuePanel() {
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingPoint) return;
+
+    if (!auth.currentUser) {
+      alert("Sesi akses berakhir. Silakan login kembali.");
+      return;
+    }
 
     try {
       if (editingPoint.id) {
