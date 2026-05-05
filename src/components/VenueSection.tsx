@@ -155,6 +155,13 @@ export default function VenueSection({ points, routes }: VenueSectionProps) {
                   const top = 100 - (((point.latitude - minLat) / (maxLat - minLat)) * 100);
                   const isSelected = selectedPoint?.id === point.id;
                   const isArea = point.type === 'area';
+                  const align = point.horizontalAlign || 'left';
+
+                  let transform = isArea ? 'none' : 'translate(-50%, -50%)';
+                  if (isArea) {
+                    if (align === 'center') transform = 'translateX(-50%)';
+                    else if (align === 'right') transform = 'translateX(-100%)';
+                  }
 
                   return (
                     <motion.div 
@@ -163,7 +170,7 @@ export default function VenueSection({ points, routes }: VenueSectionProps) {
                       style={{ 
                         left: `${left}%`, 
                         top: `${top}%`, 
-                        transform: isArea ? 'none' : 'translate(-50%, -50%)',
+                        transform,
                         width: isArea ? `${point.width}%` : 'auto',
                         height: isArea ? `${point.height}%` : 'auto',
                       }}
@@ -174,7 +181,16 @@ export default function VenueSection({ points, routes }: VenueSectionProps) {
                             setSelectedPoint(point);
                             if (window.innerWidth < 1024) document.getElementById('venue-detail')?.scrollIntoView({ behavior: 'smooth' });
                           }}
-                          className={`w-full h-full rounded-xl md:rounded-2xl border-2 shadow-2xl relative group/area transition-all duration-300 flex flex-col items-center justify-center p-1 md:p-2 text-center gap-1 ${cat.color.replace('text-', 'border-').split(' ')[0]} ${isSelected ? 'scale-105 z-40 bg-brand-gold/20 border-brand-gold ring-2 md:ring-4 ring-brand-gold/20' : 'bg-white/10 hover:bg-white/20'}`}
+                          className={`w-full h-full rounded-xl md:rounded-2xl border-2 shadow-2xl relative group/area transition-all duration-300 flex flex-col items-center justify-center p-1 md:p-2 text-center gap-1 
+                            ${cat.id === 'utama' ? 'border-brand-gold bg-brand-dark/40' : 
+                              cat.id === 'stage' ? 'border-rose-500 bg-rose-500/20' :
+                              cat.id === 'bazar' ? 'border-amber-500 bg-amber-500/20' :
+                              cat.id === 'parkir' ? 'border-blue-500 bg-blue-500/20' :
+                              cat.id === 'makan' ? 'border-orange-500 bg-orange-500/20' :
+                              cat.id === 'istirahat' ? 'border-green-500 bg-green-500/20' :
+                              cat.id === 'porsas' ? 'border-purple-500 bg-purple-500/20' :
+                              'border-slate-500 bg-slate-500/20'} 
+                            ${isSelected ? 'scale-105 z-40 ring-4 ring-brand-gold/30 border-brand-gold !bg-brand-gold/40' : 'hover:bg-opacity-40'}`}
                         >
                           <cat.icon size={14} className={isSelected ? 'text-brand-gold' : 'text-white/40'} />
                           <span className={`text-[6px] md:text-[8px] font-bold uppercase tracking-widest hidden sm:block ${isSelected ? 'text-white' : 'text-white/60'}`}>{point.name}</span>

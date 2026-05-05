@@ -260,6 +260,26 @@ export default function VenuePanel() {
                           />
                         </div>
                       </div>
+                      <div>
+                        <label className="block text-[9px] uppercase font-bold tracking-widest text-slate-400 mb-2">Arah Memanjang (Horizontal)</label>
+                        <div className="flex gap-2">
+                          {[
+                            { id: 'left', label: 'Ke Kanan', desc: 'Titik di Kiri' },
+                            { id: 'center', label: 'Tengah', desc: 'Simetris' },
+                            { id: 'right', label: 'Ke Kiri', desc: 'Titik di Kanan' },
+                          ].map(opt => (
+                            <button
+                              key={opt.id}
+                              type="button"
+                              onClick={() => setEditingPoint({ ...editingPoint, horizontalAlign: opt.id as any })}
+                              className={`flex-1 py-3 px-2 rounded-xl border-2 transition-all flex flex-col items-center ${editingPoint?.horizontalAlign === opt.id || (!editingPoint?.horizontalAlign && opt.id === 'left') ? 'border-brand-gold bg-brand-gold/10' : 'border-white bg-white text-slate-400'}`}
+                            >
+                              <span className="text-[9px] font-bold uppercase tracking-wider">{opt.label}</span>
+                              <span className="text-[7px] opacity-60">{opt.desc}</span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
                     </div>
                   )}
 
@@ -659,6 +679,13 @@ export default function VenuePanel() {
                 const left = ((point.longitude - minLng) / (maxLng - minLng)) * 100;
                 const top = 100 - (((point.latitude - minLat) / (maxLat - minLat)) * 100);
                 const isArea = point.type === 'area';
+                const align = point.horizontalAlign || 'left';
+
+                let transform = isArea ? 'none' : 'translate(-50%, -50%)';
+                if (isArea) {
+                  if (align === 'center') transform = 'translateX(-50%)';
+                  else if (align === 'right') transform = 'translateX(-100%)';
+                }
 
                 return (
                   <motion.div 
@@ -669,13 +696,21 @@ export default function VenuePanel() {
                     style={{ 
                       left: `${left}%`, 
                       top: `${top}%`,
-                      transform: isArea ? 'none' : 'translate(-50%, -50%)',
+                      transform,
                       width: isArea ? `${point.width}%` : 'auto',
                       height: isArea ? `${point.height}%` : 'auto',
                     }}
                   >
                     {isArea ? (
-                      <div className={`w-full h-full rounded-lg md:rounded-xl border-2 flex items-center justify-center p-1 relative ${cat.color.replace('text-', 'border-').split(' ')[0]} bg-white/5`}>
+                      <div className={`w-full h-full rounded-lg md:rounded-xl border-2 flex items-center justify-center p-1 relative shadow-lg
+                        ${cat.id === 'utama' ? 'border-brand-gold bg-brand-dark/60' : 
+                          cat.id === 'stage' ? 'border-rose-500 bg-rose-500/40' :
+                          cat.id === 'bazar' ? 'border-amber-500 bg-amber-500/40' :
+                          cat.id === 'parkir' ? 'border-blue-500 bg-blue-500/40' :
+                          cat.id === 'makan' ? 'border-orange-500 bg-orange-500/40' :
+                          cat.id === 'istirahat' ? 'border-green-500 bg-green-500/40' :
+                          cat.id === 'porsas' ? 'border-purple-500 bg-purple-500/40' :
+                          'border-slate-500 bg-slate-500/40'}`}>
                          <cat.icon size={12} className="text-white/20" />
                          <div className="absolute inset-x-0 -bottom-4 text-center">
                             <span className="text-[6px] text-white/40 font-bold uppercase whitespace-nowrap">{point.name}</span>

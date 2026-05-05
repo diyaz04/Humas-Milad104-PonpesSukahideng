@@ -151,6 +151,7 @@ export interface VenuePoint {
   type?: 'point' | 'area';
   width?: number; // In relative coordinate units or percentage
   height?: number;
+  horizontalAlign?: 'left' | 'center' | 'right';
   icon?: string;
 }
 
