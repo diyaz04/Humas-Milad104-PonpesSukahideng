@@ -496,7 +496,7 @@ export default function MiladPanel({ settings, news, faqs, documents, basecamps 
           {/* Basecamp Management */}
           <div className="bg-white p-8 rounded-3xl shadow-sm border border-slate-100">
             <h3 className="text-2xl font-serif font-bold text-brand-dark mb-6 flex items-center gap-2">
-              <Home className="text-brand-gold" /> Kelola Basecamp Korwil
+              <Home className="text-brand-gold" /> Kelola Penginapan Kontingen
             </h3>
 
             <form onSubmit={handleBasecampAction} className="space-y-4 mb-8 p-6 bg-slate-50 rounded-2xl border border-slate-100">

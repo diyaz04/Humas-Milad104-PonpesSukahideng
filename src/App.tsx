@@ -231,7 +231,7 @@ export default function App() {
                 { name: 'Tentang', href: '#about' },
                 { name: 'Ucapan', href: '#wish-wall' },
                 { name: 'PORSAS', href: '#porsas' },
-                { name: 'Basecamp', href: '#basecamp' },
+                { name: 'PENGINAPAN', href: '#basecamp' },
                 { name: 'Multimedia', href: '#video-content' },
                 { name: 'Agenda', href: '#agenda' },
                 { name: 'Merchandise', href: '#merchandise' },

@@ -51,12 +51,12 @@ export default function BasecampBooking({ basecamps, koorwils }: BasecampBooking
           className="flex items-center justify-center gap-2 text-brand-gold font-serif italic mb-4"
         >
           <Home size={20} />
-          <span>Akomodasi Korwil</span>
+          <span>Akomodasi Kontingen</span>
         </motion.div>
-        <h2 className="text-4xl md:text-5xl font-serif font-bold text-brand-dark mb-6">Booking Basecamp Korwil</h2>
+        <h2 className="text-4xl md:text-5xl font-serif font-bold text-brand-dark mb-6">Booking Penginapan Kontingen</h2>
         <p className="text-slate-500 max-w-2xl mx-auto">
-          Fasilitas istirahat khusus untuk rombongan Korwil selama rangkaian acara Milad ke-104. 
-          Satu basecamp diperuntukkan bagi satu Korwil.
+          Fasilitas istirahat khusus untuk rombongan kontingen selama rangkaian acara Milad ke-104. 
+          Satu unit penginapan diperuntukkan bagi satu kontingen/korwil.
         </p>
       </div>
 
