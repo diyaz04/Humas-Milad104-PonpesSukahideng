@@ -106,5 +106,13 @@ service cloud.firestore {
         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likes']) ||
         isAdmin();
     }
+
+    match /basecamps/{basecampId} {
+      allow read: if true;
+      allow create, delete: if isAdmin();
+      allow update: if 
+        (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['isBooked', 'bookedBy', 'coordinatorName', 'bookedByContact', 'bookedAt']) && !resource.data.isBooked) ||
+        isAdmin();
+    }
   }
 }

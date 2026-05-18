@@ -45,6 +45,8 @@ export default function Navbar({ onMenuOpen, onOpenDonation, onOpenAlumni }: Nav
     { name: 'Beranda', href: '#hero' },
     { name: 'Tentang', href: '#about' },
     { name: 'Ucapan', href: '#wish-wall' },
+    { name: 'PORSAS', href: '#porsas' },
+    { name: 'Basecamp', href: '#basecamp' },
     { name: 'Multimedia', href: '#video-content' },
     { name: 'Agenda', href: '#agenda' },
   ];

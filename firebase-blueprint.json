@@ -222,6 +222,23 @@
         "timestamp": { "type": "string", "format": "date-time" }
       },
       "required": ["name", "role", "message", "template", "status", "timestamp"]
+    },
+    "Basecamp": {
+      "title": "Koorwil Basecamp",
+      "description": "Basecamp accommodation for regional coordinators",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "location": { "type": "string" },
+        "capacity": { "type": "string" },
+        "price": { "type": "number" },
+        "isBooked": { "type": "boolean" },
+        "bookedBy": { "type": "string" },
+        "bookedAt": { "type": "string", "format": "date-time" },
+        "bookedByContact": { "type": "string" },
+        "coordinatorName": { "type": "string" }
+      },
+      "required": ["name", "location", "isBooked"]
     }
   },
   "firestore": {
@@ -272,6 +289,10 @@
     "wishes": {
       "schema": "Wish",
       "description": "Public wishes and messages for the 104th anniversary"
+    },
+    "basecamps": {
+      "schema": "Basecamp",
+      "description": "Basecamp booking records for Koorwils"
     }
   }
 }

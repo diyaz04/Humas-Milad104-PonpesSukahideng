@@ -153,4 +153,17 @@ export interface Wish {
   likes: number;
 }
 
+export interface Basecamp {
+  id: string;
+  name: string;
+  location: string;
+  capacity?: string;
+  price?: number;
+  isBooked: boolean;
+  bookedBy?: string;
+  bookedAt?: string;
+  bookedByContact?: string;
+  coordinatorName?: string;
+}
+
 export type AdminType = 'milad' | 'jadwal' | 'porsas' | 'pesanan' | 'donasi' | 'registrasi' | 'heregistrasi' | 'super' | null;

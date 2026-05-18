@@ -4,6 +4,7 @@ import {
   onSnapshot, 
   doc, 
   setDoc, 
+  addDoc,
   query, 
   orderBy
 } from 'firebase/firestore';
@@ -19,7 +20,7 @@ import {
   X
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Setting, News, ScheduleItem, Koorwil, Sport, Registration, Match, FAQ, AdminType, Product, DocumentResource } from './types';
+import { Setting, News, ScheduleItem, Koorwil, Sport, Registration, Match, FAQ, AdminType, Product, DocumentResource, Basecamp } from './types';
 
 // Components
 import Navbar from './components/Navbar';
@@ -43,6 +44,7 @@ import ChatBot from './components/ChatBot';
 import Donation from './components/Donation';
 import AlumniConfirmation from './components/AlumniConfirmation';
 import InfoCenter from './components/InfoCenter';
+import BasecampBooking from './components/BasecampBooking';
 
 export default function App() {
   const [activeAdmin, setActiveAdmin] = useState<AdminType>(null);
@@ -60,6 +62,7 @@ export default function App() {
   const [registrations, setRegistrations] = useState<Registration[]>([]);
   const [matches, setMatches] = useState<Match[]>([]);
   const [documents, setDocuments] = useState<DocumentResource[]>([]);
+  const [basecamps, setBasecamps] = useState<Basecamp[]>([]);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
@@ -92,6 +95,16 @@ export default function App() {
           setDoc(doc(db, 'settings', 'general'), defaultSettings).catch(err => {
              console.warn("Seeding failed (expected if not admin):", err.message);
           });
+
+          // Seed Sport "Badminton Double Putra"
+          addDoc(collection(db, 'sports'), {
+            name: "Badminton Double Putra",
+            category: "olahraga",
+            gender: "putra",
+            type: "tim"
+          }).catch(err => console.warn("Seed Sport failed:", err.message));
+
+          // Seed example basecamps if needed? Better let admin input them as requested.
         }
       }
     }, (err) => handleFirestoreError(err, OperationType.GET, 'settings/general'));
@@ -141,6 +154,11 @@ export default function App() {
       setDocuments(snap.docs.map(d => ({ id: d.id, ...d.data() } as DocumentResource)));
     }, (err) => handleFirestoreError(err, OperationType.LIST, 'documents'));
 
+    // Listen for basecamps
+    const unsubBasecamps = onSnapshot(query(collection(db, 'basecamps'), orderBy('name')), (snap) => {
+      setBasecamps(snap.docs.map(d => ({ id: d.id, ...d.data() } as Basecamp)));
+    }, (err) => handleFirestoreError(err, OperationType.LIST, 'basecamps'));
+
     return () => {
       unsubAuth();
       unsubSettings();
@@ -153,6 +171,7 @@ export default function App() {
       unsubMatches();
       unsubFaqs();
       unsubDocs();
+      unsubBasecamps();
     };
   }, []);
 
@@ -211,6 +230,8 @@ export default function App() {
                 { name: 'Beranda', href: '#hero' },
                 { name: 'Tentang', href: '#about' },
                 { name: 'Ucapan', href: '#wish-wall' },
+                { name: 'PORSAS', href: '#porsas' },
+                { name: 'Basecamp', href: '#basecamp' },
                 { name: 'Multimedia', href: '#video-content' },
                 { name: 'Agenda', href: '#agenda' },
                 { name: 'Merchandise', href: '#merchandise' },
@@ -286,7 +307,13 @@ export default function App() {
           </div>
         </section>
 
-        <InfoCenter documents={documents} />
+        <section id="pusat-informasi" className="py-24 bg-white/50">
+          <InfoCenter documents={documents} />
+        </section>
+
+        <section id="basecamp" className="py-24 bg-brand-cream/50">
+          <BasecampBooking basecamps={basecamps} koorwils={koorwils} />
+        </section>
 
         <section id="berita" className="py-24">
           <NewsSection 
@@ -370,6 +397,7 @@ export default function App() {
             registrations={registrations}
             matches={matches}
             documents={documents}
+            basecamps={basecamps}
           />
         )}
       </AnimatePresence>

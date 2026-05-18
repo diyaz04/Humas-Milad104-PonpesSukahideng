@@ -3,8 +3,8 @@ import { doc, setDoc, addDoc, collection, deleteDoc, updateDoc } from 'firebase/
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import imageCompression from 'browser-image-compression';
 import { db, storage } from '../../lib/firebase';
-import { Setting, News, FAQ, DocumentResource } from '../../types';
-import { Plus, Trash2, Edit2, Check, Save, AlertCircle, Eye, X as CloseIcon, Loader2, FileText, Download, Upload } from 'lucide-react';
+import { Setting, News, FAQ, DocumentResource, Basecamp } from '../../types';
+import { Plus, Trash2, Edit2, Check, Save, AlertCircle, Eye, X as CloseIcon, Loader2, FileText, Download, Upload, MapPin, Home } from 'lucide-react';
 import FAQPanel from './FAQPanel';
 import ConfirmModal from './ConfirmModal';
 
@@ -13,12 +13,14 @@ interface MiladPanelProps {
   news: News[];
   faqs: FAQ[];
   documents: DocumentResource[];
+  basecamps: Basecamp[];
 }
 
-export default function MiladPanel({ settings, news, faqs, documents }: MiladPanelProps) {
+export default function MiladPanel({ settings, news, faqs, documents, basecamps }: MiladPanelProps) {
   const [deleteNewsId, setDeleteNewsId] = useState<string | null>(null);
   const [editingNewsId, setEditingNewsId] = useState<string | null>(null);
   const [deleteDocId, setDeleteDocId] = useState<string | null>(null);
+  const [deleteBasecampId, setDeleteBasecampId] = useState<string | null>(null);
 
   // Document state
   const [docForm, setDocForm] = useState({
@@ -27,6 +29,16 @@ export default function MiladPanel({ settings, news, faqs, documents }: MiladPan
     category: 'PORSAS'
   });
   const [isAddingDoc, setIsAddingDoc] = useState(false);
+
+  // Basecamp state
+  const [basecampForm, setBasecampForm] = useState({
+    name: '',
+    location: '',
+    capacity: '',
+    price: 0
+  });
+  const [isAddingBasecamp, setIsAddingBasecamp] = useState(false);
+  const [editingBasecampId, setEditingBasecampId] = useState<string | null>(null);
 
   const [localSettings, setLocalSettings] = useState<Setting>(settings || {
     heroTitle: '',
@@ -208,6 +220,62 @@ export default function MiladPanel({ settings, news, faqs, documents }: MiladPan
     if (deleteDocId) {
       await deleteDoc(doc(db, 'documents', deleteDocId));
       setDeleteDocId(null);
+    }
+  };
+
+  const handleBasecampAction = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!basecampForm.name || !basecampForm.location) return;
+
+    setIsAddingBasecamp(true);
+    try {
+      if (editingBasecampId) {
+        await updateDoc(doc(db, 'basecamps', editingBasecampId), {
+          ...basecampForm
+        });
+        setEditingBasecampId(null);
+        alert("Basecamp berhasil diperbarui!");
+      } else {
+        await addDoc(collection(db, 'basecamps'), {
+          ...basecampForm,
+          isBooked: false
+        });
+        alert("Basecamp berhasil ditambahkan!");
+      }
+      setBasecampForm({ name: '', location: '', capacity: '', price: 0 });
+    } catch (err: any) {
+      alert("Error: " + err.message);
+    } finally {
+      setIsAddingBasecamp(false);
+    }
+  };
+
+  const startEditBasecamp = (b: Basecamp) => {
+    setEditingBasecampId(b.id);
+    setBasecampForm({
+      name: b.name,
+      location: b.location,
+      capacity: b.capacity || '',
+      price: b.price || 0
+    });
+  };
+
+  const confirmDeleteBasecamp = async () => {
+    if (deleteBasecampId) {
+      await deleteDoc(doc(db, 'basecamps', deleteBasecampId));
+      setDeleteBasecampId(null);
+    }
+  };
+
+  const resetBooking = async (id: string) => {
+    if (confirm("Reset status booking basecamp ini?")) {
+      await updateDoc(doc(db, 'basecamps', id), {
+        isBooked: false,
+        bookedBy: null,
+        bookedAt: null,
+        bookedByContact: null,
+        coordinatorName: null
+      });
     }
   };
 
@@ -425,6 +493,126 @@ export default function MiladPanel({ settings, news, faqs, documents }: MiladPan
 
       <div className="md:col-span-2">
         <div className="grid md:grid-cols-2 gap-12">
+          {/* Basecamp Management */}
+          <div className="bg-white p-8 rounded-3xl shadow-sm border border-slate-100">
+            <h3 className="text-2xl font-serif font-bold text-brand-dark mb-6 flex items-center gap-2">
+              <Home className="text-brand-gold" /> Kelola Basecamp Korwil
+            </h3>
+
+            <form onSubmit={handleBasecampAction} className="space-y-4 mb-8 p-6 bg-slate-50 rounded-2xl border border-slate-100">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-[10px] uppercase tracking-widest text-slate-400 font-bold mb-2 block">Nama Unit/Rumah</label>
+                  <input 
+                    type="text" 
+                    placeholder="Contoh: Villa Hijau"
+                    value={basecampForm.name}
+                    onChange={e => setBasecampForm({...basecampForm, name: e.target.value})}
+                    className="w-full border-2 border-slate-100 rounded-xl p-3 outline-none focus:border-brand-gold"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] uppercase tracking-widest text-slate-400 font-bold mb-2 block">Lokasi / Alamat</label>
+                  <input 
+                    type="text" 
+                    placeholder="Contoh: Dekat Gerbang"
+                    value={basecampForm.location}
+                    onChange={e => setBasecampForm({...basecampForm, location: e.target.value})}
+                    className="w-full border-2 border-slate-100 rounded-xl p-3 outline-none focus:border-brand-gold"
+                    required
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-[10px] uppercase tracking-widest text-slate-400 font-bold mb-2 block">Kapasitas</label>
+                  <input 
+                    type="text" 
+                    placeholder="Contoh: 15 Orang"
+                    value={basecampForm.capacity}
+                    onChange={e => setBasecampForm({...basecampForm, capacity: e.target.value})}
+                    className="w-full border-2 border-slate-100 rounded-xl p-3 outline-none focus:border-brand-gold"
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] uppercase tracking-widest text-slate-400 font-bold mb-2 block">Harga (Jika Ada)</label>
+                  <input 
+                    type="number" 
+                    value={basecampForm.price}
+                    onChange={e => setBasecampForm({...basecampForm, price: parseInt(e.target.value)})}
+                    className="w-full border-2 border-slate-100 rounded-xl p-3 outline-none focus:border-brand-gold"
+                  />
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <button 
+                  type="submit"
+                  disabled={isAddingBasecamp}
+                  className="flex-grow bg-brand-dark text-brand-gold py-3 rounded-xl font-bold uppercase tracking-widest flex items-center justify-center gap-2 disabled:opacity-50"
+                >
+                  {isAddingBasecamp ? <Loader2 size={18} className="animate-spin" /> : (editingBasecampId ? <Check size={18} /> : <Plus size={18} />)}
+                  {editingBasecampId ? 'Update Basecamp' : 'Tambah Basecamp'}
+                </button>
+                {editingBasecampId && (
+                  <button 
+                    type="button"
+                    onClick={() => {
+                      setEditingBasecampId(null);
+                      setBasecampForm({ name: '', location: '', capacity: '', price: 0 });
+                    }}
+                    className="bg-slate-200 text-slate-600 px-4 rounded-xl font-bold"
+                  >
+                    Batal
+                  </button>
+                )}
+              </div>
+            </form>
+
+            <div className="space-y-4">
+              {basecamps.map(bc => (
+                <div key={bc.id} className="p-4 bg-slate-50 rounded-2xl border border-slate-100 group">
+                  <div className="flex justify-between items-start mb-2">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-brand-dark">{bc.name}</span>
+                        {bc.isBooked ? (
+                          <span className="text-[8px] bg-red-100 text-red-600 px-2 py-0.5 rounded-full font-bold uppercase">Sudah Dibooking</span>
+                        ) : (
+                          <span className="text-[8px] bg-green-100 text-green-600 px-2 py-0.5 rounded-full font-bold uppercase">Tersedia</span>
+                        )}
+                      </div>
+                      <p className="text-xs text-slate-400 flex items-center gap-1 mt-0.5">
+                        <MapPin size={10} /> {bc.location} {bc.capacity && `• Cap: ${bc.capacity}`}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <button onClick={() => startEditBasecamp(bc)} className="p-2 text-slate-400 hover:text-brand-gold"><Edit2 size={16} /></button>
+                      <button onClick={() => setDeleteBasecampId(bc.id)} className="p-2 text-slate-400 hover:text-red-500"><Trash2 size={16} /></button>
+                    </div>
+                  </div>
+                  {bc.isBooked && (
+                    <div className="mt-3 pt-3 border-t border-slate-200/50">
+                      <div className="flex justify-between items-end">
+                        <div className="text-[10px] text-slate-500 space-y-0.5">
+                          <p><span className="font-bold uppercase tracking-tighter">Korwil:</span> {bc.bookedBy}</p>
+                          <p><span className="font-bold uppercase tracking-tighter">PIC:</span> {bc.coordinatorName} ({bc.bookedByContact})</p>
+                        </div>
+                        <button 
+                          onClick={() => resetBooking(bc.id)}
+                          className="text-[9px] font-bold text-brand-dark underline uppercase"
+                        >
+                          Reset Booking
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+              {basecamps.length === 0 && <p className="text-center py-8 text-slate-300 text-sm italic">Belum ada unit basecamp.</p>}
+            </div>
+          </div>
+
           {/* Document Management Section */}
           <div className="bg-white p-8 rounded-3xl shadow-sm border border-slate-100">
             <h3 className="text-2xl font-serif font-bold text-brand-dark mb-6 flex items-center gap-2">
@@ -527,6 +715,14 @@ export default function MiladPanel({ settings, news, faqs, documents }: MiladPan
         onConfirm={confirmDeleteDoc}
         title="Hapus Dokumen?"
         message="Apakah Anda yakin ingin menghapus dokumen ini?"
+      />
+
+      <ConfirmModal 
+        isOpen={deleteBasecampId !== null}
+        onClose={() => setDeleteBasecampId(null)}
+        onConfirm={confirmDeleteBasecamp}
+        title="Hapus Basecamp?"
+        message="Apakah Anda yakin ingin menghapus unit basecamp ini?"
       />
 
       <ConfirmModal 

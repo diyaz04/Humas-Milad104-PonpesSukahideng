@@ -3,7 +3,7 @@ import { motion } from 'motion/react';
 import { X, Lock, LogOut, Mail, Key, LayoutDashboard, Calendar, Trophy, ShoppingBag, Heart, Users, Settings, UserCheck, MapPin } from 'lucide-react';
 import { User } from 'firebase/auth';
 import { auth, signInWithEmailAndPassword } from '../../lib/firebase';
-import { Setting, News, ScheduleItem, Koorwil, Sport, Registration, Match, FAQ, AdminType, DocumentResource } from '../../types';
+import { Setting, News, ScheduleItem, Koorwil, Sport, Registration, Match, FAQ, AdminType, DocumentResource, Basecamp } from '../../types';
 
 import MiladPanel from './MiladPanel';
 import JadwalPanel from './JadwalPanel';
@@ -29,6 +29,7 @@ interface AdminDashboardProps {
   registrations: Registration[];
   matches: Match[];
   documents: DocumentResource[];
+  basecamps: Basecamp[];
 }
 
 export default function AdminDashboard({ 
@@ -46,7 +47,8 @@ export default function AdminDashboard({
   sports,
   registrations,
   matches,
-  documents
+  documents,
+  basecamps
 }: AdminDashboardProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -176,7 +178,7 @@ export default function AdminDashboard({
           >
             {(!isAuthRequired || (user && auth.currentUser)) ? (
               <>
-                {currentTab === 'milad' && <MiladPanel settings={settings} news={news} faqs={faqs} documents={documents} />}
+                {currentTab === 'milad' && <MiladPanel settings={settings} news={news} faqs={faqs} documents={documents} basecamps={basecamps} />}
                 {currentTab === 'jadwal' && <JadwalPanel schedule={schedule} />}
                 {currentTab === 'porsas' && <PorsasPanel koorwils={koorwils} sports={sports} registrations={registrations} matches={matches} />}
                 {currentTab === 'pesanan' && <MerchandisePanel user={user} />}
