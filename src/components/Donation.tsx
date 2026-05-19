@@ -8,7 +8,8 @@ export default function Donation() {
   const [formData, setFormData] = useState({
     name: '',
     amount: '',
-    message: ''
+    message: '',
+    bank: ''
   });
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState<string | null>(null);
@@ -28,8 +29,8 @@ export default function Donation() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.name || !formData.amount) {
-      alert("Harap isi nama dan nominal donasi.");
+    if (!formData.name || !formData.amount || !formData.bank) {
+      alert("Harap isi nama, nominal, dan pilih rekening tujuan.");
       return;
     }
 
@@ -41,6 +42,7 @@ export default function Donation() {
         name: formData.name,
         amount: amountNum,
         message: formData.message,
+        bank: formData.bank,
         status: 'pending',
         timestamp: new Date().toISOString()
       };
@@ -49,11 +51,11 @@ export default function Donation() {
 
       // WhatsApp Redirect
       const waNumber = "6285721754753"; // Neng Fatim
-      const waMessage = `Konfirmasi Donasi Milad 104 & PORSAS\n\nNama: ${formData.name}\nNominal: Rp ${amountNum.toLocaleString('id-ID')}\nPesan: ${formData.message || '-'}\n\n*Saya akan mengirimkan bukti transfer setelah ini.*`;
+      const waMessage = `Konfirmasi Donasi Milad 104 & PORSAS\n\nNama: ${formData.name}\nNominal: Rp ${amountNum.toLocaleString('id-ID')}\nRekening Tujuan: ${formData.bank}\nPesan: ${formData.message || '-'}\n\n*Saya akan mengirimkan bukti transfer setelah ini.*`;
       const waUrl = `https://wa.me/${waNumber}?text=${encodeURIComponent(waMessage)}`;
       
       window.open(waUrl, '_blank');
-      setFormData({ name: '', amount: '', message: '' });
+      setFormData({ name: '', amount: '', message: '', bank: '' });
       alert("Terima kasih atas niat baik Anda! Anda akan diarahkan ke WhatsApp untuk konfirmasi bukti transfer.");
     } catch (error) {
       handleFirestoreError(error, OperationType.WRITE, 'donations');
@@ -158,6 +160,20 @@ export default function Donation() {
                   className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-6 py-4 text-brand-dark focus:outline-none focus:border-brand-gold transition-all font-mono"
                   required
                 />
+              </div>
+              <div>
+                <label className="block text-[10px] uppercase tracking-[0.2em] text-slate-400 font-bold mb-3 ml-1">Pilih Rekening Tujuan</label>
+                <select 
+                  value={formData.bank}
+                  onChange={e => setFormData({ ...formData, bank: e.target.value })}
+                  className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-6 py-4 text-brand-dark focus:outline-none focus:border-brand-gold transition-all"
+                  required
+                >
+                  <option value="">-- Pilih Bank --</option>
+                  {bankAccounts.map(acc => (
+                    <option key={acc.bank} value={acc.bank}>{acc.bank} - {acc.number}</option>
+                  ))}
+                </select>
               </div>
               <div>
                 <label className="block text-[10px] uppercase tracking-[0.2em] text-slate-400 font-bold mb-3 ml-1">Pesan / Doa (Opsional)</label>

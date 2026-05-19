@@ -111,6 +111,7 @@ export interface Donation {
   name: string;
   amount: number;
   message?: string;
+  bank?: string;
   status: 'pending' | 'verified' | 'rejected';
   timestamp: string;
 }
