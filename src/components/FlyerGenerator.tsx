@@ -548,14 +548,6 @@ export default function FlyerGenerator({ newsItem, onClose }: FlyerGeneratorProp
                       value={newsLink} 
                       size={105}
                       level="H"
-                      imageSettings={showWatermark ? {
-                        src: logoBase64 || "https://lh3.googleusercontent.com/d/10ePHDITHyany16gFdE6axqBjSwr2UROr",
-                        x: undefined,
-                        y: undefined,
-                        height: 24,
-                        width: 24,
-                        excavate: true,
-                      } : undefined}
                     />
                   </div>
                   <span className="text-[9px] uppercase tracking-widest font-sans font-bold pointer-events-none mt-1" style={{ color: style.subTextColor }}>
@@ -766,14 +758,6 @@ export default function FlyerGenerator({ newsItem, onClose }: FlyerGeneratorProp
                   value={newsLink} 
                   size={105}
                   level="H"
-                  imageSettings={showWatermark ? {
-                    src: logoBase64 || "https://lh3.googleusercontent.com/d/10ePHDITHyany16gFdE6axqBjSwr2UROr",
-                    x: undefined,
-                    y: undefined,
-                    height: 24,
-                    width: 24,
-                    excavate: true,
-                  } : undefined}
                 />
               </div>
               <span className="text-[9px] uppercase tracking-widest font-sans font-bold pointer-events-none mt-1" style={{ color: style.subTextColor }}>
