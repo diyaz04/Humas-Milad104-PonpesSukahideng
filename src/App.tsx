@@ -175,6 +175,24 @@ export default function App() {
     };
   }, []);
 
+  useEffect(() => {
+    if (sports.length > 0) {
+      const hasBadminton = sports.some(s => s.name.toLowerCase() === 'badminton double putra');
+      if (!hasBadminton) {
+        addDoc(collection(db, 'sports'), {
+          name: "Badminton Double Putra",
+          category: "olahraga",
+          gender: "putra",
+          type: "tim"
+        }).then(() => {
+          console.log("Successfully auto-seeded Badminton Double Putra!");
+        }).catch(err => {
+          console.warn("Auto-seeding Badminton Double Putra failed:", err.message);
+        });
+      }
+    }
+  }, [sports]);
+
   const handleAdminAccess = (keyword: string) => {
     if (keyword === 'milad') setActiveAdmin('milad');
     else if (keyword === 'jadwal') setActiveAdmin('jadwal');

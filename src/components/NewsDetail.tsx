@@ -1,11 +1,12 @@
-import React, { useEffect } from 'react';
-import { motion } from 'motion/react';
+import React, { useEffect, useState } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { X, Calendar, Share2, ArrowLeft, Eye } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { id } from 'date-fns/locale';
 import { News } from '../types';
 import { db } from '../lib/firebase';
 import { doc, updateDoc, increment } from 'firebase/firestore';
+import FlyerGenerator from './FlyerGenerator';
 
 interface NewsDetailProps {
   news: News;
@@ -13,6 +14,8 @@ interface NewsDetailProps {
 }
 
 export default function NewsDetail({ news, onClose }: NewsDetailProps) {
+  const [showFlyer, setShowFlyer] = useState(false);
+
   useEffect(() => {
     const incrementViews = async () => {
       try {
@@ -60,7 +63,7 @@ export default function NewsDetail({ news, onClose }: NewsDetailProps) {
           </button>
           
           <button 
-            onClick={shareLink}
+            onClick={() => setShowFlyer(true)}
             className="flex items-center gap-2 bg-brand-gold text-brand-dark px-4 py-2 rounded-full font-bold uppercase tracking-widest text-[10px] hover:bg-brand-lightgold transition-all"
           >
             <Share2 size={14} /> Bagikan
@@ -126,6 +129,15 @@ export default function NewsDetail({ news, onClose }: NewsDetailProps) {
       {/* Decorative Ornaments */}
       <div className="fixed bottom-0 right-0 w-64 h-64 bg-brand-gold/5 rounded-full blur-3xl z-0 pointer-events-none" />
       <div className="fixed top-0 left-0 w-48 h-48 bg-brand-forest/5 rounded-full blur-3xl z-0 pointer-events-none" />
+
+      <AnimatePresence>
+        {showFlyer && (
+          <FlyerGenerator 
+            newsItem={news} 
+            onClose={() => setShowFlyer(false)} 
+          />
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }

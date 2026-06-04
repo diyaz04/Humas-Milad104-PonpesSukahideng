@@ -4,7 +4,8 @@ import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import imageCompression from 'browser-image-compression';
 import { db, storage } from '../../lib/firebase';
 import { Setting, News, FAQ, DocumentResource, Basecamp } from '../../types';
-import { Plus, Trash2, Edit2, Check, Save, AlertCircle, Eye, X as CloseIcon, Loader2, FileText, Download, Upload, MapPin, Home } from 'lucide-react';
+import { Plus, Trash2, Edit2, Check, Save, AlertCircle, Eye, X as CloseIcon, Loader2, FileText, Download, Upload, MapPin, Home, Sparkles } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
 import FAQPanel from './FAQPanel';
 import ConfirmModal from './ConfirmModal';
 
